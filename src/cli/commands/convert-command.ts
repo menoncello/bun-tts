@@ -90,10 +90,7 @@ export class ConvertCommand {
         category: configResult.error.category,
         details: configResult.error.details,
       });
-      console.error(
-        'Error loading configuration:',
-        configResult.error.message
-      );
+      console.error('Error loading configuration:', configResult.error.message);
     }
   }
 }

@@ -5,6 +5,12 @@
     "moduleResolution": "bundler",
     "lib": ["ES2022"],
     "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "src/*": ["./src/*"],
+      "interfaces/*": ["./src/interfaces/*"],
+      "config/*": ["./src/config/*"]
+    },
       "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,

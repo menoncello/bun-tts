@@ -84,7 +84,10 @@ export class ConfigurationError extends BunTtsBaseError {
    * @param details - Additional context information about the configuration error
    */
   constructor(message: string, details?: Record<string, unknown>) {
-    super(message, 'CONFIG_ERROR', 'configuration', { recoverable: false, details });
+    super(message, 'CONFIG_ERROR', 'configuration', {
+      recoverable: false,
+      details,
+    });
     this.name = 'ConfigurationError';
   }
 }

@@ -38,9 +38,7 @@ describe('CLI App Component Tests', () => {
     const { lastFrame } = render(<App flags={{ help: true }} input={[]} />);
     const content = getLastFrameContent(lastFrame);
 
-    expect(content).toContain(
-      'bun-tts - Professional Audiobook Creation Tool'
-    );
+    expect(content).toContain('bun-tts - Professional Audiobook Creation Tool');
     expect(content).toContain('Usage:');
     expect(content).toContain('Commands:');
   });

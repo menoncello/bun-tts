@@ -1,5 +1,11 @@
 import { cosmiconfig } from 'cosmiconfig';
-import { InvalidConfigError, MissingConfigError, success, failure, type Result } from '../errors/index.js';
+import {
+  InvalidConfigError,
+  MissingConfigError,
+  success,
+  failure,
+  type Result,
+} from '../errors/index.js';
 import type { ConfigOptions } from '../types/index.js';
 
 // Audio configuration constants
@@ -54,7 +60,10 @@ export class ConfigManager {
 
       if (result?.config) {
         const validatedConfig = this.validateConfig(result.config);
-        this.config = this.mergeConfigurations(validatedConfig, options.defaults);
+        this.config = this.mergeConfigurations(
+          validatedConfig,
+          options.defaults
+        );
         return success(this.config);
       }
 
@@ -98,7 +107,9 @@ export class ConfigManager {
    * @param options - Configuration loading options
    * @returns Promise resolving to cosmiconfig result or null
    */
-  private async loadConfigFile(options: ConfigManagerOptions): Promise<{ config: unknown } | null> {
+  private async loadConfigFile(
+    options: ConfigManagerOptions
+  ): Promise<{ config: unknown } | null> {
     if (options.configPath) {
       return this.explorer.load(options.configPath);
     }
@@ -147,10 +158,7 @@ export class ConfigManager {
       );
     }
     return failure(
-      new InvalidConfigError(
-        configPath || 'unknown',
-        'Unknown error occurred'
-      )
+      new InvalidConfigError(configPath || 'unknown', 'Unknown error occurred')
     );
   }
 
@@ -211,7 +219,10 @@ export class ConfigManager {
    * @throws Error if engine is invalid
    */
   private validateTtsEngine(engine: unknown): void {
-    if (engine && !VALID_TTS_ENGINES.includes(engine as typeof VALID_TTS_ENGINES[number])) {
+    if (
+      engine &&
+      !VALID_TTS_ENGINES.includes(engine as (typeof VALID_TTS_ENGINES)[number])
+    ) {
       throw new Error(
         `Invalid ttsEngine: ${engine}. Must be '${VALID_TTS_ENGINES.join("' or '")}'`
       );
@@ -226,7 +237,12 @@ export class ConfigManager {
    * @throws Error if format is invalid
    */
   private validateOutputFormat(format: unknown): void {
-    if (format && !VALID_OUTPUT_FORMATS.includes(format as typeof VALID_OUTPUT_FORMATS[number])) {
+    if (
+      format &&
+      !VALID_OUTPUT_FORMATS.includes(
+        format as (typeof VALID_OUTPUT_FORMATS)[number]
+      )
+    ) {
       throw new Error(
         `Invalid outputFormat: ${format}. Must be '${VALID_OUTPUT_FORMATS.join("', '")}'`
       );
@@ -241,15 +257,26 @@ export class ConfigManager {
    * @throws Error if any numeric value is invalid
    */
   private validateNumericValues(config: Record<string, unknown>): void {
-    if (config.sampleRate && (typeof config.sampleRate !== 'number' || config.sampleRate <= 0)) {
+    if (
+      config.sampleRate &&
+      (typeof config.sampleRate !== 'number' || config.sampleRate <= 0)
+    ) {
       throw new Error('sampleRate must be a positive number');
     }
 
-    if (config.channels && ![MONO_CHANNELS, STEREO_CHANNELS].includes(config.channels as number)) {
-      throw new Error(`channels must be ${MONO_CHANNELS} (mono) or ${STEREO_CHANNELS} (stereo)`);
+    if (
+      config.channels &&
+      ![MONO_CHANNELS, STEREO_CHANNELS].includes(config.channels as number)
+    ) {
+      throw new Error(
+        `channels must be ${MONO_CHANNELS} (mono) or ${STEREO_CHANNELS} (stereo)`
+      );
     }
 
-    if (config.bitrate && (typeof config.bitrate !== 'number' || config.bitrate <= 0)) {
+    if (
+      config.bitrate &&
+      (typeof config.bitrate !== 'number' || config.bitrate <= 0)
+    ) {
       throw new Error('bitrate must be a positive number');
     }
   }
@@ -281,8 +308,15 @@ export class ConfigManager {
    * @throws Error if speed is invalid
    */
   private validateSpeedSetting(speed: unknown): void {
-    if (speed && (typeof speed !== 'number' || speed <= MIN_SPEED_MULTIPLIER || speed > MAX_SPEED_MULTIPLIER)) {
-      throw new Error(`voiceSettings.speed must be a number between ${MIN_SPEED_MULTIPLIER} and ${MAX_SPEED_MULTIPLIER}`);
+    if (
+      speed &&
+      (typeof speed !== 'number' ||
+        speed <= MIN_SPEED_MULTIPLIER ||
+        speed > MAX_SPEED_MULTIPLIER)
+    ) {
+      throw new Error(
+        `voiceSettings.speed must be a number between ${MIN_SPEED_MULTIPLIER} and ${MAX_SPEED_MULTIPLIER}`
+      );
     }
   }
 
@@ -293,8 +327,15 @@ export class ConfigManager {
    * @throws Error if pitch is invalid
    */
   private validatePitchSetting(pitch: unknown): void {
-    if (pitch && (typeof pitch !== 'number' || pitch <= MIN_PITCH_MULTIPLIER || pitch > MAX_PITCH_MULTIPLIER)) {
-      throw new Error(`voiceSettings.pitch must be a number between ${MIN_PITCH_MULTIPLIER} and ${MAX_PITCH_MULTIPLIER}`);
+    if (
+      pitch &&
+      (typeof pitch !== 'number' ||
+        pitch <= MIN_PITCH_MULTIPLIER ||
+        pitch > MAX_PITCH_MULTIPLIER)
+    ) {
+      throw new Error(
+        `voiceSettings.pitch must be a number between ${MIN_PITCH_MULTIPLIER} and ${MAX_PITCH_MULTIPLIER}`
+      );
     }
   }
 
@@ -305,8 +346,15 @@ export class ConfigManager {
    * @throws Error if volume is invalid
    */
   private validateVolumeSetting(volume: unknown): void {
-    if (volume && (typeof volume !== 'number' || volume <= MIN_VOLUME_MULTIPLIER || volume > MAX_VOLUME_MULTIPLIER)) {
-      throw new Error(`voiceSettings.volume must be a number between ${MIN_VOLUME_MULTIPLIER} and ${MAX_VOLUME_MULTIPLIER}`);
+    if (
+      volume &&
+      (typeof volume !== 'number' ||
+        volume <= MIN_VOLUME_MULTIPLIER ||
+        volume > MAX_VOLUME_MULTIPLIER)
+    ) {
+      throw new Error(
+        `voiceSettings.volume must be a number between ${MIN_VOLUME_MULTIPLIER} and ${MAX_VOLUME_MULTIPLIER}`
+      );
     }
   }
 
@@ -324,17 +372,23 @@ export class ConfigManager {
 
     const emotionSettings = emotion as Record<string, unknown>;
 
-    if (emotionSettings.intensity &&
-        (typeof emotionSettings.intensity !== 'number' ||
-         emotionSettings.intensity < MIN_EMOTION_INTENSITY ||
-         emotionSettings.intensity > MAX_EMOTION_INTENSITY)) {
+    if (
+      emotionSettings.intensity &&
+      (typeof emotionSettings.intensity !== 'number' ||
+        emotionSettings.intensity < MIN_EMOTION_INTENSITY ||
+        emotionSettings.intensity > MAX_EMOTION_INTENSITY)
+    ) {
       throw new Error(
         `voiceSettings.emotion.intensity must be a number between ${MIN_EMOTION_INTENSITY} and ${MAX_EMOTION_INTENSITY}`
       );
     }
 
-    if (emotionSettings.engine &&
-        !VALID_EMOTION_ENGINES.includes(emotionSettings.engine as typeof VALID_EMOTION_ENGINES[number])) {
+    if (
+      emotionSettings.engine &&
+      !VALID_EMOTION_ENGINES.includes(
+        emotionSettings.engine as (typeof VALID_EMOTION_ENGINES)[number]
+      )
+    ) {
       throw new Error(
         `voiceSettings.emotion.engine must be '${VALID_EMOTION_ENGINES.join("' or '")}'`
       );

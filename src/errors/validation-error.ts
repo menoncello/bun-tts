@@ -19,7 +19,7 @@ export class ValidationError extends BunTtsError {
       code: 'VALIDATION_ERROR',
       category: 'validation',
       recoverable: false,
-      details
+      details,
     });
     this.name = 'ValidationError';
   }

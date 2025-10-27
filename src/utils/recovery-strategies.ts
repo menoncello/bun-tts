@@ -99,7 +99,9 @@ export class FileSystemRecoveryStrategy implements RecoveryStrategy {
 
     try {
       // Wait a moment and try again
-      await new Promise((resolve) => setTimeout(resolve, FILE_SYSTEM_RETRY_DELAY));
+      await new Promise((resolve) =>
+        setTimeout(resolve, FILE_SYSTEM_RETRY_DELAY)
+      );
 
       // Check if file exists now
       const fs = await import('fs/promises');

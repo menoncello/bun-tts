@@ -20,7 +20,12 @@ export class BunTtsError extends Error {
   /** Unique error code for programmatic error handling */
   public readonly code: string;
   /** Error category for grouping similar types of errors */
-  public readonly category: 'configuration' | 'parsing' | 'tts' | 'file' | 'validation';
+  public readonly category:
+    | 'configuration'
+    | 'parsing'
+    | 'tts'
+    | 'file'
+    | 'validation';
   /** Additional details about error context */
   public readonly details?: Record<string, unknown>;
   /** Whether error is recoverable or should terminate execution */
@@ -32,10 +37,7 @@ export class BunTtsError extends Error {
    * @param message - Human-readable error message
    * @param options - Configuration options for the error
    */
-  constructor(
-    message: string,
-    options: BunTtsErrorOptions
-  ) {
+  constructor(message: string, options: BunTtsErrorOptions) {
     super(message);
     this.name = 'BunTtsError';
     this.code = options.code;

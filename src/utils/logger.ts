@@ -51,8 +51,7 @@ export class Logger {
    * @returns A configured Pino logger instance for production
    */
   private createProductionLogger(verbose: boolean): ReturnType<typeof pino> {
-    const isPretty =
-      process.stdout.isTTY && !process.env.NO_COLOR;
+    const isPretty = process.stdout.isTTY && !process.env.NO_COLOR;
     const level = verbose ? 'debug' : 'info';
 
     return pino({
@@ -224,10 +223,10 @@ export class Logger {
     return fn()
       .then((result) => {
         const duration = Date.now() - startTime;
-        operationLogger.debug(
-          `Completed ${operation}`,
-          { duration, success: true }
-        );
+        operationLogger.debug(`Completed ${operation}`, {
+          duration,
+          success: true,
+        });
         return result;
       })
       .catch((error) => {
@@ -273,7 +272,6 @@ export class Logger {
     return this.logger;
   }
 }
-
 
 // Legacy function exports for backward compatibility during migration
 /**
@@ -325,7 +323,9 @@ export const logOperation = <T>(
   _context?: LogContext
 ): Promise<T> => {
   // This function is deprecated - use Logger.logOperation() instead
-  throw new Error('logOperation() is deprecated. Use Logger.logOperation() instead.');
+  throw new Error(
+    'logOperation() is deprecated. Use Logger.logOperation() instead.'
+  );
 };
 
 /**
@@ -342,5 +342,7 @@ export const logPerformance = (
   _context?: LogContext
 ): void => {
   // This function is deprecated - use Logger.logPerformance() instead
-  throw new Error('logPerformance() is deprecated. Use Logger.logPerformance() instead.');
+  throw new Error(
+    'logPerformance() is deprecated. Use Logger.logPerformance() instead.'
+  );
 };

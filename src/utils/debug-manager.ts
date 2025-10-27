@@ -1,8 +1,17 @@
 import { PinoLoggerAdapter } from '../adapters/pino-logger-adapter.js';
 import type { Logger } from '../interfaces/logger.js';
 import type { BunTtsError } from '../types/index.js';
-import { DEFAULT_MAX_LOG_ENTRIES, BYTES_PER_KB, MAX_METRICS_PER_NAME } from './debug-constants.js';
-import type { DebugOptions, PerformanceMetric, MemorySnapshot, DebugLog } from './debug-interfaces.js';
+import {
+  DEFAULT_MAX_LOG_ENTRIES,
+  BYTES_PER_KB,
+  MAX_METRICS_PER_NAME,
+} from './debug-constants.js';
+import type {
+  DebugOptions,
+  PerformanceMetric,
+  MemorySnapshot,
+  DebugLog,
+} from './debug-interfaces.js';
 import { errorReporter } from './error-reporter.js';
 
 /**
@@ -427,7 +436,8 @@ class DebugManager {
       level,
       message,
       metadata,
-      stack: level === 'trace' ? new Error('Trace stack capture').stack : undefined,
+      stack:
+        level === 'trace' ? new Error('Trace stack capture').stack : undefined,
     };
 
     this.debugLogs.push(log);

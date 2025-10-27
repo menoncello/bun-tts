@@ -7,7 +7,10 @@
 
 import { ConfigCommand } from '../cli/commands/config-command.js';
 import { ConvertCommand } from '../cli/commands/convert-command.js';
-import { HelpCommand, ConsoleOutputWriter } from '../cli/commands/help-command.js';
+import {
+  HelpCommand,
+  ConsoleOutputWriter,
+} from '../cli/commands/help-command.js';
 import { VersionCommand } from '../cli/commands/version-command.js';
 import { ConfigManager } from '../config/index.js';
 import type { Logger } from '../interfaces/logger.js';

@@ -93,6 +93,59 @@ export class ErrorRecoveryManager {
   }
 
   /**
+   * Logs recovery attempt information
+   * @param error - The error to recover from
+   * @param context - Recovery context containing attempt information
+   */
+  private logRecoveryAttempt(
+    error: BunTtsError,
+    context: RecoveryContext
+  ): void {
+    debugManager().debug(`Attempting recovery for ${error.name}`, {
+      errorCode: error.code,
+      category: error.category,
+      attempt: context.attempt,
+      operation: context.operation,
+    });
+  }
+
+  /**
+   * Attempts recovery using registered strategies
+   * @param error - The error to recover from
+   * @param context - Recovery context containing attempt information
+   * @returns Result of strategy recovery attempt
+   */
+  private async attemptStrategyRecovery<T>(
+    error: BunTtsError,
+    context: RecoveryContext
+  ): Promise<Result<T, BunTtsError>> {
+    const strategies = getStrategiesForError(error, this.strategies);
+    return tryStrategies<T>({
+      strategies,
+      error,
+      context,
+      defaultMaxRetries: DEFAULT_MAX_RETRIES,
+      defaultRetryDelay: DEFAULT_RETRY_DELAY,
+      delay: this.delay,
+    });
+  }
+
+  /**
+   * Attempts recovery using fallback function
+   * @param fallback - Optional fallback recovery function
+   * @param context - Recovery context containing attempt information
+   * @param error - The error to recover from
+   * @returns Result of fallback recovery attempt
+   */
+  private async attemptFallbackRecovery<T>(
+    fallback: (() => Promise<Result<T, BunTtsError>>) | undefined,
+    context: RecoveryContext,
+    error: BunTtsError
+  ): Promise<Result<T, BunTtsError>> {
+    return tryFallbackRecovery<T>(fallback, context, error);
+  }
+
+  /**
    * Attempts to recover from an error using registered strategies and fallback options
    * @param error - The error to attempt recovery from
    * @param context - Recovery context containing attempt information
@@ -104,28 +157,21 @@ export class ErrorRecoveryManager {
     context: RecoveryContext,
     fallback?: () => Promise<Result<T, BunTtsError>>
   ): Promise<Result<T, BunTtsError>> {
-    debugManager().debug(`Attempting recovery for ${error.name}`, {
-      errorCode: error.code,
-      category: error.category,
-      attempt: context.attempt,
-      operation: context.operation,
-    });
+    this.logRecoveryAttempt(error, context);
 
-    const strategies = getStrategiesForError(error, this.strategies);
-    const strategyResult = await tryStrategies<T>({
-      strategies,
+    const strategyResult = await this.attemptStrategyRecovery<T>(
       error,
-      context,
-      defaultMaxRetries: DEFAULT_MAX_RETRIES,
-      defaultRetryDelay: DEFAULT_RETRY_DELAY,
-      delay: this.delay,
-    });
-
+      context
+    );
     if (strategyResult.success) {
       return strategyResult;
     }
 
-    const fallbackResult = await tryFallbackRecovery<T>(fallback, context, error);
+    const fallbackResult = await this.attemptFallbackRecovery<T>(
+      fallback,
+      context,
+      error
+    );
     if (fallbackResult.success) {
       return fallbackResult;
     }
@@ -252,7 +298,9 @@ const createRecoveryManager = (): ErrorRecoveryManager => {
  * Registers all configuration-related recovery strategies
  * @param manager - The recovery manager to register strategies with
  */
-const registerConfigurationStrategies = (manager: ErrorRecoveryManager): void => {
+const registerConfigurationStrategies = (
+  manager: ErrorRecoveryManager
+): void => {
   const configStrategy = new ConfigurationRecoveryStrategy();
 
   manager.registerStrategy('ConfigurationError', configStrategy);

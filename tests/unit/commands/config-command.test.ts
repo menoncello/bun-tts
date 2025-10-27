@@ -11,7 +11,8 @@ import {
 describe('ConfigCommand Setup', () => {
   it('should receive both logger and configManager via DI', () => {
     const mockLogger = createMockLogger() as any;
-    const mockConfigManager = createMockConfigManager() as unknown as ConfigManager;
+    const mockConfigManager =
+      createMockConfigManager() as unknown as ConfigManager;
     const configCommand = new ConfigCommand(mockLogger, mockConfigManager);
 
     expect((configCommand as any).logger).toBe(mockLogger);

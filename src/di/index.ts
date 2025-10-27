@@ -8,7 +8,12 @@
 
 import { ConfigManager } from '../config/index.js';
 import { Logger } from '../utils/logger.js';
-import { resolve, container, diContainer, initializeContainer } from './container.js';
+import {
+  resolve,
+  container,
+  diContainer,
+  initializeContainer,
+} from './container.js';
 import {
   DIContainer,
   DEPENDENCIES,
@@ -16,7 +21,7 @@ import {
   DependencyType,
   ServiceLifetime,
   ServiceMetadata,
-  SERVICE_REGISTRY
+  SERVICE_REGISTRY,
 } from './types.js';
 
 // Re-export for isolatedModules compatibility
@@ -106,14 +111,15 @@ export const getCommonDependencies = (): CommonDependencies => {
  * logger.info('Processing document', { parser: 'markdown' });
  * ```
  */
-export const getDocumentProcessingDependencies = (): DocumentProcessingDependencies => {
-  return {
-    config: resolve(DEPENDENCIES.CONFIG_MANAGER),
-    logger: resolve(DEPENDENCIES.LOGGER),
-    // Note: These parsers will be implemented in future iterations
-    markdownParser: null as unknown,
-    pdfParser: null as unknown,
-    epubParser: null as unknown,
-    documentProcessor: null as unknown,
+export const getDocumentProcessingDependencies =
+  (): DocumentProcessingDependencies => {
+    return {
+      config: resolve(DEPENDENCIES.CONFIG_MANAGER),
+      logger: resolve(DEPENDENCIES.LOGGER),
+      // Note: These parsers will be implemented in future iterations
+      markdownParser: null as unknown,
+      pdfParser: null as unknown,
+      epubParser: null as unknown,
+      documentProcessor: null as unknown,
+    };
   };
-};

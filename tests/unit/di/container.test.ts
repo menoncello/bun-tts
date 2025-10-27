@@ -104,20 +104,12 @@ describe('DI Container Initialization', () => {
   it('should have all required dependencies registered', () => {
     const registeredDependencies = container.registrations;
 
-    expect(registeredDependencies).toHaveProperty(
-      DEPENDENCIES.CONFIG_MANAGER
-    );
+    expect(registeredDependencies).toHaveProperty(DEPENDENCIES.CONFIG_MANAGER);
     expect(registeredDependencies).toHaveProperty(DEPENDENCIES.LOGGER);
     expect(registeredDependencies).toHaveProperty(DEPENDENCIES.HELP_COMMAND);
-    expect(registeredDependencies).toHaveProperty(
-      DEPENDENCIES.VERSION_COMMAND
-    );
-    expect(registeredDependencies).toHaveProperty(
-      DEPENDENCIES.CONVERT_COMMAND
-    );
-    expect(registeredDependencies).toHaveProperty(
-      DEPENDENCIES.CONFIG_COMMAND
-    );
+    expect(registeredDependencies).toHaveProperty(DEPENDENCIES.VERSION_COMMAND);
+    expect(registeredDependencies).toHaveProperty(DEPENDENCIES.CONVERT_COMMAND);
+    expect(registeredDependencies).toHaveProperty(DEPENDENCIES.CONFIG_COMMAND);
   });
 });
 

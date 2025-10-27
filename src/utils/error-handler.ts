@@ -9,13 +9,19 @@ const logger = new Logger();
  */
 export function setupGlobalErrorHandlers(): void {
   process.on('uncaughtException', (error: Error) => {
-    logger.error('Uncaught exception occurred', { type: 'uncaughtException', error });
+    logger.error('Uncaught exception occurred', {
+      type: 'uncaughtException',
+      error,
+    });
     process.exit(1);
   });
 
   process.on('unhandledRejection', (reason: unknown) => {
     const error = reason instanceof Error ? reason : new Error(String(reason));
-    logger.error('Unhandled rejection occurred', { type: 'unhandledRejection', error });
+    logger.error('Unhandled rejection occurred', {
+      type: 'unhandledRejection',
+      error,
+    });
     process.exit(1);
   });
 }
@@ -125,7 +131,7 @@ export function withErrorHandling<T extends readonly unknown[], R>(
         {
           code: 'UNKNOWN_ERROR',
           category: 'validation',
-          details: { originalError: error }
+          details: { originalError: error },
         }
       );
     }

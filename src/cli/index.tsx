@@ -167,7 +167,9 @@ function logCliStartup(context: CliContext): void {
  * @returns {boolean} True if the command is valid, false otherwise
  */
 function isValidCommand(commandName: string): boolean {
-  return AVAILABLE_COMMANDS.includes(commandName.toLowerCase() as typeof AVAILABLE_COMMANDS[number]);
+  return AVAILABLE_COMMANDS.includes(
+    commandName.toLowerCase() as (typeof AVAILABLE_COMMANDS)[number]
+  );
 }
 
 /**
@@ -176,7 +178,10 @@ function isValidCommand(commandName: string): boolean {
  * @param {string} commandName - The name of the command to execute
  * @param {CliContext} context - The CLI context
  */
-async function executeCommand(commandName: string, context: CliContext): Promise<void> {
+async function executeCommand(
+  commandName: string,
+  context: CliContext
+): Promise<void> {
   const command = getCommand(commandName);
 
   if (!command) {
@@ -233,7 +238,8 @@ function handleCommandError(error: unknown, commandName: string): void {
   console.error(`Command failed: ${errorMessage}`);
 
   if (cli.flags.verbose) {
-    const stackTrace = error instanceof Error ? error.stack : 'No stack available';
+    const stackTrace =
+      error instanceof Error ? error.stack : 'No stack available';
     console.error('Stack trace:', stackTrace);
   }
 
@@ -274,7 +280,8 @@ function handleUIError(error: unknown): void {
   console.error('Failed to start UI:', errorMessage);
 
   if (cli.flags.verbose) {
-    const stackTrace = error instanceof Error ? error.stack : 'No stack available';
+    const stackTrace =
+      error instanceof Error ? error.stack : 'No stack available';
     console.error('Stack trace:', stackTrace);
   }
 
@@ -318,6 +325,9 @@ async function main(): Promise<void> {
 
 // Start the application
 main().catch((error) => {
-  console.error('Fatal error:', error instanceof Error ? error.message : String(error));
+  console.error(
+    'Fatal error:',
+    error instanceof Error ? error.message : String(error)
+  );
   process.exit(1);
 });
