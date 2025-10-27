@@ -135,7 +135,6 @@ export class PinoLoggerAdapter implements Logger {
     };
   }
 
-  
   /**
    * Checks if pretty output should be enabled.
    *
@@ -291,7 +290,9 @@ class PinoLoggerUtils {
    * @returns Test-safe child logger instance
    */
   static createTestSafeChildLogger(parentLogger: pino.Logger): pino.Logger {
-    const childLogger = pino(PinoLoggerUtils.createBaseConfig(parentLogger.level));
+    const childLogger = pino(
+      PinoLoggerUtils.createBaseConfig(parentLogger.level)
+    );
 
     // Copy any bindings from the parent logger
     const bindings = parentLogger.bindings();
@@ -340,7 +341,10 @@ class PinoLoggerUtils {
    * @param logger - The Pino logger instance
    * @param logEntry - The log entry to process
    */
-  private static processLogEntry(logger: pino.Logger, logEntry: Record<string, unknown>): void {
+  private static processLogEntry(
+    logger: pino.Logger,
+    logEntry: Record<string, unknown>
+  ): void {
     if (this.isStructuredLogEntry(logEntry)) {
       this.logWithLevel(logger, logEntry);
     } else if (this.hasMessageField(logEntry)) {
@@ -354,11 +358,11 @@ class PinoLoggerUtils {
    * @param logEntry - The log entry to check
    * @returns True if log entry has valid level and message fields
    */
-  private static isStructuredLogEntry(logEntry: Record<string, unknown>): boolean {
+  private static isStructuredLogEntry(
+    logEntry: Record<string, unknown>
+  ): boolean {
     return Boolean(
-      logEntry.level &&
-      logEntry.msg &&
-      typeof logEntry.level === 'string'
+      logEntry.level && logEntry.msg && typeof logEntry.level === 'string'
     );
   }
 
@@ -378,7 +382,10 @@ class PinoLoggerUtils {
    * @param logger - The Pino logger instance
    * @param logEntry - The log entry to log
    */
-  private static logWithLevel(logger: pino.Logger, logEntry: Record<string, unknown>): void {
+  private static logWithLevel(
+    logger: pino.Logger,
+    logEntry: Record<string, unknown>
+  ): void {
     const level = (logEntry.level as string).toLowerCase();
     const msg = logEntry.msg as string;
     const logData = { ...logEntry };
@@ -392,7 +399,10 @@ class PinoLoggerUtils {
    * @param logger - The Pino logger instance
    * @param logEntry - The log entry to log
    */
-  private static logWithMessage(logger: pino.Logger, logEntry: Record<string, unknown>): void {
+  private static logWithMessage(
+    logger: pino.Logger,
+    logEntry: Record<string, unknown>
+  ): void {
     const msg = logEntry.msg as string;
     const metadata = { ...logEntry };
     delete metadata.msg;
