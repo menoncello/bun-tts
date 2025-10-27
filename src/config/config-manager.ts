@@ -1,24 +1,15 @@
-import { homedir } from 'os';
-import { join } from 'path';
 import { cosmiconfig, type CosmiconfigResult } from 'cosmiconfig';
 import { ConfigurationError } from '../errors/configuration-error.js';
 import { Result, Ok, Err } from '../errors/result.js';
 import type { BunTtsConfig } from '../types/config.js';
+import { ConfigAccess } from './config-access.js';
+import { ConfigMerger } from './config-merger.js';
+import { ConfigPaths } from './config-paths.js';
+import { ConfigValidator } from './config-validator.js';
 
 /**
- * Configuration validation constants
+ * Configuration constants
  */
-const VALID_LOG_LEVELS = ['trace', 'debug', 'info', 'warn', 'error', 'fatal'] as const;
-const VALID_TTS_ENGINES = ['kokoro', 'chatterbox'] as const;
-const VALID_OUTPUT_FORMATS = ['mp3', 'wav', 'ogg'] as const;
-const MIN_SAMPLE_RATE = 8000;
-const MAX_SAMPLE_RATE = 48000;
-const MIN_QUALITY = 0;
-const MAX_QUALITY = 1;
-const MIN_RATE = 0.1;
-const MAX_RATE = 3.0;
-const MIN_VOLUME = 0;
-const MAX_VOLUME = 2.0;
 const JSON_INDENTATION = 2;
 
 /**
@@ -32,6 +23,10 @@ export class ConfigManager {
   private config: BunTtsConfig | undefined;
   private configPath: string | undefined;
   private readonly moduleName = 'bun-tts';
+  private readonly validator = new ConfigValidator();
+  private readonly merger = new ConfigMerger();
+  private readonly paths = new ConfigPaths();
+  private readonly access = new ConfigAccess();
 
   /**
    * Load configuration from file system
@@ -82,7 +77,9 @@ export class ConfigManager {
    * @param options.configPath - Optional path to a specific configuration file to load
    * @returns Promise resolving to a Result containing the loaded configuration or a ConfigurationError
    */
-  async loadConfig(options?: { configPath?: string }): Promise<Result<BunTtsConfig, ConfigurationError>> {
+  async loadConfig(options?: {
+    configPath?: string;
+  }): Promise<Result<BunTtsConfig, ConfigurationError>> {
     return this.load(options?.configPath);
   }
 
@@ -139,53 +136,11 @@ export class ConfigManager {
    * @param userConfig - The user-provided configuration object
    * @returns A merged BunTtsConfig object
    */
-  private async mergeWithDefaults(userConfig: Partial<BunTtsConfig>): Promise<BunTtsConfig> {
+  private async mergeWithDefaults(
+    userConfig: Partial<BunTtsConfig>
+  ): Promise<BunTtsConfig> {
     const defaults = await this.getDefaultConfig();
-    return this.deepMerge(defaults as unknown as Record<string, unknown>, userConfig as unknown as Record<string, unknown>) as unknown as BunTtsConfig;
-  }
-
-  /**
-   * Deep merge two objects
-   *
-   * Recursively merges properties from the source object into the target object.
-   * Arrays are replaced rather than merged. Objects are merged recursively.
-   *
-   * @param target - The target object to merge into
-   * @param source - The source object to merge from
-   * @returns A new object containing the merged properties
-   */
-  private deepMerge<T extends Record<string, unknown>>(
-    target: T,
-    source: Partial<T>
-  ): T {
-    const result = { ...target } as T;
-
-    for (const key in source) {
-      if (Object.prototype.hasOwnProperty.call(source, key)) {
-        const sourceValue = source[key];
-        const targetValue = result[key];
-
-        if (
-          sourceValue &&
-          typeof sourceValue === 'object' &&
-          !Array.isArray(sourceValue) &&
-          targetValue &&
-          typeof targetValue === 'object' &&
-          !Array.isArray(targetValue)
-        ) {
-          // Recursively merge nested objects
-          result[key] = this.deepMerge(
-            targetValue as Record<string, unknown>,
-            sourceValue as Partial<Record<string, unknown>>
-          ) as T[Extract<keyof T, string>];
-        } else if (sourceValue !== undefined) {
-          // Use source value if it's defined
-          result[key] = sourceValue as T[Extract<keyof T, string>];
-        }
-      }
-    }
-
-    return result;
+    return this.merger.mergeWithDefaults(defaults, userConfig);
   }
 
   /**
@@ -198,184 +153,7 @@ export class ConfigManager {
    * @returns A Result containing true on success or a ConfigurationError on failure
    */
   validate(config: Partial<BunTtsConfig>): Result<true, ConfigurationError> {
-    const loggingValidation = this.validateLoggingConfig(config.logging);
-    if (!loggingValidation.success) {
-      return loggingValidation;
-    }
-
-    const ttsValidation = this.validateTtsConfig(config.tts);
-    if (!ttsValidation.success) {
-      return ttsValidation;
-    }
-
-    const processingValidation = this.validateProcessingConfig(config.processing);
-    if (!processingValidation.success) {
-      return processingValidation;
-    }
-
-    const cacheValidation = this.validateCacheConfig(config.cache);
-    if (!cacheValidation.success) {
-      return cacheValidation;
-    }
-
-    return Ok(true);
-  }
-
-  /**
-   * Validate logging configuration
-   *
-   * @param logging - The logging configuration to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
-   */
-  private validateLoggingConfig(logging?: BunTtsConfig['logging']): Result<true, ConfigurationError> {
-    if (logging?.level && !VALID_LOG_LEVELS.includes(logging.level)) {
-      return Err(new ConfigurationError(`Invalid log level: ${logging.level}`));
-    }
-    return Ok(true);
-  }
-
-  /**
-   * Validate TTS configuration
-   *
-   * @param tts - The TTS configuration to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
-   */
-  private validateTtsConfig(tts?: BunTtsConfig['tts']): Result<true, ConfigurationError> {
-    if (!tts) {
-      return Ok(true);
-    }
-
-    const validations = [
-      () => this.validateTtsEngine(tts.defaultEngine),
-      () => this.validateTtsOutputFormat(tts.outputFormat),
-      () => this.validateTtsSampleRate(tts.sampleRate),
-      () => this.validateTtsQuality(tts.quality),
-      () => this.validateTtsRate(tts.rate),
-      () => this.validateTtsVolume(tts.volume),
-    ];
-
-    for (const validation of validations) {
-      const result = validation();
-      if (!result.success) {
-        return result;
-      }
-    }
-
-    return Ok(true);
-  }
-
-  /**
-   * Validate TTS engine
-   *
-   * @param engine - The engine to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
-   */
-  private validateTtsEngine(engine?: string): Result<true, ConfigurationError> {
-    if (engine && !VALID_TTS_ENGINES.includes(engine as typeof VALID_TTS_ENGINES[number])) {
-      return Err(new ConfigurationError(`Invalid TTS engine: ${engine}`));
-    }
-    return Ok(true);
-  }
-
-  /**
-   * Validate TTS output format
-   *
-   * @param format - The output format to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
-   */
-  private validateTtsOutputFormat(format?: string): Result<true, ConfigurationError> {
-    if (format && !VALID_OUTPUT_FORMATS.includes(format as typeof VALID_OUTPUT_FORMATS[number])) {
-      return Err(new ConfigurationError(`Invalid output format: ${format}`));
-    }
-    return Ok(true);
-  }
-
-  /**
-   * Validate TTS sample rate
-   *
-   * @param sampleRate - The sample rate to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
-   */
-  private validateTtsSampleRate(sampleRate?: number): Result<true, ConfigurationError> {
-    if (sampleRate && (sampleRate < MIN_SAMPLE_RATE || sampleRate > MAX_SAMPLE_RATE)) {
-      return Err(new ConfigurationError(`Sample rate must be between ${MIN_SAMPLE_RATE} and ${MAX_SAMPLE_RATE}`));
-    }
-    return Ok(true);
-  }
-
-  /**
-   * Validate TTS quality
-   *
-   * @param quality - The quality to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
-   */
-  private validateTtsQuality(quality?: number): Result<true, ConfigurationError> {
-    if (quality && (quality < MIN_QUALITY || quality > MAX_QUALITY)) {
-      return Err(new ConfigurationError(`Quality must be between ${MIN_QUALITY} and ${MAX_QUALITY}`));
-    }
-    return Ok(true);
-  }
-
-  /**
-   * Validate TTS rate
-   *
-   * @param rate - The rate to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
-   */
-  private validateTtsRate(rate?: number): Result<true, ConfigurationError> {
-    if (rate && (rate < MIN_RATE || rate > MAX_RATE)) {
-      return Err(new ConfigurationError(`Rate must be between ${MIN_RATE} and ${MAX_RATE}`));
-    }
-    return Ok(true);
-  }
-
-  /**
-   * Validate TTS volume
-   *
-   * @param volume - The volume to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
-   */
-  private validateTtsVolume(volume?: number): Result<true, ConfigurationError> {
-    if (volume && (volume < MIN_VOLUME || volume > MAX_VOLUME)) {
-      return Err(new ConfigurationError(`Volume must be between ${MIN_VOLUME} and ${MAX_VOLUME}`));
-    }
-    return Ok(true);
-  }
-
-  /**
-   * Validate processing configuration
-   *
-   * @param processing - The processing configuration to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
-   */
-  private validateProcessingConfig(processing?: BunTtsConfig['processing']): Result<true, ConfigurationError> {
-    if (processing?.maxFileSize && processing.maxFileSize <= 0) {
-      return Err(new ConfigurationError(`Max file size must be positive`));
-    }
-
-    if (processing?.maxWorkers && processing.maxWorkers <= 0) {
-      return Err(new ConfigurationError(`Max workers must be positive`));
-    }
-
-    return Ok(true);
-  }
-
-  /**
-   * Validate cache configuration
-   *
-   * @param cache - The cache configuration to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
-   */
-  private validateCacheConfig(cache?: BunTtsConfig['cache']): Result<true, ConfigurationError> {
-    if (cache?.maxSize && cache.maxSize <= 0) {
-      return Err(new ConfigurationError(`Cache max size must be positive`));
-    }
-
-    if (cache?.ttl && cache.ttl <= 0) {
-      return Err(new ConfigurationError(`Cache TTL must be positive`));
-    }
-
-    return Ok(true);
+    return this.validator.validate(config);
   }
 
   /**
@@ -386,7 +164,7 @@ export class ConfigManager {
    * @returns The absolute path to the global config directory
    */
   getGlobalConfigDir(): string {
-    return join(homedir(), '.bun-tts');
+    return this.paths.getGlobalConfigDir();
   }
 
   /**
@@ -397,7 +175,7 @@ export class ConfigManager {
    * @returns The absolute path to the global config file
    */
   getGlobalConfigPath(): string {
-    return join(this.getGlobalConfigDir(), 'config.json');
+    return this.paths.getGlobalConfigPath();
   }
 
   /**
@@ -415,10 +193,56 @@ export class ConfigManager {
       _comment: {
         'This is a sample configuration file for bun-tts': true,
         'Copy this to bun-tts.config.json and modify as needed': true,
-        'See documentation for all available options': true
-      }
+        'See documentation for all available options': true,
+      },
     };
     return JSON.stringify(sampleConfig, null, JSON_INDENTATION);
+  }
+
+  /**
+   * Get configuration value by key
+   *
+   * Retrieves a configuration value using dot notation for nested keys.
+   * Returns the provided default value if the key is not found.
+   *
+   * @param key - The configuration key to retrieve (supports dot notation)
+   * @param defaultValue - Default value to return if key is not found
+   * @returns The configuration value or default
+   */
+  get<T = unknown>(key: string, defaultValue?: T): T {
+    return this.access.get(this.config, key, defaultValue);
+  }
+
+  /**
+   * Set configuration value by key
+   *
+   * Sets a configuration value using dot notation for nested keys.
+   *
+   * @param key - The configuration key to set (supports dot notation)
+   * @param value - The value to set
+   */
+  set(key: string, value: unknown): void {
+    if (this.config) {
+      this.config = this.access.set(this.config, key, value);
+    }
+  }
+
+  /**
+   * Check if configuration key exists
+   *
+   * @param key - The configuration key to check (supports dot notation)
+   * @returns True if the key exists, false otherwise
+   */
+  has(key: string): boolean {
+    return this.access.has(this.config, key);
+  }
+
+  /**
+   * Clear all configuration
+   */
+  clear(): void {
+    this.config = undefined;
+    this.configPath = undefined;
   }
 
   /**
@@ -442,7 +266,10 @@ export class ConfigManager {
       }
 
       const fs = await import('fs/promises');
-      await fs.writeFile(filePath, JSON.stringify(config, null, JSON_INDENTATION));
+      await fs.writeFile(
+        filePath,
+        JSON.stringify(config, null, JSON_INDENTATION)
+      );
 
       return Ok(undefined as void);
     } catch (error) {
