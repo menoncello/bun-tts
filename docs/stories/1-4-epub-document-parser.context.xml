@@ -1,0 +1,84 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>4</storyId>
+    <title>EPUB Document Parser</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-10-27</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-4-epub-document-parser.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>a publisher or author with EPUB content</asA>
+    <iWant>the system to parse EPUB files and extract structured content</iWant>
+    <soThat>I can convert e-books into audiobooks</soThat>
+    <tasks>Implement EPUB parser foundation with @smoores/epub library, table of contents parsing, multimedia content handling, metadata extraction, EPUB version compatibility, and comprehensive testing</tasks>
+  </story>
+
+  <acceptanceCriteria>
+1. Extract content from EPUB files (including zipped HTML/XML structure)
+2. Parse table of contents and chapter navigation
+3. Handle embedded images and multimedia content
+4. Extract metadata (title, author, language, publisher)
+5. Manage different EPUB versions and specifications
+6. Generate clean text output with structure preservation
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/architecture.md" title="Decision Architecture" section="Document Processing Stack" snippet="EPUB: @smoores/epub v0.1.9 (TypeScript-native EPUB parsing)" />
+      <doc path="docs/architecture.md" title="Decision Architecture" section="Pattern 2: Streaming Document Processing" snippet="Purpose: Process large documents (1000+ pages) without memory issues. Components: DocumentStream for chunked reading, StreamingProcessor for progressive analysis" />
+      <doc path="docs/architecture.md" title="Decision Architecture" section="Project Structure" snippet="src/core/document-processing/parsers/EPUBParser.ts - EPUB parsing implementation" />
+      <doc path="docs/architecture.md" title="Decision Architecture" section="API Contracts" snippet="Document Parser API: parse(input: string | Buffer): Promise&lt;{success: boolean; data?: DocumentStructure; error?: DocumentParseError}&gt;" />
+      <doc path="docs/architecture.md" title="Decision Architecture" section="Data Architecture" snippet="DocumentStructure model with Chapter interface containing id, title, paragraphs, startIndex, endIndex" />
+      <doc path="docs/epics.md" title="Epic Breakdown" section="Story 1.4" snippet="Extract content from EPUB files (including zipped HTML/XML structure), Parse table of contents and chapter navigation, Handle embedded images and multimedia content" />
+      <doc path="docs/PRD.md" title="Product Requirements" section="Enhanced Document Processing" snippet="FR003: Parse and extract structured content from EPUB files with chapter detection, metadata extraction, and embedded image handling" />
+      <doc path="docs/stories/1-2-markdown-document-parser.md" title="Story 1.2" section="Lessons Learned" snippet="Use Dependency Injection pattern for parser dependencies, Implement comprehensive error handling with custom error classes" />
+    </docs>
+    <code>
+      <!-- No existing EPUB parser code found - these are the planned locations -->
+      <file path="src/core/document-processing/parsers/EPUBParser.ts" kind="parser" symbol="EPUBParser" reason="Main EPUB parsing implementation" />
+      <file path="src/core/document-processing/types.ts" kind="types" symbol="DocumentStructure" reason="Document structure interfaces" />
+      <file path="src/core/document-processing/StructureAnalyzer.ts" kind="analyzer" symbol="StructureAnalyzer" reason="Document structure analysis integration" />
+      <file path="tests/unit/document-processing/parsers/EPUBParser.test.ts" kind="test" symbol="EPUBParser tests" reason="Unit tests for EPUB parser" />
+    </code>
+    <dependencies>
+      <ecosystem name="Node.js/Bun">
+        <package name="@smoores/epub" version="0.1.9" reason="TypeScript-native EPUB parsing library" />
+        <package name="typescript" version="latest" reason="Type safety across codebase" />
+        <package name="pino" version="10.1.0" reason="Ultra-fast structured logging" />
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint name="Architecture Pattern" description="Must follow streaming document processing pattern for memory efficiency with large documents" />
+    <constraint name="Error Handling" description="Must use custom error classes and Result pattern for structured error propagation" />
+    <constraint name="Interface Standard" description="Must implement standard DocumentParser interface with parse() method" />
+    <constraint name="Testing Standards" description="Must include comprehensive unit tests, integration tests, and mutation testing with StrykerJS" />
+    <constraint name="Performance Requirements" description="Must handle 1000+ page documents without memory issues through streaming" />
+    <constraint name="Dependency Injection" description="Should use DI pattern for parser dependencies as learned from Story 1.2" />
+    <constraint name="Configuration Integration" description="Must integrate with existing cosmiconfig-based configuration system" />
+  </constraints>
+
+  <interfaces>
+    <interface name="DocumentParser" kind="class interface" signature="parse(input: string | Buffer): Promise&lt;{success: boolean; data?: DocumentStructure; error?: DocumentParseError}&gt;" path="src/core/document-processing/types.ts" />
+    <interface name="DocumentStructure" kind="type interface" signature="metadata: DocumentMetadata; chapters: Chapter[]; totalParagraphs: number; totalSentences: number" path="src/core/document-processing/types.ts" />
+    <interface name="Chapter" kind="type interface" signature="id: string; title: string; paragraphs: Paragraph[]; startIndex: number; endIndex: number" path="src/core/document-processing/types.ts" />
+  </interfaces>
+
+  <tests>
+    <standards>Use Bun Test for testing framework with feature organization. Unit tests co-located with source files as *.test.ts. Include comprehensive test coverage for all parsing scenarios with mutation testing using StrykerJS for parser logic quality. Follow pattern from Story 1.2 with Dependency Injection for test setup.</standards>
+    <locations>tests/unit/document-processing/parsers/ for unit tests, tests/integration/ for epic-level workflows, tests/e2e/ for complete user journeys</locations>
+    <ideas>
+      <test idea="EPUB file parsing with different versions (2.0, 3.0+)" acceptanceCriteria="5" />
+      <test idea="Table of contents extraction and chapter navigation" acceptanceCriteria="2" />
+      <test idea="Embedded images and multimedia content handling" acceptanceCriteria="3" />
+      <test idea="Metadata extraction (title, author, language, publisher)" acceptanceCriteria="4" />
+      <test idea="Large document streaming performance" acceptanceCriteria="1,6" />
+      <test idea="Error handling for corrupted EPUB files" acceptanceCriteria="1" />
+      <test idea="Integration with existing document structure analyzer" acceptanceCriteria="6" />
+    </ideas>
+  </tests>
+</story-context>

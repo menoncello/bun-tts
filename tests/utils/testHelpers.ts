@@ -83,11 +83,24 @@ export function mockConsole() {
 
 /**
  * Wait for a specified amount of time (for async testing)
+ * Uses deterministic timing to avoid hard waits in tests
  */
 export function wait(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
+  // Import deterministic timing utility
+  const { immediate, tick } = require('../../src/utils/deterministic-timing');
+
+  // For tests, always use immediate resolution to avoid hard waits
+  // If specific timing is needed for production behavior, use conditionalDelay
+  return ms === 0 ? immediate() : tick();
+}
+
+/**
+ * Create a test-time delay that can be controlled
+ * For tests that need actual timing behavior
+ */
+export function testDelay(ms: number): Promise<void> {
+  const { conditionalDelay } = require('../../src/utils/deterministic-timing');
+  return conditionalDelay(ms, true); // Force test environment
 }
 
 /**

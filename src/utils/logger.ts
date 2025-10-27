@@ -346,3 +346,6 @@ export const logPerformance = (
     'logPerformance() is deprecated. Use Logger.logPerformance() instead.'
   );
 };
+
+// Default logger instance for backwards compatibility
+export const logger = new Logger();

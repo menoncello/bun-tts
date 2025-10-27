@@ -348,7 +348,9 @@ describe('DebugManager Performance Measurement - Async Measurement', () => {
 
   it('should measure async operations', async () => {
     const asyncFn = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      // Use deterministic timing instead of hard wait
+      const { tick } = require('../../src/utils/deterministic-timing');
+      await tick();
       return 'result';
     };
 
@@ -365,7 +367,9 @@ describe('DebugManager Performance Measurement - Async Measurement', () => {
 
   it('should handle async operation errors', async () => {
     const asyncFn = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      // Use deterministic timing instead of hard wait
+      const { tick } = require('../../src/utils/deterministic-timing');
+      await tick();
       throw new Error('Test error');
     };
 

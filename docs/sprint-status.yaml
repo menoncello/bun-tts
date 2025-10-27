@@ -41,7 +41,7 @@ development_status:
   1-1-project-infrastructure-cli-foundation: done
   1-2-markdown-document-parser: done
   1-3-pdf-document-parser: backlog
-  1-4-epub-document-parser: backlog
+  1-4-epub-document-parser: review
   1-5-document-structure-analyzer: backlog
   1-6-configuration-management-system: backlog
   epic-1-retrospective: optional
