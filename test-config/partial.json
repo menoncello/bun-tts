@@ -1,0 +1,6 @@
+{
+  "ttsEngine": "chatterbox",
+  "voiceSettings": {
+    "speed": 1.5
+  }
+}

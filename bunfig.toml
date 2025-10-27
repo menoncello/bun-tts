@@ -1,0 +1,53 @@
+# Bun Configuration File
+
+[install]
+cache = true
+auto = "auto"
+
+[lockfile]
+print = "yarn"
+
+[test]
+preload = ["./tests/setup.ts"]
+coverageThreshold = 80
+coveragePathIgnorePatterns = [
+  "tests/**/*"
+]
+
+[build]
+target = "node"
+minify = false
+sourcemap = "inline"
+
+[bundle]
+define = { "process.env.NODE_ENV" = "\"production\"" }
+
+[docs]
+private = false
+
+[loader]
+".ts" = "ts"
+".tsx" = "tsx"
+".js" = "js"
+".jsx" = "jsx"
+".json" = "json"
+
+[loglevel]
+level = "info"
+
+[install.scopes]
+"@types" = "dev"
+"@test" = "dev"
+"@testing" = "dev"
+
+[env.development]
+NODE_ENV = "development"
+LOG_LEVEL = "debug"
+
+[env.production]
+NODE_ENV = "production"
+LOG_LEVEL = "error"
+
+[env.test]
+NODE_ENV = "test"
+LOG_LEVEL = "error"

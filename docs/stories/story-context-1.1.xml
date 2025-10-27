@@ -1,0 +1,137 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.1</storyId>
+    <title>Project Infrastructure & CLI Foundation</title>
+    <status>Ready</status>
+    <generatedAt>2025-10-26</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/story-1.1.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer working on bun-tts project</asA>
+    <iWant>establish the basic project structure, build system, and CLI framework</iWant>
+    <soThat>I have a solid foundation for implementing all features</soThat>
+    <tasks>Initialize Bun project with TypeScript configuration, Implement basic CLI framework, Establish error handling framework, Implement configuration management system, Set up testing framework and initial tests, Configure StrykerJS for mutation testing, Set up strict linting configuration, Configure Prettier code formatting, Configure package.json for distribution</tasks>
+  </story>
+
+  <acceptanceCriteria>
+1. Bun-based project with TypeScript configuration and build pipeline
+2. Basic CLI entry point with help system and version command
+3. Error handling framework with structured logging
+4. Configuration system for user settings and project preferences
+5. Testing framework setup with initial unit tests
+6. Package.json configured for cross-platform distribution
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Decision Architecture - bun-tts</title>
+        <section>Project Initialization</section>
+        <snippet>First implementation story should execute: npx create-ink-app bun-tts --typescript. This establishes base architecture with React component-based TUI framework via Ink, TypeScript with full type safety, Babel configuration for React components in CLI environment.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Decision Architecture - bun-tts</title>
+        <section>Decision Summary</section>
+        <snippet>Technology decisions: CLI Framework (Ink + React), CLI Parsing (Clack), Configuration (Cosmiconfig v9.0.0), Error Handling (Custom classes + Result pattern), Logging (Pino v10.1.0), Testing (Bun Test), Module Organization (Feature-based).</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Decision Architecture - bun-tts</title>
+        <section>Project Structure</section>
+        <snippet>Complete directory layout with src/cli/, src/ui/, src/core/, src/config/, src/errors/, src/utils/, src/types/, tests/unit/, tests/integration/ directories. Follow exact layout from architecture.md lines 36-100+.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Goals and Background Context</section>
+        <snippet>Goals: Establish bun-tts as standard CLI tool for audiobook creation, deliver professional audiobook creation with 95%+ processing success rate, provide complete offline functionality using open-source TTS engines, enable cross-platform deployment.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Functional Requirements</section>
+        <snippet>FR001-FR020 covering document processing, TTS processing, user experience, configuration, emotion system, and system integration requirements with detailed specifications.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <!-- No existing code found - this is the foundation story -->
+    </code>
+    <dependencies>
+      <ecosystem name="Node.js/Bun">
+        <package name="ink" version="latest" purpose="TUI Framework - React for CLI applications"/>
+        <package name="react" version="latest" purpose="React components for Ink"/>
+        <package name="clack" version="latest" purpose="CLI parsing - modern TypeScript-first approach"/>
+        <package name="cosmiconfig" version="^9.0.0" purpose="Configuration management - multi-format support"/>
+        <package name="pino" version="^10.1.0" purpose="Logging - ultra-fast structured logging"/>
+        <package name="@stryker-mutator/core" version="latest" purpose="Mutation testing framework"/>
+        <package name="@stryker-mutator/typescript" version="latest" purpose="TypeScript mutation testing"/>
+        <package name="eslint" version="latest" purpose="Code linting and quality"/>
+        <package name="@typescript-eslint/parser" version="latest" purpose="TypeScript parsing for ESLint"/>
+        <package name="@typescript-eslint/eslint-plugin" version="latest" purpose="TypeScript-specific ESLint rules"/>
+        <package name="eslint-plugin-react" version="latest" purpose="React-specific ESLint rules"/>
+        <package name="eslint-plugin-import" version="latest" purpose="Import/export linting rules"/>
+        <package name="eslint-config-prettier" version="latest" purpose="ESLint-Prettier integration"/>
+        <package name="prettier" version="latest" purpose="Code formatting"/>
+        <package name="typescript" version="latest" purpose="TypeScript compiler and type checking"/>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint name="Project Structure" enforcement="strict">Follow exact directory layout from architecture.md lines 36-100+: src/cli/, src/ui/, src/core/, src/config/, src/errors/, src/utils/, src/types/, tests/unit/, tests/integration/</constraint>
+    <constraint name="Code Quality" enforcement="strict">ESLint rules: 300 lines per file limit, 30 lines per method limit, complexity limit of 15, no-duplicate-code rule</constraint>
+    <constraint name="Testing Standards" enforcement="strict">StrykerJS thresholds: 90% success, 80% warning, 70% error for mutation testing</constraint>
+    <constraint name="Code Formatting" enforcement="automatic">Prettier formatting with ESLint integration using eslint-config-prettier</constraint>
+    <constraint name="Error Handling" enforcement="required">Use custom BunTtsError class hierarchy and Result pattern for functional error propagation</constraint>
+    <constraint name="Configuration" enforcement="required">Use Cosmiconfig v9.0.0 for multi-format configuration support (.json, .yml, .js)</constraint>
+    <constraint name="Logging" enforcement="required">Use Pino v10.1.0 for ultra-fast structured JSON logging</constraint>
+    <constraint name="TypeScript" enforcement="strict">Full type safety across entire codebase with strict TypeScript configuration</constraint>
+  </constraints>
+  <interfaces>
+    <!-- No existing interfaces - this story creates foundational interfaces -->
+  </interfaces>
+  <tests>
+    <standards>Use Bun Test for unit and integration testing. Follow feature-based test organization with tests/unit/ and tests/integration/ directories. Implement comprehensive test utilities and mocking helpers. Ensure all tests pass mutation testing with StrykerJS thresholds (90% success, 80% warning, 70% error).</standards>
+    <locations>tests/unit/ for co-located unit tests, tests/integration/ for integration tests. Follow feature-based organization aligning with epic structure.</locations>
+    <ideas>
+      <test idea="CLI entry point initialization" mapsTo="AC1">
+Test that `npx create-ink-app bun-tts --typescript` creates proper project structure with TypeScript configuration
+      </test>
+      <test idea="Help system functionality" mapsTo="AC2">
+Verify help command displays comprehensive command documentation and usage examples
+      </test>
+      <test idea="Version command output" mapsTo="AC2">
+Test version command returns semantic version in correct format
+      </test>
+      <test idea="Error handling framework" mapsTo="AC3">
+Verify BunTtsError classes and Result pattern work correctly for error propagation
+      </test>
+      <test idea="Structured logging" mapsTo="AC3">
+Test Pino logger produces correct JSON structured output
+      </test>
+      <test idea="Configuration management" mapsTo="AC4">
+Test Cosmiconfig loads .json, .yml, and .js configuration formats correctly
+      </test>
+      <test idea="Testing framework setup" mapsTo="AC5">
+Verify Bun Test can run unit tests with proper TypeScript support
+      </test>
+      <test idea="Package.json distribution" mapsTo="AC6">
+Test package.json has correct cross-platform binary scripts and metadata
+      </test>
+      <test idea="ESLint configuration" mapsTo="Quality Standards">
+Verify ESLint enforces 300 lines/file, 30 lines/method, complexity 15, and no-duplicate rules
+      </test>
+      <test idea="Prettier integration" mapsTo="Quality Standards">
+Test Prettier formatting works correctly with ESLint integration
+      </test>
+      <test idea="StrykerJS mutation testing" mapsTo="Quality Standards">
+Verify StrykerJS runs correctly with configured thresholds for unit tests only
+      </test>
+    </ideas>
+  </tests>
+</story-context>
