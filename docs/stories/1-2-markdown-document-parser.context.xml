@@ -1,0 +1,243 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>2</storyId>
+    <title>Markdown Document Parser</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-10-27</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-2-markdown-document-parser.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>content creator using Markdown files</asA>
+    <iWant>the system to parse my .md files and extract the document structure</iWant>
+    <soThat>I can convert my technical documentation into well-organized audiobooks</soThat>
+    <tasks>Implement Markdown parser foundation (AC: 1, 2, 6), Handle special Markdown elements (AC: 3), Implement robust error handling (AC: 4), Create structured output system (AC: 6), Write comprehensive tests (Quality Standards)</tasks>
+  </story>
+
+  <acceptanceCriteria>1. Parse Markdown files with chapter detection (using ## headers as chapters)
+2. Extract paragraph structure and sentence boundaries
+3. Handle code blocks, tables, and lists appropriately
+4. Recover gracefully from malformed Markdown syntax
+5. Provide confidence scoring for structure detection
+6. Export parsed structure as JSON for downstream processing</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Decision Architecture</title>
+        <section>Document Processing Stack</section>
+        <snippet>Markdown: marked (high-performance Markdown parser). Implementation location: src/core/document-processing/parsers/MarkdownParser.ts</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Decision Architecture</title>
+        <section>Pattern 2: Streaming Document Processing</section>
+        <snippet>Purpose: Process large documents (1000+ pages) without memory issues. Use async generators for memory-efficient processing with DocumentStream interface.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Decision Architecture</title>
+        <section>Data Architecture</section>
+        <snippet>DocumentStructure model with chapters, paragraphs, and metadata for JSON export compatibility with TTS processing pipeline.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Story 1.2</section>
+        <snippet>Parse Markdown files with chapter detection (using ## headers as chapters), extract paragraph structure, handle code blocks/tables/lists, graceful error recovery, confidence scoring, JSON export.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Enhanced Document Processing</section>
+        <snippet>FR001: Parse and extract structured content from Markdown (.md) files with chapter/paragraph/sentence detection and automatic recovery from malformed markup.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/story-1.1.md</path>
+        <title>Story 1.1</title>
+        <section>Lessons Learned</section>
+        <snippet>Dependency Injection is Critical: Use Awilix framework for all parser components. Eliminate Singleton Anti-patterns: MarkdownParser must be DI-managed, not static.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/errors/bun-tts-error.ts</path>
+        <kind>error-class</kind>
+        <symbol>BunTtsError</symbol>
+        <lines>19-95</lines>
+        <reason>Base error class for custom MarkdownParseError with categories, codes, and structured error handling</reason>
+      </artifact>
+      <artifact>
+        <path>src/errors/result.ts</path>
+        <kind>utility-type</kind>
+        <symbol>Result</symbol>
+        <lines>11-13</lines>
+        <reason>Result pattern for functional error handling: {success: boolean, data?: T, error?: BunTtsError}</reason>
+      </artifact>
+      <artifact>
+        <path>src/di/container.ts</path>
+        <kind>di-container</kind>
+        <symbol>container</symbol>
+        <lines>22-40</lines>
+        <reason>Awilix DI container configuration for registering MarkdownParser as singleton with dependencies</reason>
+      </artifact>
+      <artifact>
+        <path>src/interfaces/logger.ts</path>
+        <kind>interface</kind>
+        <symbol>Logger</symbol>
+        <lines>5-47</lines>
+        <reason>Logger interface for structured logging with metadata support in parser operations</reason>
+      </artifact>
+      <artifact>
+        <path>src/config/config-manager.ts</path>
+        <kind>service-class</kind>
+        <symbol>ConfigManager</symbol>
+        <lines>1-50</lines>
+        <reason>Configuration management for parser settings, chapter detection patterns, confidence thresholds</reason>
+      </artifact>
+    </code>
+    <dependencies>
+  <ecosystem name="node-bun">
+    <package name="awilix" version="^12.0.5" purpose="Dependency Injection framework for parser components"/>
+    <package name="pino" version="^10.1.0" purpose="Ultra-fast structured logging for parsing operations"/>
+    <package name="cosmiconfig" version="^9.0.0" purpose="Configuration management for parser settings"/>
+    <package name="@clack/prompts" version="^0.11.0" purpose="CLI prompts for interactive error handling"/>
+    <package name="ink" version="^6.4.0" purpose="React-based TUI framework for future UI components"/>
+    <package name="react" version="^19.2.0" purpose="UI framework for TUI components"/>
+  </ecosystem>
+  <ecosystem name="development">
+    <package name="bun" version="^1.3.1" purpose="JavaScript runtime and test framework"/>
+    <package name="typescript" version="^5.9.3" purpose="Type safety for parser interfaces and implementation"/>
+    <package name="eslint" version="^9.38.0" purpose="Code quality enforcement with 300/30/15 limits"/>
+    <package name="prettier" version="latest" purpose="Code formatting for consistent style"/>
+    <package name="@stryker-mutator/core" version="^9.2.0" purpose="Mutation testing for parser logic quality"/>
+    <package name="ink-testing-library" version="4.0.0" purpose="TUI component testing"/>
+  </ecosystem>
+  <ecosystem name="required">
+    <package name="marked" version="latest" purpose="High-performance Markdown parser library"/>
+    <package name="pdf-parse" version="latest" purpose="PDF parsing (future Epic 1.3)"/>
+    <package name="@smoores/epub" version="latest" purpose="EPUB parsing (future Epic 1.4)"/>
+  </ecosystem>
+</dependencies>
+  </artifacts>
+
+  <constraints>
+- Use Dependency Injection with Awilix framework - no static singletons
+- Implement MarkdownParser as DI-managed singleton class
+- Use BunTtsError hierarchy for custom parsing errors with 'parsing' category
+- Apply Result pattern: {success: boolean, data?: DocumentStructure, error?: MarkdownParseError}
+- Follow ESLint limits: 300 lines per file, 30 lines per method, complexity < 15
+- Use Prettier formatting for all source files
+- Apply Bun Test framework with DI testing utilities
+- Use Logger interface for structured logging with metadata
+- Implement streaming architecture for 1000+ page documents
+- Use marked library as specified in architecture decisions
+- Create TypeScript interfaces for DocumentStructure model
+- Zero tolerance for unhandled parsing errors
+- Use async generators for memory-efficient processing
+</constraints>
+  <interfaces>
+    <interface>
+      <name>MarkdownParser</name>
+      <kind>class interface</kind>
+      <signature>class MarkdownParser {
+  constructor(logger: Logger, configManager: ConfigManager)
+  parse(input: string | Buffer): Promise&lt;Result&lt;DocumentStructure, MarkdownParseError&gt;&gt;
+  validate(structure: DocumentStructure): Promise&lt;ValidationResult&gt;
+}</signature>
+      <path>src/core/document-processing/parsers/MarkdownParser.ts</path>
+    </interface>
+    <interface>
+      <name>DocumentStructure</name>
+      <kind>type interface</kind>
+      <signature>interface DocumentStructure {
+  metadata: DocumentMetadata;
+  chapters: Chapter[];
+  totalParagraphs: number;
+  totalSentences: number;
+}</signature>
+      <path>src/core/document-processing/types.ts</path>
+    </interface>
+    <interface>
+      <name>DocumentStream</name>
+      <kind>type interface</kind>
+      <signature>interface DocumentStream {
+  async *chunks(): AsyncGenerator&lt;DocumentChunk&gt;
+  async getStructure(): Promise&lt;DocumentStructure&gt;
+}</signature>
+      <path>src/core/document-processing/types.ts</path>
+    </interface>
+    <interface>
+      <name>MarkdownParserConfig</name>
+      <kind>type interface</kind>
+      <signature>interface MarkdownParserConfig {
+  chapterDetectionPattern: string;
+  confidenceThreshold: number;
+  enableStreaming: boolean;
+  maxChunkSize: number;
+}</signature>
+      <path>src/core/document-processing/config/MarkdownParserConfig.ts</path>
+    </interface>
+  </interfaces>
+  <tests>
+    <standards>Use Bun Test framework with DI testing utilities following Story 1.1 patterns. Apply StrykerJS mutation testing with 90/80/70 thresholds. Mock dependencies using MockLogger and test factories. Test both happy path and error scenarios with Result pattern. Ensure comprehensive coverage for parser logic including malformed Markdown handling.</standards>
+    <locations>tests/unit/document-processing/parsers/ for MarkdownParser unit tests, tests/integration/document-processing.test.ts for end-to-end parsing workflows, tests/unit/document-processing/errors/ for MarkdownParseError testing, co-locate tests with source files using *.test.ts pattern</locations>
+    <ideas>
+      <test>
+        <ac>1</ac>
+        <idea>Test chapter detection with various header levels and malformed headers</idea>
+      </test>
+      <test>
+        <ac>2</ac>
+        <idea>Test paragraph and sentence boundary extraction with complex Markdown structures</idea>
+      </test>
+      <test>
+        <ac>3</ac>
+        <idea>Test code block detection and handling with nested code blocks and inline code</idea>
+      </test>
+      <test>
+        <ac>3</ac>
+        <idea>Test table parsing with malformed tables and edge cases</idea>
+      </test>
+      <test>
+        <ac>3</ac>
+        <idea>Test ordered/unordered list parsing with nested structures</idea>
+      </test>
+      <test>
+        <ac>4</ac>
+        <idea>Test graceful recovery from malformed Markdown with various syntax errors</idea>
+      </test>
+      <test>
+        <ac>4</ac>
+        <idea>Test MarkdownParseError creation with proper error codes and categories</idea>
+      </test>
+      <test>
+        <ac>5</ac>
+        <idea>Test confidence scoring algorithm with edge cases and thresholds</idea>
+      </test>
+      <test>
+        <ac>6</ac>
+        <idea>Test JSON export with complete DocumentStructure validation</idea>
+      </test>
+      <test>
+        <quality></quality>
+        <idea>Test streaming architecture with large documents (1000+ pages simulation)</idea>
+      </test>
+      <test>
+        <quality></quality>
+        <idea>Test DI container integration with MarkdownParser singleton lifecycle</idea>
+      </test>
+      <test>
+        <quality></quality>
+        <idea>Test Result pattern usage in all parser operations</idea>
+      </test>
+      <test>
+        <quality></quality>
+        <idea>Performance tests for parsing speed and memory usage</idea>
+      </test>
+    </ideas>
+  </tests>
+</story-context>
