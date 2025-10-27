@@ -22,8 +22,10 @@ export const debugManager = (): DebugManager => {
  * @param metadata - Optional additional data to associate with the timer
  * @returns void
  */
-export const startTimer = (name: string, metadata?: Record<string, unknown>): void =>
-  debugManager().startTimer(name, metadata);
+export const startTimer = (
+  name: string,
+  metadata?: Record<string, unknown>
+): void => debugManager().startTimer(name, metadata);
 
 /**
  * Ends a performance timer using the debug manager singleton.
@@ -31,8 +33,10 @@ export const startTimer = (name: string, metadata?: Record<string, unknown>): vo
  * @param metadata - Optional additional data to associate with the timer result
  * @returns The duration in milliseconds, or 0 if timer wasn't found
  */
-export const endTimer = (name: string, metadata?: Record<string, unknown>): number =>
-  debugManager().endTimer(name, metadata);
+export const endTimer = (
+  name: string,
+  metadata?: Record<string, unknown>
+): number => debugManager().endTimer(name, metadata);
 
 /**
  * Measures the execution time of an async function using the debug manager singleton.
@@ -66,8 +70,10 @@ export const measureSync = <T>(
  * @param metadata - Optional additional data to include with the log
  * @returns void
  */
-export const debugLog = (message: string, metadata?: Record<string, unknown>): void =>
-  debugManager().debug(message, metadata);
+export const debugLog = (
+  message: string,
+  metadata?: Record<string, unknown>
+): void => debugManager().debug(message, metadata);
 
 /**
  * Logs a trace message using the debug manager singleton.
@@ -75,5 +81,7 @@ export const debugLog = (message: string, metadata?: Record<string, unknown>): v
  * @param metadata - Optional additional data to include with the log
  * @returns void
  */
-export const traceLog = (message: string, metadata?: Record<string, unknown>): void =>
-  debugManager().trace(message, metadata);
+export const traceLog = (
+  message: string,
+  metadata?: Record<string, unknown>
+): void => debugManager().trace(message, metadata);

@@ -8,7 +8,10 @@ import {
 } from 'awilix';
 import { ConfigCommand } from '../../../src/cli/commands/config-command.js';
 import { ConvertCommand } from '../../../src/cli/commands/convert-command.js';
-import { HelpCommand, ConsoleOutputWriter } from '../../../src/cli/commands/help-command.js';
+import {
+  HelpCommand,
+  ConsoleOutputWriter,
+} from '../../../src/cli/commands/help-command.js';
 import { VersionCommand } from '../../../src/cli/commands/version-command.js';
 import { ConfigManager } from '../../../src/config/index.js';
 import { Logger as LoggerClass } from '../../../src/utils/logger.js';
@@ -25,7 +28,11 @@ function createMockFunction() {
   return fn;
 }
 
-function registerCoreDependencies(container: AwilixContainer, useMocks: boolean, mocks: any = {}) {
+function registerCoreDependencies(
+  container: AwilixContainer,
+  useMocks: boolean,
+  mocks: any = {}
+) {
   container.register({
     configManager: mocks.configManager
       ? asValue(mocks.configManager)
@@ -33,7 +40,9 @@ function registerCoreDependencies(container: AwilixContainer, useMocks: boolean,
 
     logger: mocks.logger
       ? asValue(mocks.logger)
-      : asFunction(() => new LoggerClass(useMocks), { lifetime: Lifetime.SINGLETON }),
+      : asFunction(() => new LoggerClass(useMocks), {
+          lifetime: Lifetime.SINGLETON,
+        }),
 
     outputWriter: mocks.outputWriter
       ? asValue(mocks.outputWriter)
@@ -43,9 +52,12 @@ function registerCoreDependencies(container: AwilixContainer, useMocks: boolean,
 
 function registerCommands(container: AwilixContainer) {
   container.register({
-    helpCommand: asFunction((cradle) => new HelpCommand(cradle.logger, cradle.outputWriter), {
-      lifetime: Lifetime.TRANSIENT,
-    }),
+    helpCommand: asFunction(
+      (cradle) => new HelpCommand(cradle.logger, cradle.outputWriter),
+      {
+        lifetime: Lifetime.TRANSIENT,
+      }
+    ),
     versionCommand: asFunction((cradle) => new VersionCommand(cradle.logger), {
       lifetime: Lifetime.TRANSIENT,
     }),
@@ -183,9 +195,13 @@ function createConfigMethod(returnValue: any) {
  */
 export const createMockConfigManager = () => {
   return {
-    loadConfig: createConfigMethod(Promise.resolve({ success: true, data: { sample: 'config' } })),
+    loadConfig: createConfigMethod(
+      Promise.resolve({ success: true, data: { sample: 'config' } })
+    ),
     getConfig: createConfigMethod({ sample: 'config' }),
-    reloadConfig: createConfigMethod(Promise.resolve({ success: true, data: { sample: 'config' } })),
+    reloadConfig: createConfigMethod(
+      Promise.resolve({ success: true, data: { sample: 'config' } })
+    ),
     createSampleConfig: createConfigMethod('# Sample Config'),
   };
 };

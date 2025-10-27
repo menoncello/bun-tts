@@ -46,7 +46,9 @@ describe('CLI App - Help Functionality', () => {
     expect(getLastFrameContent(lastFrame)).toContain(
       'bun-tts - Professional Audiobook Creation Tool'
     );
-    expect(getLastFrameContent(lastFrame)).toContain('Show help message and usage information');
+    expect(getLastFrameContent(lastFrame)).toContain(
+      'Show help message and usage information'
+    );
   });
 
   it('should render verbose help when verbose flag is provided with help', () => {

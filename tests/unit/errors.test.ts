@@ -13,7 +13,10 @@ import {
 } from '../../src/errors/result.js';
 import { ValidationError } from '../../src/errors/validation-error.js';
 
-function createTestError(code: string, category: 'configuration' | 'parsing' | 'tts' | 'file' | 'validation'): BunTtsError {
+function createTestError(
+  code: string,
+  category: 'configuration' | 'parsing' | 'tts' | 'file' | 'validation'
+): BunTtsError {
   return new BunTtsError('test error', { code, category });
 }
 
@@ -21,7 +24,7 @@ describe('BunTtsError Core Functionality', () => {
   it('should create error with message and code', () => {
     const error = new BunTtsError('Test error', {
       code: 'TEST_CODE',
-      category: 'validation'
+      category: 'validation',
     });
 
     expect(error.message).toBe('Test error');
@@ -35,7 +38,7 @@ describe('BunTtsError Core Functionality', () => {
     const error = new BunTtsError('Test error', {
       code: 'TEST_CODE',
       category: 'validation',
-      details
+      details,
     });
 
     expect(error.details).toEqual(details);
@@ -44,7 +47,7 @@ describe('BunTtsError Core Functionality', () => {
   it('should provide user-friendly message', () => {
     const error = new BunTtsError('Test error', {
       code: 'TEST_CODE',
-      category: 'validation'
+      category: 'validation',
     });
     expect(error.getUserMessage()).toBe('Test error (Error code: TEST_CODE)');
   });
@@ -52,7 +55,7 @@ describe('BunTtsError Core Functionality', () => {
   it('should have default exit code', () => {
     const error = new BunTtsError('Test error', {
       code: 'TEST_CODE',
-      category: 'validation'
+      category: 'validation',
     });
     expect(error.getExitCode()).toBe(1);
   });
@@ -60,7 +63,7 @@ describe('BunTtsError Core Functionality', () => {
   it('should maintain stack trace', () => {
     const error = new BunTtsError('Test error', {
       code: 'TEST_CODE',
-      category: 'validation'
+      category: 'validation',
     });
     expect(error.stack).toBeDefined();
     expect(error.stack).toContain('BunTtsError');

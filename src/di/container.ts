@@ -7,9 +7,13 @@ import {
 } from 'awilix';
 import { ConfigCommand } from '../cli/commands/config-command.js';
 import { ConvertCommand } from '../cli/commands/convert-command.js';
-import { HelpCommand, ConsoleOutputWriter } from '../cli/commands/help-command.js';
+import {
+  HelpCommand,
+  ConsoleOutputWriter,
+} from '../cli/commands/help-command.js';
 import { VersionCommand } from '../cli/commands/version-command.js';
 import { ConfigManager } from '../config/index.js';
+import { MarkdownParser } from '../core/document-processing/parsers/markdown-parser.js';
 import { Logger } from '../utils/logger.js';
 
 /**
@@ -44,11 +48,22 @@ container.register({
   outputWriter: asClass(ConsoleOutputWriter, { lifetime: Lifetime.SINGLETON }),
 });
 
+// Document Processing - SINGLETON for parser configuration and efficiency
+container.register({
+  markdownParser: asFunction(
+    (cradle) => new MarkdownParser(cradle.logger, cradle.configManager),
+    { lifetime: Lifetime.SINGLETON }
+  ),
+});
+
 // CLI Commands - TRANSIENT for command execution with proper dependency injection
 container.register({
-  helpCommand: asFunction((cradle) => new HelpCommand(cradle.logger, cradle.outputWriter), {
-    lifetime: Lifetime.TRANSIENT,
-  }),
+  helpCommand: asFunction(
+    (cradle) => new HelpCommand(cradle.logger, cradle.outputWriter),
+    {
+      lifetime: Lifetime.TRANSIENT,
+    }
+  ),
   versionCommand: asFunction((cradle) => new VersionCommand(cradle.logger), {
     lifetime: Lifetime.TRANSIENT,
   }),
@@ -106,7 +121,8 @@ export const registerModule = (
   factory: new (...args: unknown[]) => unknown,
   options: Record<string, unknown> = {}
 ): void => {
-  const lifetime = (options.lifetime as keyof typeof Lifetime) || Lifetime.TRANSIENT;
+  const lifetime =
+    (options.lifetime as keyof typeof Lifetime) || Lifetime.TRANSIENT;
   container.register(name, asClass(factory, { lifetime }));
 };
 

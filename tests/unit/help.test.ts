@@ -75,9 +75,7 @@ describe('CLI Help Command-Specific Features', () => {
     const helpText = generateHelp({ command: 'unknown' });
 
     expect(helpText).toContain('Unknown command: unknown');
-    expect(helpText).toContain(
-      "Run 'bun-tts help' to see available commands"
-    );
+    expect(helpText).toContain("Run 'bun-tts help' to see available commands");
   });
 });
 

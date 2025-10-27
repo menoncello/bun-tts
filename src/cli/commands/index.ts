@@ -50,7 +50,9 @@ export const commands: Record<string, Command> = {
     name: 'help',
     description: 'Show help message and usage information',
     handler: async (context) => {
-      const helpCommand = resolve<DIContainer['helpCommand']>(DEPENDENCIES.HELP_COMMAND);
+      const helpCommand = resolve<DIContainer['helpCommand']>(
+        DEPENDENCIES.HELP_COMMAND
+      );
       await helpCommand.execute(context);
     },
     examples: ['bun-tts help', 'bun-tts --help'],
@@ -60,7 +62,9 @@ export const commands: Record<string, Command> = {
     name: 'version',
     description: 'Show version information',
     handler: async (context) => {
-      const versionCommand = resolve<DIContainer['versionCommand']>(DEPENDENCIES.VERSION_COMMAND);
+      const versionCommand = resolve<DIContainer['versionCommand']>(
+        DEPENDENCIES.VERSION_COMMAND
+      );
       await versionCommand.execute(context);
     },
     examples: ['bun-tts version', 'bun-tts --version', 'bun-tts -v'],
@@ -70,7 +74,9 @@ export const commands: Record<string, Command> = {
     name: 'convert',
     description: 'Convert a document to audiobook format',
     handler: async (context) => {
-      const convertCommand = resolve<DIContainer['convertCommand']>(DEPENDENCIES.CONVERT_COMMAND);
+      const convertCommand = resolve<DIContainer['convertCommand']>(
+        DEPENDENCIES.CONVERT_COMMAND
+      );
       await convertCommand.execute(context);
     },
     examples: [
@@ -84,7 +90,9 @@ export const commands: Record<string, Command> = {
     name: 'config',
     description: 'Manage configuration settings',
     handler: async (context) => {
-      const configCommand = resolve<DIContainer['configCommand']>(DEPENDENCIES.CONFIG_COMMAND);
+      const configCommand = resolve<DIContainer['configCommand']>(
+        DEPENDENCIES.CONFIG_COMMAND
+      );
       await configCommand.execute(context);
     },
     examples: [
@@ -94,7 +102,6 @@ export const commands: Record<string, Command> = {
     ],
   },
 };
-
 
 /**
  * Formats a command's help information as a readable string.
@@ -215,7 +222,10 @@ export class TypeSafeCommandRegistry implements CommandRegistry {
       throw new Error('Command name must be a non-empty string');
     }
 
-    if (typeof command.description !== 'string' || !command.description.trim()) {
+    if (
+      typeof command.description !== 'string' ||
+      !command.description.trim()
+    ) {
       throw new Error('Command description must be a non-empty string');
     }
 
@@ -223,8 +233,11 @@ export class TypeSafeCommandRegistry implements CommandRegistry {
       throw new TypeError('Command handler must be a function');
     }
 
-    if (command.examples && (!Array.isArray(command.examples) ||
-        !command.examples.every(example => typeof example === 'string'))) {
+    if (
+      command.examples &&
+      (!Array.isArray(command.examples) ||
+        !command.examples.every((example) => typeof example === 'string'))
+    ) {
       throw new Error('Command examples must be an array of strings');
     }
   }
@@ -252,11 +265,15 @@ export function validateCommandName(name: string): void {
   }
 
   if (name.length > MAX_COMMAND_NAME_LENGTH) {
-    throw new Error(`Command name must be ${MAX_COMMAND_NAME_LENGTH} characters or less`);
+    throw new Error(
+      `Command name must be ${MAX_COMMAND_NAME_LENGTH} characters or less`
+    );
   }
 
   if (!COMMAND_NAME_PATTERN.test(name)) {
-    throw new Error('Command name must start with a letter and contain only letters, numbers, hyphens, and underscores');
+    throw new Error(
+      'Command name must start with a letter and contain only letters, numbers, hyphens, and underscores'
+    );
   }
 }
 

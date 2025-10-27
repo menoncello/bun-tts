@@ -62,8 +62,11 @@ function validateDefaultConfig(config: any): void {
 }
 
 function validateCustomConfig(config: any, customValues: any): void {
-  Object.keys(customValues).forEach(key => {
-    if (typeof customValues[key] === 'object' && !Array.isArray(customValues[key])) {
+  Object.keys(customValues).forEach((key) => {
+    if (
+      typeof customValues[key] === 'object' &&
+      !Array.isArray(customValues[key])
+    ) {
       expect(config[key]).toEqual(expect.objectContaining(customValues[key]));
     } else {
       expect(config[key]).toBe(customValues[key]);

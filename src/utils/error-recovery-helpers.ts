@@ -3,6 +3,9 @@ import type { BunTtsError } from '../types/index.js';
 import { debugManager } from './debug.js';
 import type { RecoveryStrategy, RecoveryContext } from './error-recovery.js';
 
+// Constants for magic numbers
+const DEFAULT_MAX_RETRIES = 3;
+
 /**
  * Parameters for operation execution
  */
@@ -22,6 +25,17 @@ export interface StrategyExecutionParams {
   error: BunTtsError;
   context: RecoveryContext;
   defaultMaxRetries: number;
+  defaultRetryDelay: number;
+  delay: (ms: number) => Promise<void>;
+}
+
+/**
+ * Parameters for applying a single strategy
+ */
+interface ApplyStrategyParams {
+  strategy: RecoveryStrategy;
+  error: BunTtsError;
+  context: RecoveryContext;
   defaultRetryDelay: number;
   delay: (ms: number) => Promise<void>;
 }
@@ -50,7 +64,12 @@ export const handleSuccessfulOperation = async <T>(
     return result;
   }
 
-  logOperationFailure(params.operationName, params.attempt, result.error, params.metadata);
+  logOperationFailure(
+    params.operationName,
+    params.attempt,
+    result.error,
+    params.metadata
+  );
   return result;
 };
 
@@ -67,11 +86,14 @@ export const handleOperationError = <T>(
   normalizeError: (error: unknown) => BunTtsError
 ): Result<T, BunTtsError> => {
   const normalizedError = normalizeError(error);
-  debugManager().error(`Unexpected error in operation: ${params.operationName}`, {
-    attempt: params.attempt,
-    error: normalizedError.message,
-    metadata: params.metadata,
-  });
+  debugManager().error(
+    `Unexpected error in operation: ${params.operationName}`,
+    {
+      attempt: params.attempt,
+      error: normalizedError.message,
+      metadata: params.metadata,
+    }
+  );
 
   return failure(normalizedError);
 };
@@ -182,11 +204,52 @@ export const getStrategiesForError = (
   error: BunTtsError,
   strategies: Map<string, RecoveryStrategy[]>
 ): RecoveryStrategy[] => {
-  return (
-    strategies.get(error.name) ||
-    strategies.get(error.category) ||
-    []
-  );
+  return strategies.get(error.name) || strategies.get(error.category) || [];
+};
+
+/**
+ * Checks if a strategy can be applied for recovery
+ * @param strategy - The recovery strategy to check
+ * @param error - The error to recover from
+ * @param attempt - Current attempt number
+ * @param defaultMaxRetries - Default maximum retry attempts
+ * @returns True if the strategy can be applied
+ */
+const canApplyStrategy = (
+  strategy: RecoveryStrategy,
+  error: BunTtsError,
+  attempt: number,
+  defaultMaxRetries: number
+): boolean => {
+  if (!strategy.canRecover(error)) {
+    return false;
+  }
+
+  const maxRetries = strategy.maxRetries ?? defaultMaxRetries;
+  return attempt <= maxRetries;
+};
+
+/**
+ * Prepares and applies a recovery strategy with delay and execution
+ * @param params - Strategy application parameters
+ * @returns Result of strategy execution
+ */
+const applyStrategy = async <T>(
+  params: ApplyStrategyParams
+): Promise<Result<T, BunTtsError>> => {
+  const retryDelay = params.strategy.retryDelay ?? params.defaultRetryDelay;
+
+  debugManager().debug(`Applying recovery strategy`, {
+    strategy: params.strategy.constructor.name,
+    attempt: params.context.attempt,
+    maxRetries: params.strategy.maxRetries ?? DEFAULT_MAX_RETRIES,
+  });
+
+  if (params.context.attempt > 1) {
+    await params.delay(retryDelay * params.context.attempt);
+  }
+
+  return executeStrategy<T>(params.strategy, params.error, params.context);
 };
 
 /**
@@ -198,28 +261,24 @@ export const tryStrategies = async <T>(
   params: StrategyExecutionParams
 ): Promise<Result<T, BunTtsError>> => {
   for (const strategy of params.strategies) {
-    if (!strategy.canRecover(params.error)) {
+    if (
+      !canApplyStrategy(
+        strategy,
+        params.error,
+        params.context.attempt,
+        params.defaultMaxRetries
+      )
+    ) {
       continue;
     }
 
-    const maxRetries = strategy.maxRetries ?? params.defaultMaxRetries;
-    const retryDelay = strategy.retryDelay ?? params.defaultRetryDelay;
-
-    if (params.context.attempt > maxRetries) {
-      continue;
-    }
-
-    debugManager().debug(`Applying recovery strategy`, {
-      strategy: strategy.constructor.name,
-      attempt: params.context.attempt,
-      maxRetries,
+    const result = await applyStrategy<T>({
+      strategy,
+      error: params.error,
+      context: params.context,
+      defaultRetryDelay: params.defaultRetryDelay,
+      delay: params.delay,
     });
-
-    if (params.context.attempt > 1) {
-      await params.delay(retryDelay * params.context.attempt);
-    }
-
-    const result = await executeStrategy<T>(strategy, params.error, params.context);
     if (result.success) {
       return result;
     }
@@ -321,7 +380,9 @@ export const createFinalFailureResult = <T>(
   lastError: BunTtsError | null,
   normalizeError: (error: unknown) => BunTtsError
 ): Result<T, BunTtsError> => {
-  const finalError = lastError || normalizeError(new Error('Unknown error occurred during recovery'));
+  const finalError =
+    lastError ||
+    normalizeError(new Error('Unknown error occurred during recovery'));
   return failure(finalError);
 };
 

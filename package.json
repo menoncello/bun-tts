@@ -69,6 +69,7 @@
     "awilix": "^12.0.5",
     "cosmiconfig": "^9.0.0",
     "ink": "^6.4.0",
+    "marked": "^16.4.1",
     "meow": "^14.0.0",
     "pino": "^10.1.0",
     "react": "^19.2.0"
@@ -88,6 +89,7 @@
     "globals": "^16.4.0",
     "ink-testing-library": "4.0.0",
     "jiti": "^2.6.1",
+    "prettier": "^3.6.2",
     "react-devtools-core": "7.0.1",
     "react-dom": "^19.2.0",
     "typescript": "^5.9.3",

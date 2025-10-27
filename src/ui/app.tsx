@@ -50,7 +50,11 @@ function DefaultMessage(): React.ReactElement {
  * @param props.verbose - Whether to show verbose help information
  * @returns React.ReactElement containing the formatted help message
  */
-function HelpMessage({ verbose = false }: { verbose?: boolean }): React.ReactElement {
+function HelpMessage({
+  verbose = false,
+}: {
+  verbose?: boolean;
+}): React.ReactElement {
   const helpText = generateHelp({ verbose });
 
   return (
@@ -71,7 +75,13 @@ function HelpMessage({ verbose = false }: { verbose?: boolean }): React.ReactEle
  * @param props.index - The line index for the React key
  * @returns React.ReactElement containing the formatted help line
  */
-function HelpLine({ line, index }: { line: string; index: number }): React.ReactElement {
+function HelpLine({
+  line,
+  index,
+}: {
+  line: string;
+  index: number;
+}): React.ReactElement {
   const coloredLine = getColoredHelpLine(line);
 
   return (
@@ -112,11 +122,13 @@ function getColoredHelpLine(line: string): React.ReactElement {
  * @returns true if the line is a header, false otherwise
  */
 function isHeaderLine(line: string): boolean {
-  return line.startsWith('bun-tts -') ||
-         line.startsWith('Usage:') ||
-         line.startsWith('Commands:') ||
-         line.startsWith('Options:') ||
-         line.startsWith('Examples:');
+  return (
+    line.startsWith('bun-tts -') ||
+    line.startsWith('Usage:') ||
+    line.startsWith('Commands:') ||
+    line.startsWith('Options:') ||
+    line.startsWith('Examples:')
+  );
 }
 
 /**
@@ -196,7 +208,13 @@ function VersionMessage(): React.ReactElement {
  * @param props.index - The line index for the React key
  * @returns React.ReactElement containing the formatted version line
  */
-function VersionLine({ line, index }: { line: string; index: number }): React.ReactElement {
+function VersionLine({
+  line,
+  index,
+}: {
+  line: string;
+  index: number;
+}): React.ReactElement {
   const coloredLine = getColoredVersionLine(line);
 
   return (

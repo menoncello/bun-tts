@@ -96,6 +96,92 @@ class ErrorReporter {
   }
 
   /**
+   * Creates error context with system information
+   * @param context - Additional context information for the error report
+   * @returns Enhanced context with system information
+   */
+  private createErrorContext(
+    context: Record<string, unknown>
+  ): Record<string, unknown> {
+    return {
+      ...context,
+      platform: process.platform,
+      arch: process.arch,
+      nodeVersion: process.version,
+    };
+  }
+
+  /**
+   * Extracts user information from context or defaults
+   * @param context - Context information
+   * @returns User ID from context or default
+   */
+  private extractUserId(context: Record<string, unknown>): string {
+    return (
+      ((context as Record<string, unknown>)?.userId as string) ||
+      this.options.userId
+    );
+  }
+
+  /**
+   * Extracts session information from context or defaults
+   * @param context - Context information
+   * @returns Session ID from context or default
+   */
+  private extractSessionId(context: Record<string, unknown>): string {
+    return (
+      ((context as Record<string, unknown>)?.sessionId as string) ||
+      this.options.sessionId
+    );
+  }
+
+  /**
+   * Extracts environment information from context or defaults
+   * @param context - Context information
+   * @returns Environment from context, process env, or default
+   */
+  private extractEnvironment(context: Record<string, unknown>): string {
+    return (
+      ((context as Record<string, unknown>)?.environment as string) ||
+      process.env.NODE_ENV ||
+      this.options.environment
+    );
+  }
+
+  /**
+   * Creates a structured error report
+   * @param error - Normalized error
+   * @param context - Additional context information
+   * @returns Structured error report
+   */
+  private createErrorReport(
+    error: BunTtsError,
+    context: Record<string, unknown>
+  ): ErrorReport {
+    return {
+      error,
+      timestamp: new Date().toISOString(),
+      context: this.createErrorContext(context),
+      userId: this.extractUserId(context),
+      sessionId: this.extractSessionId(context),
+      environment: this.extractEnvironment(context),
+      version: this.getVersion(),
+    };
+  }
+
+  /**
+   * Reports an error through all configured channels
+   * @param report - Error report to send
+   */
+  private reportThroughChannels(report: ErrorReport): void {
+    this.logError(report);
+
+    if (this.options.enableConsoleReporting) {
+      this.consoleError(report);
+    }
+  }
+
+  /**
    * Report an error with optional context information.
    * @param error - The error to report (can be Error, BunTtsError, or unknown)
    * @param context - Additional context information for the error report
@@ -106,29 +192,9 @@ class ErrorReporter {
     context: Record<string, unknown> = {}
   ): ErrorReport {
     const normalizedError = this.normalizeError(error);
-    const report: ErrorReport = {
-      error: normalizedError,
-      timestamp: new Date().toISOString(),
-      context: {
-        ...context,
-        platform: process.platform,
-        arch: process.arch,
-        nodeVersion: process.version,
-      },
-      userId: (context as Record<string, unknown>)?.userId as string || this.options.userId,
-      sessionId: (context as Record<string, unknown>)?.sessionId as string || this.options.sessionId,
-      environment:
-        (context as Record<string, unknown>)?.environment as string ||
-        process.env.NODE_ENV ||
-        this.options.environment,
-      version: this.getVersion(),
-    };
+    const report = this.createErrorReport(normalizedError, context);
 
-    this.logError(report);
-
-    if (this.options.enableConsoleReporting) {
-      this.consoleError(report);
-    }
+    this.reportThroughChannels(report);
 
     return report;
   }
@@ -260,9 +326,7 @@ class ErrorReporter {
     console.error(`\n🚨 ${report.error.name} [${report.error.code}]`);
     console.error(`📋 Message: ${report.error.message}`);
     console.error(`🏷️  Category: ${report.error.category}`);
-    console.error(
-      `🔄 Recoverable: ${report.error.recoverable ? 'Yes' : 'No'}`
-    );
+    console.error(`🔄 Recoverable: ${report.error.recoverable ? 'Yes' : 'No'}`);
 
     this.displayErrorDetails(report.error.details);
     this.displayContext(report.context);

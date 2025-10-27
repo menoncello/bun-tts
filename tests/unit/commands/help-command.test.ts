@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach } from 'bun:test';
-import { HelpCommand, ConsoleOutputWriter } from '../../../src/cli/commands/help-command';
+import {
+  HelpCommand,
+  ConsoleOutputWriter,
+} from '../../../src/cli/commands/help-command';
 import { createMockLogger, createTestCliContext } from '../di/test-utils';
 
 function createMockOutputWriter() {
@@ -50,7 +53,9 @@ describe('HelpCommand Basic Display', () => {
     await helpCommand.execute(testContext);
 
     expect(mockOutputWriter.write.calls).toHaveLength(1);
-    expect(mockOutputWriter.write.calls[0][0]).toContain('bun-tts - Professional Audiobook Creation Tool');
+    expect(mockOutputWriter.write.calls[0][0]).toContain(
+      'bun-tts - Professional Audiobook Creation Tool'
+    );
 
     expect(mockLogger.info.calls).toHaveLength(1);
     expect(mockLogger.info.calls[0]).toEqual([
@@ -82,7 +87,9 @@ describe('HelpCommand Verbose Display', () => {
     await helpCommand.execute(verboseContext);
 
     expect(mockOutputWriter.write.calls).toHaveLength(1);
-    expect(mockOutputWriter.write.calls[0][0]).toContain('Verbose Information:');
+    expect(mockOutputWriter.write.calls[0][0]).toContain(
+      'Verbose Information:'
+    );
 
     expect(mockLogger.info.calls).toHaveLength(0);
     expect(mockLogger.debug.calls).toHaveLength(1);
@@ -142,7 +149,9 @@ describe('HelpCommand Constructor Validation', () => {
     it('should work with default outputWriter when only logger provided', () => {
       const commandWithDefaultOutput = new HelpCommand(mockLogger);
       expect(commandWithDefaultOutput).toBeDefined();
-      expect((commandWithDefaultOutput as any).outputWriter).toBeInstanceOf(ConsoleOutputWriter);
+      expect((commandWithDefaultOutput as any).outputWriter).toBeInstanceOf(
+        ConsoleOutputWriter
+      );
     });
   });
 

@@ -19,7 +19,7 @@ export class ConfigurationError extends BunTtsError {
       code: 'CONFIG_ERROR',
       category: 'configuration',
       recoverable: false,
-      details
+      details,
     });
     this.name = 'ConfigurationError';
   }

@@ -19,7 +19,7 @@ export class ProcessingError extends BunTtsError {
       code: 'PROCESSING_ERROR',
       category: 'tts',
       recoverable: true,
-      details
+      details,
     });
     this.name = 'ProcessingError';
   }

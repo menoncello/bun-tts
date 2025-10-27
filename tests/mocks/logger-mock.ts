@@ -51,7 +51,10 @@ const initializeCallTracking = () => ({
 /**
  * Create logging method for specific level
  */
-const createLoggingMethod = (calls: Record<string, Array<[string, any?]>>, level: string) => {
+const createLoggingMethod = (
+  calls: Record<string, Array<[string, any?]>>,
+  level: string
+) => {
   return (message: string, metadata?: Record<string, unknown>) => {
     if (calls[level]) {
       calls[level].push([message, metadata]);
