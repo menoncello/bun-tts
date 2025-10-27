@@ -43,27 +43,22 @@ Present the user with research type options:
 **What type of research do you need?**
 
 1. **Market Research** - Comprehensive market analysis with TAM/SAM/SOM calculations, competitive intelligence, customer segments, and go-to-market strategy
-
    - Use for: Market opportunity assessment, competitive landscape analysis, market sizing
    - Output: Detailed market research report with financials
 
 2. **Deep Research Prompt Generator** - Create structured, multi-step research prompts optimized for AI platforms (ChatGPT, Gemini, Grok, Claude)
-
    - Use for: Generating comprehensive research prompts, structuring complex investigations
    - Output: Optimized research prompt with framework, scope, and validation criteria
 
 3. **Technical/Architecture Research** - Evaluate technology stacks, architecture patterns, frameworks, and technical approaches
-
    - Use for: Tech stack decisions, architecture pattern selection, framework evaluation
    - Output: Technical research report with recommendations and trade-off analysis
 
 4. **Competitive Intelligence** - Deep dive into specific competitors, their strategies, products, and market positioning
-
    - Use for: Competitor deep dives, competitive strategy analysis
    - Output: Competitive intelligence report
 
 5. **User Research** - Customer insights, personas, jobs-to-be-done, and user behavior analysis
-
    - Use for: Customer discovery, persona development, user journey mapping
    - Output: User research report with personas and insights
 

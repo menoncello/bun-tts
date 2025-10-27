@@ -237,12 +237,10 @@ Draft non-functional requirements with NFR prefix.
 **Gather high-level UX/UI information:**
 
 1. **UX Principles** (2-4 key principles that guide design decisions)
-
    - What core experience qualities matter most?
    - Any critical accessibility or usability requirements?
 
 2. **Platform & Screens**
-
    - Target platforms (web, mobile, desktop)
    - Core screens/views users will interact with
    - Key interaction patterns or navigation approach
@@ -269,7 +267,6 @@ Create high-level epic list showing logical delivery sequence.
 **Epic Sequencing Rules:**
 
 1. **Epic 1 MUST establish foundation**
-
    - Project infrastructure (repo, CI/CD, core setup)
    - Initial deployable functionality
    - Development workflow established
@@ -348,14 +345,12 @@ For each epic from the epic list, expand with full story details:
 **Epic Expansion Process:**
 
 1. **Expanded Goal** (2-3 sentences)
-
    - Describe the epic's objective and value delivery
    - Explain how it builds on previous work
 
 2. **Story Breakdown**
 
    **Critical Story Requirements:**
-
    - **Vertical slices** - Each story delivers complete, testable functionality
    - **Sequential** - Stories must be logically ordered within epic
    - **No forward dependencies** - No story depends on work from a later story/epic

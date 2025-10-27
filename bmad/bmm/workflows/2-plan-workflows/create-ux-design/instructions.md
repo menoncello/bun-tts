@@ -994,13 +994,11 @@ Target devices from PRD: {{devices}}
 For responsive design:
 
 1. **Desktop** (large screens):
-
    - How should we use the extra space?
    - Multi-column layouts?
    - Side navigation?
 
 2. **Tablet** (medium screens):
-
    - Simplified layout from desktop?
    - Touch-optimized interactions?
    - Portrait vs landscape considerations?

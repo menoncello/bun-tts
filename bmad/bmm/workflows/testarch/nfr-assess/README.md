@@ -411,25 +411,21 @@ bmad tea *nfr-assess \
 ## Best Practices
 
 1. **Never Guess Thresholds**
-
    - If threshold is unknown, mark as CONCERNS
    - Recommend defining threshold in tech-spec.md
    - Don't infer thresholds from similar features
 
 2. **Evidence-Based Assessment**
-
    - Every assessment must be backed by evidence
    - Mark NFRs without evidence as "NO EVIDENCE"
    - Don't assume or infer - require explicit evidence
 
 3. **Deterministic Rules**
-
    - Apply PASS/CONCERNS/FAIL consistently
    - Document reasoning for each classification
    - Use same rules across all NFR categories
 
 4. **Actionable Recommendations**
-
    - Provide specific steps, not generic advice
    - Include priority, effort estimate, owner suggestion
    - Focus on quick wins first

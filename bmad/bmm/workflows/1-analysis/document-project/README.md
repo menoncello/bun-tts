@@ -165,12 +165,10 @@ Your choice [1/2/3]:
 The workflow uses three CSV files:
 
 1. **project-types.csv** - Project type detection and classification
-
    - Location: `/bmad/bmm/workflows/3-solutioning/architecture/project-types/project-types.csv`
    - 12 project types with detection keywords
 
 2. **registry.csv** - Architecture template matching
-
    - Location: `/bmad/bmm/workflows/3-solutioning/templates/registry.csv`
    - 170+ architecture patterns
 

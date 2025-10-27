@@ -279,7 +279,6 @@ See [tea-index.csv](../../../testarch/tea-index.csv) for complete knowledge base
 ### Immediate Actions (Before Merge)
 
 1. **{action_1}** - {description}
-
    - Priority: {P0 | P1 | P2}
    - Owner: {team_or_person}
    - Estimated Effort: {time_estimate}
@@ -292,7 +291,6 @@ See [tea-index.csv](../../../testarch/tea-index.csv) for complete knowledge base
 ### Follow-up Actions (Future PRs)
 
 1. **{action_1}** - {description}
-
    - Priority: {P2 | P3}
    - Target: {next_sprint | backlog}
 

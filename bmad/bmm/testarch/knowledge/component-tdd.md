@@ -67,7 +67,7 @@ export const Button = ({
   onClick,
   disabled = false,
   loading = false,
-  variant = 'primary',
+  variant = 'primary'
 }: ButtonProps) => {
   return (
     <button
@@ -123,12 +123,7 @@ test.describe('Button Component', () => {
   test('should call onClick when clicked', async ({ mount }) => {
     let clicked = false;
     const component = await mount(
-      <Button
-        label="Submit"
-        onClick={() => {
-          clicked = true;
-        }}
-      />
+      <Button label="Submit" onClick={() => { clicked = true; }} />
     );
 
     await component.getByRole('button').click();
@@ -174,14 +169,16 @@ export const AllTheProviders: FC<Props> = ({ children, initialAuth }) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
-      mutations: { retry: false },
-    },
+      mutations: { retry: false }
+    }
   });
 
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AuthProvider initialAuth={initialAuth}>{children}</AuthProvider>
+        <AuthProvider initialAuth={initialAuth}>
+          {children}
+        </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
   );
@@ -196,7 +193,9 @@ Cypress.Commands.add('wrappedMount', (component, options = {}) => {
   const { initialAuth, ...mountOptions } = options;
 
   return mount(
-    <AllTheProviders initialAuth={initialAuth}>{component}</AllTheProviders>,
+    <AllTheProviders initialAuth={initialAuth}>
+      {component}
+    </AllTheProviders>,
     mountOptions
   );
 });
@@ -210,7 +209,7 @@ describe('UserProfile Component', () => {
     const user = { id: 1, name: 'John Doe', email: 'john@example.com' };
 
     cy.wrappedMount(<UserProfile />, {
-      initialAuth: { user, token: 'fake-token' },
+      initialAuth: { user, token: 'fake-token' }
     });
 
     cy.contains('John Doe').should('be.visible');
@@ -219,7 +218,7 @@ describe('UserProfile Component', () => {
 
   it('should show login prompt when not authenticated', () => {
     cy.wrappedMount(<UserProfile />, {
-      initialAuth: { user: null, token: null },
+      initialAuth: { user: null, token: null }
     });
 
     cy.contains('Please log in').should('be.visible');
@@ -284,21 +283,9 @@ describe('Form Component Accessibility', () => {
   });
 
   it('should have proper ARIA labels', () => {
-    cy.get('input[name="email"]').should(
-      'have.attr',
-      'aria-label',
-      'Email address'
-    );
-    cy.get('input[name="password"]').should(
-      'have.attr',
-      'aria-label',
-      'Password'
-    );
-    cy.get('button[type="submit"]').should(
-      'have.attr',
-      'aria-label',
-      'Submit form'
-    );
+    cy.get('input[name="email"]').should('have.attr', 'aria-label', 'Email address');
+    cy.get('input[name="password"]').should('have.attr', 'aria-label', 'Password');
+    cy.get('button[type="submit"]').should('have.attr', 'aria-label', 'Submit form');
   });
 
   it('should support keyboard navigation', () => {
@@ -328,8 +315,8 @@ describe('Form Component Accessibility', () => {
   it('should have sufficient color contrast', () => {
     cy.checkA11y(null, {
       rules: {
-        'color-contrast': { enabled: true },
-      },
+        'color-contrast': { enabled: true }
+      }
     });
   });
 });
@@ -343,7 +330,8 @@ test.describe('Form Component Accessibility', () => {
   test('should have no accessibility violations', async ({ mount, page }) => {
     await mount(<Form />);
 
-    const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
+    const accessibilityScanResults = await new AxeBuilder({ page })
+      .analyze();
 
     expect(accessibilityScanResults.violations).toEqual([]);
   });
@@ -359,9 +347,7 @@ test.describe('Form Component Accessibility', () => {
     await component.getByLabel('Password').fill('password123');
     await page.keyboard.press('Tab');
 
-    await expect(
-      component.getByRole('button', { name: 'Submit form' })
-    ).toBeFocused();
+    await expect(component.getByRole('button', { name: 'Submit form' })).toBeFocused();
 
     await page.keyboard.press('Enter');
     await expect(component.getByText('Form submitted')).toBeVisible();
@@ -397,9 +383,7 @@ test.describe('Button Visual Regression', () => {
   });
 
   test('should match secondary button snapshot', async ({ mount }) => {
-    const component = await mount(
-      <Button label="Secondary" variant="secondary" />
-    );
+    const component = await mount(<Button label="Secondary" variant="secondary" />);
     await expect(component).toHaveScreenshot('button-secondary.png');
   });
 
@@ -427,7 +411,7 @@ describe('Button Visual Regression', () => {
     // Option 2: cypress-plugin-snapshots (local snapshots)
     cy.get('button').toMatchImageSnapshot({
       name: 'button-primary',
-      threshold: 0.01, // 1% threshold for pixel differences
+      threshold: 0.01 // 1% threshold for pixel differences
     });
   });
 
@@ -450,12 +434,12 @@ export default defineConfig({
   expect: {
     toHaveScreenshot: {
       maxDiffPixels: 100, // Allow 100 pixels difference
-      threshold: 0.2, // 20% threshold
-    },
+      threshold: 0.2 // 20% threshold
+    }
   },
   use: {
-    screenshot: 'only-on-failure',
-  },
+    screenshot: 'only-on-failure'
+  }
 });
 
 // Update snapshots when intentional changes are made

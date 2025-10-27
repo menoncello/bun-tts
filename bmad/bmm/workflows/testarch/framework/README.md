@@ -40,7 +40,6 @@ The TEA agent runs this workflow when:
 **Primary Deliverables:**
 
 1. **Configuration File**
-
    - `playwright.config.ts` or `cypress.config.ts` with production-ready settings
    - Timeouts: action 15s, navigation 30s, test 60s
    - Reporters: HTML + JUnit XML
@@ -63,12 +62,10 @@ The TEA agent runs this workflow when:
    **Note**: Test organization (e2e/, api/, integration/, etc.) is flexible. The **support/** folder contains reusable fixtures, helpers, and factories - the core framework pattern.
 
 3. **Environment Configuration**
-
    - `.env.example` with `TEST_ENV`, `BASE_URL`, `API_URL`, auth credentials
    - `.nvmrc` with Node version (LTS)
 
 4. **Test Infrastructure**
-
    - Fixture architecture using `mergeTests` pattern
    - Data factories with auto-cleanup (faker-based)
    - Sample tests demonstrating best practices

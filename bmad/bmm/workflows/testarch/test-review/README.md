@@ -64,7 +64,6 @@ The TEA agent runs this workflow when:
 Key variables that control review behavior (configured in `workflow.yaml`):
 
 - **review_scope**: `single` | `directory` | `suite` (default: `single`)
-
   - `single`: Review one test file
   - `directory`: Review all tests in a directory
   - `suite`: Review entire test suite
@@ -166,9 +165,7 @@ await expect(page.locator('.text')).toBeVisible();
 
 ```typescript
 test.describe('1.3-E2E-001: User Login Flow', () => {
-  test('should log in successfully with valid credentials', async ({
-    page,
-  }) => {
+  test('should log in successfully with valid credentials', async ({ page }) => {
     // Test implementation
   });
 });
@@ -212,9 +209,7 @@ test.describe('P2: Edge Case - International Addresses', () => {
 
 ```typescript
 // ✅ Good: Explicit wait for condition
-await expect(page.locator('[data-testid="user-menu"]')).toBeVisible({
-  timeout: 10000,
-});
+await expect(page.locator('[data-testid="user-menu"]')).toBeVisible({ timeout: 10000 });
 ```
 
 **FAIL**: Hard waits introduce flakiness

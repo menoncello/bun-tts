@@ -51,7 +51,6 @@ This workflow performs a comprehensive assessment of non-functional requirements
 **Actions:**
 
 1. Load relevant knowledge fragments from `{project-root}/bmad/bmm/testarch/tea-index.csv`:
-
    - `nfr-criteria.md` - Non-functional requirements criteria and thresholds (security, performance, reliability, maintainability with code examples, 658 lines, 4 examples)
    - `ci-burn-in.md` - CI/CD burn-in patterns for reliability validation (10-iteration detection, sharding, selective execution, 678 lines, 4 examples)
    - `test-quality.md` - Test quality expectations for maintainability (deterministic, isolated, explicit assertions, length/time limits, 658 lines, 5 examples)
@@ -59,7 +58,6 @@ This workflow performs a comprehensive assessment of non-functional requirements
    - `error-handling.md` - Reliability validation patterns: scoped exceptions, retry validation, telemetry logging, graceful degradation (736 lines, 4 examples)
 
 2. Read story file (if provided):
-
    - Extract NFR requirements
    - Identify specific thresholds or SLAs
    - Note any custom NFR categories
@@ -78,7 +76,6 @@ This workflow performs a comprehensive assessment of non-functional requirements
 **Actions:**
 
 1. Determine which NFR categories to assess (default: performance, security, reliability, maintainability):
-
    - **Performance**: Response time, throughput, resource usage
    - **Security**: Authentication, authorization, data protection, vulnerability scanning
    - **Reliability**: Error handling, recovery, availability, fault tolerance
@@ -87,7 +84,6 @@ This workflow performs a comprehensive assessment of non-functional requirements
 2. Add custom NFR categories if specified (e.g., accessibility, internationalization, compliance)
 
 3. Gather thresholds for each NFR:
-
    - From tech-spec.md (primary source)
    - From PRD.md (product-level SLAs)
    - From story file (feature-specific requirements)
@@ -107,14 +103,12 @@ This workflow performs a comprehensive assessment of non-functional requirements
 1. For each NFR category, discover evidence sources:
 
    **Performance Evidence:**
-
    - Load test results (JMeter, k6, Lighthouse)
    - Application metrics (response times, throughput, resource usage)
    - Performance monitoring data (New Relic, Datadog, APM)
    - Playwright performance traces (if applicable)
 
    **Security Evidence:**
-
    - Security scan results (SAST, DAST, dependency scanning)
    - Authentication/authorization test results
    - Penetration test reports
@@ -122,7 +116,6 @@ This workflow performs a comprehensive assessment of non-functional requirements
    - Compliance audit results
 
    **Reliability Evidence:**
-
    - Error logs and error rates
    - Uptime monitoring data
    - Chaos engineering test results
@@ -130,7 +123,6 @@ This workflow performs a comprehensive assessment of non-functional requirements
    - CI burn-in results (stability over time)
 
    **Maintainability Evidence:**
-
    - Code coverage reports (Istanbul, NYC, c8)
    - Static analysis results (ESLint, SonarQube)
    - Technical debt metrics
@@ -138,7 +130,6 @@ This workflow performs a comprehensive assessment of non-functional requirements
    - Test quality assessment (from test-review workflow)
 
 2. Read relevant files from evidence directories:
-
    - `{test_results_dir}` for test execution results
    - `{metrics_dir}` for application metrics
    - `{logs_dir}` for application logs
@@ -157,13 +148,11 @@ This workflow performs a comprehensive assessment of non-functional requirements
 1. For each NFR, apply deterministic PASS/CONCERNS/FAIL rules:
 
    **PASS Criteria:**
-
    - Evidence exists AND meets defined threshold
    - No concerns flagged in evidence
    - Example: Response time is 350ms (threshold: 500ms) → PASS
 
    **CONCERNS Criteria:**
-
    - Threshold is UNKNOWN (not defined)
    - Evidence is MISSING or INCOMPLETE
    - Evidence is close to threshold (within 10%)
@@ -171,14 +160,12 @@ This workflow performs a comprehensive assessment of non-functional requirements
    - Example: Response time is 480ms (threshold: 500ms, 96% of threshold) → CONCERNS
 
    **FAIL Criteria:**
-
    - Evidence exists BUT does not meet threshold
    - Critical evidence is MISSING
    - Evidence shows consistent failures
    - Example: Response time is 750ms (threshold: 500ms) → FAIL
 
 2. Document findings for each NFR:
-
    - Status (PASS/CONCERNS/FAIL)
    - Evidence source (file path, test name, metric name)
    - Actual value vs threshold
@@ -199,21 +186,18 @@ This workflow performs a comprehensive assessment of non-functional requirements
 **Actions:**
 
 1. For each NFR with CONCERNS or FAIL status, identify quick wins:
-
    - Low-effort, high-impact improvements
    - Configuration changes (no code changes needed)
    - Optimization opportunities (caching, indexing, compression)
    - Monitoring additions (detect issues before they become failures)
 
 2. Provide recommended actions for each issue:
-
    - Specific steps to remediate (not generic advice)
    - Priority (CRITICAL, HIGH, MEDIUM, LOW)
    - Estimated effort (hours, days)
    - Owner suggestion (dev, ops, security)
 
 3. Suggest monitoring hooks for gaps:
-
    - Add performance monitoring (APM, synthetic monitoring)
    - Add error tracking (Sentry, Rollbar, error logs)
    - Add security monitoring (intrusion detection, audit logs)
@@ -234,7 +218,6 @@ This workflow performs a comprehensive assessment of non-functional requirements
 **Actions:**
 
 1. Create NFR assessment markdown file:
-
    - Use template from `nfr-report-template.md`
    - Include executive summary (overall status, critical issues)
    - Add NFR-by-NFR assessment (status, evidence, thresholds)
@@ -262,7 +245,6 @@ This workflow performs a comprehensive assessment of non-functional requirements
    ```
 
 3. Generate evidence checklist (if enabled):
-
    - List all NFRs with MISSING or INCOMPLETE evidence
    - Assign owners for evidence collection
    - Suggest evidence sources (tests, metrics, logs)
@@ -630,7 +612,6 @@ Recommendation: BLOCKER - optimize performance before release
 ## Evidence Gaps
 
 - [ ] Chaos engineering test results (reliability)
-
   - Owner: DevOps Team
   - Deadline: 2025-10-21
   - Suggested evidence: Run chaos monkey tests in staging

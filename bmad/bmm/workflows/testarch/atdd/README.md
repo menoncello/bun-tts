@@ -186,14 +186,12 @@ TEA generates tests using AI by:
 When Playwright MCP is available, TEA **additionally**:
 
 1. **Verifies generated tests** by:
-
    - **Launching real browser** with `generator_setup_page`
    - **Executing generated test steps** with `browser_*` tools (`navigate`, `click`, `type`)
    - **Seeing actual UI** with `browser_snapshot` (visual verification)
    - **Discovering real selectors** with `browser_generate_locator` (auto-generate from live DOM)
 
 2. **Enhances AI-generated tests** by:
-
    - **Validating selectors exist** in actual DOM (not just guesses)
    - **Verifying behavior** with `browser_verify_text`, `browser_verify_visible`, `browser_verify_url`
    - **Capturing actual interaction log** with `generator_read_log`
@@ -297,9 +295,7 @@ test('should display error for invalid credentials', async ({ page }) => {
   await page.click('[data-testid="login-button"]');
 
   // THEN: Error message is displayed
-  await expect(page.locator('[data-testid="error-message"]')).toHaveText(
-    'Invalid email or password'
-  );
+  await expect(page.locator('[data-testid="error-message"]')).toHaveText('Invalid email or password');
 });
 ```
 
@@ -335,8 +331,7 @@ export const createUser = (overrides = {}) => ({
   ...overrides,
 });
 
-export const createUsers = (count: number) =>
-  Array.from({ length: count }, () => createUser());
+export const createUsers = (count: number) => Array.from({ length: count }, () => createUser());
 ```
 
 **Factory principles:**
@@ -393,9 +388,7 @@ test('should display user name', async ({ page }) => {
 // ❌ WRONG: Multiple assertions (not atomic)
 test('should display user info', async ({ page }) => {
   await expect(page.locator('[data-testid="user-name"]')).toHaveText('John');
-  await expect(page.locator('[data-testid="user-email"]')).toHaveText(
-    'john@example.com'
-  );
+  await expect(page.locator('[data-testid="user-email"]')).toHaveText('john@example.com');
 });
 ```
 

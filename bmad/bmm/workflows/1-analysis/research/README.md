@@ -413,7 +413,6 @@ Add to `workflow.yaml` `frameworks` section under appropriate research type.
 ## Version History
 
 - **v2.0.0** - Multi-type research system with router architecture
-
   - Added deep_prompt research type for AI research platform optimization
   - Added technical research type for technology evaluation
   - Consolidated competitive, user, domain under market with focus variants

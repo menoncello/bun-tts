@@ -44,26 +44,22 @@ The TEA agent runs this workflow when:
 **Primary Deliverables:**
 
 1. **CI Configuration File**
-
    - `.github/workflows/test.yml` (GitHub Actions)
    - `.gitlab-ci.yml` (GitLab CI)
    - Platform-specific optimizations and best practices
 
 2. **Pipeline Stages**
-
    - **Lint**: Code quality checks (<2 min)
    - **Test**: Parallel execution with 4 shards (<10 min per shard)
    - **Burn-In**: Flaky test detection with 10 iterations (<30 min)
    - **Report**: Aggregate results and publish artifacts
 
 3. **Helper Scripts**
-
    - `scripts/test-changed.sh`: Selective testing (run only affected tests)
    - `scripts/ci-local.sh`: Local CI mirror for debugging
    - `scripts/burn-in.sh`: Standalone burn-in execution
 
 4. **Documentation**
-
    - `docs/ci.md`: Pipeline guide, debugging, secrets setup
    - `docs/ci-secrets-checklist.md`: Required secrets and configuration
    - Inline comments in CI configuration files

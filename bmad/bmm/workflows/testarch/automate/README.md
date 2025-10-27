@@ -205,7 +205,6 @@ TEA heals tests using pattern-based analysis by:
 When Playwright MCP is available, TEA **additionally**:
 
 1. **Debugs failures interactively** before applying pattern-based fixes:
-
    - **Pause test execution** with `playwright_test_debug_test` (step through, inspect state)
    - **See visual failure context** with `browser_snapshot` (screenshot of failure state)
    - **Inspect live DOM** with browser tools (find why selector doesn't match)
@@ -213,7 +212,6 @@ When Playwright MCP is available, TEA **additionally**:
    - **Inspect network activity** with `browser_network_requests` (failed API calls, CORS errors, timeouts)
 
 2. **Enhances pattern-based fixes** with real-world data:
-
    - **Pattern match identifies issue** (e.g., "stale selector")
    - **MCP discovers actual selector** with `browser_generate_locator` from live page
    - **TEA applies refined fix** using real DOM structure (not just pattern guess)
@@ -257,7 +255,6 @@ When Playwright MCP is available, TEA **additionally**:
 **Healing Modes:**
 
 1. **MCP-Enhanced Healing** (when Playwright MCP available):
-
    - Pattern-based analysis **+** Interactive debugging
    - Visual context with `browser_snapshot`
    - Console log analysis with `browser_console_messages`
@@ -506,9 +503,7 @@ npm run test:e2e:p1  # Run P0 + P1 tests (pre-merge)
 All tests follow BDD format for clarity:
 
 ```typescript
-test('[P0] should login with valid credentials and load dashboard', async ({
-  page,
-}) => {
+test('[P0] should login with valid credentials and load dashboard', async ({ page }) => {
   // GIVEN: User is on login page
   await page.goto('/login');
 
@@ -536,9 +531,7 @@ test('[P0] should display user name', async ({ page }) => {
 // ❌ WRONG: Multiple assertions (not atomic)
 test('[P0] should display user info', async ({ page }) => {
   await expect(page.locator('[data-testid="user-name"]')).toHaveText('John');
-  await expect(page.locator('[data-testid="user-email"]')).toHaveText(
-    'john@example.com'
-  );
+  await expect(page.locator('[data-testid="user-email"]')).toHaveText('john@example.com');
 });
 ```
 
@@ -555,15 +548,13 @@ test('should load user dashboard after login', async ({ page }) => {
     route.fulfill({
       status: 200,
       body: JSON.stringify({ id: 1, name: 'Test User' }),
-    })
+    }),
   );
 
   // NOW navigate
   await page.goto('/dashboard');
 
-  await expect(page.locator('[data-testid="user-name"]')).toHaveText(
-    'Test User'
-  );
+  await expect(page.locator('[data-testid="user-name"]')).toHaveText('Test User');
 });
 ```
 
@@ -622,8 +613,7 @@ export const createUser = (overrides = {}) => ({
   ...overrides,
 });
 
-export const createUsers = (count: number) =>
-  Array.from({ length: count }, () => createUser());
+export const createUsers = (count: number) => Array.from({ length: count }, () => createUser());
 
 // API helper for cleanup
 export const deleteUser = async (userId: number) => {

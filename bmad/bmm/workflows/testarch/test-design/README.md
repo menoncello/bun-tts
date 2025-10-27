@@ -39,28 +39,24 @@ The TEA agent runs this workflow when:
 **Test Design Document** (`test-design-epic-{N}.md`):
 
 1. **Risk Assessment Matrix**
-
    - Risk ID, category, description
    - Probability (1-3) × Impact (1-3) = Score
    - Scores ≥6 flagged as high-priority
    - Mitigation plans with owners and timelines
 
 2. **Coverage Matrix**
-
    - Requirement → Test Level (E2E/API/Component/Unit)
    - Priority assignment (P0-P3)
    - Risk linkage
    - Test count estimates
 
 3. **Execution Order**
-
    - Smoke tests (P0 subset, <5 min)
    - P0 tests (critical paths, <10 min)
    - P1 tests (important features, <30 min)
    - P2/P3 tests (full regression, <60 min)
 
 4. **Resource Estimates**
-
    - Hours per priority level
    - Total effort in days
    - Tooling and data prerequisites
@@ -200,7 +196,6 @@ The TEA agent runs this workflow when:
 **Exploration Modes:**
 
 1. **MCP-Assisted Exploration** (if Playwright MCP available):
-
    - Interactive browser exploration using MCP tools
    - `planner_setup_page` - Initialize browser
    - `browser_navigate` - Explore pages
@@ -249,14 +244,12 @@ The TEA agent runs this workflow when:
 ### Discovered Features:
 
 1. User Management (/admin/users)
-
    - List users (table with 10 columns)
    - Edit user (modal form)
    - Delete user (confirmation dialog)
    - Export to CSV (download button)
 
 2. Reporting Dashboard (/admin/reports)
-
    - Date range picker
    - Filter by department
    - Generate PDF report
@@ -271,7 +264,6 @@ The TEA agent runs this workflow when:
 ### User Journeys Mapped:
 
 1. Admin deletes inactive user
-
    - Navigate to /admin/users
    - Click delete icon
    - Confirm in modal

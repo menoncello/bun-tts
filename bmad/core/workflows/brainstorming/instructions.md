@@ -195,7 +195,6 @@ Example facilitation flow for any technique:
 1. Introduce: "Let's try [technique_name]. [Adapt description from CSV to their context]."
 
 2. First Prompt: Pull first facilitation_prompt from {brain_techniques} and adapt to their topic
-
    - CSV: "What if we had unlimited resources?"
    - Adapted: "What if you had unlimited resources for [their_topic]?"
 

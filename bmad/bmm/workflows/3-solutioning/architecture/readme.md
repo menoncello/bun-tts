@@ -101,13 +101,11 @@ Step 12: Final review and update workflow status
 ## Expected Inputs
 
 - **PRD** (Product Requirements Document) with:
-
   - Functional Requirements
   - Non-Functional Requirements
   - Performance and compliance needs
 
 - **Epics** file with:
-
   - User stories
   - Acceptance criteria
   - Dependencies
@@ -136,7 +134,6 @@ Step 7 handles unique or complex patterns that need to be INVENTED:
 
 1. **Detection**:
    The workflow analyzes the PRD for concepts that don't have standard solutions:
-
    - Novel interaction patterns (e.g., "swipe to match" when Tinder doesn't exist)
    - Complex multi-epic workflows (e.g., "viral invitation system")
    - Unique data relationships (e.g., "social graph" before Facebook)
@@ -144,7 +141,6 @@ Step 7 handles unique or complex patterns that need to be INVENTED:
 
 2. **Design Collaboration**:
    Instead of just picking technologies, the workflow helps DESIGN the solution:
-
    - Identifies the core problem to solve
    - Explores different approaches with the user
    - Documents how components interact
@@ -153,7 +149,6 @@ Step 7 handles unique or complex patterns that need to be INVENTED:
 
 3. **Documentation**:
    Novel patterns become part of the architecture with:
-
    - Pattern name and purpose
    - Component interactions
    - Data flow diagrams
@@ -184,7 +179,6 @@ Step 8 prevents agent conflicts by defining patterns for consistency:
    The LLM asks: "What could an agent encounter where they'd have to guess?"
 
 2. **Pattern Categories** (principles, not prescriptions):
-
    - **Naming**: How things are named (APIs, database fields, files)
    - **Structure**: How things are organized (folders, modules, layers)
    - **Format**: How data is formatted (JSON structures, responses)
@@ -194,7 +188,6 @@ Step 8 prevents agent conflicts by defining patterns for consistency:
    - **Consistency**: Cross-cutting concerns (dates, errors, logs)
 
 3. **LLM Intelligence**:
-
    - Uses the principle to identify patterns beyond the 7 categories
    - Figures out what specific patterns matter for chosen tech
    - Only asks about patterns that could cause conflicts

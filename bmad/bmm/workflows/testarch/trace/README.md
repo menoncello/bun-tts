@@ -676,18 +676,15 @@ Next Steps:
 ### Phase 1 - Traceability
 
 1. **Run Trace After Test Implementation**
-
    - Don't run `*trace` before tests exist (run `*atdd` first)
    - Trace is most valuable after initial test suite is written
 
 2. **Prioritize by Risk**
-
    - P0 gaps are BLOCKERS (must fix before release)
    - P1 gaps are HIGH priority (block PR merge)
    - P3 gaps are acceptable (fix if time permits)
 
 3. **Explicit Mapping**
-
    - Use test IDs (`1.3-E2E-001`) for clear traceability
    - Reference criteria in describe blocks
    - Use Given-When-Then narrative
@@ -700,25 +697,21 @@ Next Steps:
 ### Phase 2 - Gate Decision
 
 5. **Evidence is King**
-
    - Never make gate decisions without fresh test results
    - Validate evidence freshness (<7 days old)
    - Link to all evidence sources (reports, logs, artifacts)
 
 6. **P0 is Sacred**
-
    - P0 failures ALWAYS result in FAIL (no exceptions except waivers)
    - P0 = Critical user journeys, security, data integrity
    - Waivers require VP/CTO approval + business justification
 
 7. **Waivers are Temporary**
-
    - Waiver applies ONLY to specific release
    - Issue must be fixed in next release
    - Never waive: security, data corruption, compliance violations
 
 8. **CONCERNS is Not PASS**
-
    - CONCERNS means "deploy with monitoring"
    - Create follow-up stories for issues
    - Do not ignore CONCERNS repeatedly

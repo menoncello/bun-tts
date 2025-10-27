@@ -14,12 +14,10 @@
 Ask the user these critical questions to shape the research:
 
 1. **What is the product/service you're researching?**
-
    - Name and brief description
    - Current stage (idea, MVP, launched, scaling)
 
 2. **What are your primary research objectives?**
-
    - Market sizing and opportunity assessment?
    - Competitive intelligence gathering?
    - Customer segment validation?
@@ -28,7 +26,6 @@ Ask the user these critical questions to shape the research:
    - Product-market fit validation?
 
 3. **Research depth preference:**
-
    - Quick scan (2-3 hours) - High-level insights
    - Standard analysis (4-6 hours) - Comprehensive coverage
    - Deep dive (8+ hours) - Exhaustive research with modeling
@@ -47,13 +44,11 @@ Ask the user these critical questions to shape the research:
 Work with the user to establish:
 
 1. **Market Category Definition**
-
    - Primary category/industry
    - Adjacent or overlapping markets
    - Where this fits in the value chain
 
 2. **Geographic Scope**
-
    - Global, regional, or country-specific?
    - Primary markets vs. expansion markets
    - Regulatory considerations by region

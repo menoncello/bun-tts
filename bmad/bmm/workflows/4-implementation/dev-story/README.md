@@ -28,7 +28,6 @@ The DEV runs this workflow:
 **Required Files:**
 
 - **Story Document** (`{story_dir}/story-{epic}.{story}.md`): Complete specification including:
-
   - User story statement
   - Acceptance criteria (immutable during dev)
   - Tasks and subtasks (checkable during implementation)

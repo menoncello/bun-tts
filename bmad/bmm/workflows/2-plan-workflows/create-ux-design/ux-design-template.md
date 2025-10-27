@@ -108,7 +108,6 @@ _Generated using BMad Method - Create UX Design Workflow v1.0_
 This UX Design Specification was created through visual collaboration:
 
 - **Color Theme Visualizer**: {{color_themes_html}}
-
   - Interactive HTML showing all color theme options explored
   - Live UI component examples in each theme
   - Side-by-side comparison and semantic color usage

@@ -60,9 +60,7 @@ export function extractSelector(errorMessage: string): string | null {
   if (playwrightMatch) return playwrightMatch[1];
 
   // Cypress: "Timed out retrying: Expected to find element: '.submit-button'"
-  const cypressMatch = errorMessage.match(
-    /Expected to find element: ['"]([^'"]+)['"]/i
-  );
+  const cypressMatch = errorMessage.match(/Expected to find element: ['"]([^'"]+)['"]/i);
   if (cypressMatch) return cypressMatch[1];
 
   return null;
@@ -74,23 +72,18 @@ export function extractSelector(errorMessage: string): string | null {
 export function suggestBetterSelector(badSelector: string): string {
   // If using CSS class → suggest data-testid
   if (badSelector.startsWith('.') || badSelector.includes('class=')) {
-    const elementName =
-      badSelector.match(/class=["']([^"']+)["']/)?.[1] || badSelector.slice(1);
+    const elementName = badSelector.match(/class=["']([^"']+)["']/)?.[1] || badSelector.slice(1);
     return `page.getByTestId('${elementName}') // Prefer data-testid over CSS class`;
   }
 
   // If using ID → suggest data-testid
   if (badSelector.startsWith('#')) {
-    return `page.getByTestId('${badSelector.slice(
-      1
-    )}') // Prefer data-testid over ID`;
+    return `page.getByTestId('${badSelector.slice(1)}') // Prefer data-testid over ID`;
   }
 
   // If using nth() → suggest filter() or more specific selector
   if (badSelector.includes('.nth(')) {
-    return `page.locator('${
-      badSelector.split('.nth(')[0]
-    }').filter({ hasText: 'specific text' }) // Avoid brittle nth(), use filter()`;
+    return `page.locator('${badSelector.split('.nth(')[0]}').filter({ hasText: 'specific text' }) // Avoid brittle nth(), use filter()`;
   }
 
   // If using complex CSS → suggest ARIA role
@@ -107,11 +100,7 @@ export function suggestBetterSelector(badSelector: string): string {
 ```typescript
 // tests/healing/selector-healing.spec.ts
 import { test, expect } from '@playwright/test';
-import {
-  isSelectorFailure,
-  extractSelector,
-  suggestBetterSelector,
-} from '../../src/testing/healing/selector-healing';
+import { isSelectorFailure, extractSelector, suggestBetterSelector } from '../../src/testing/healing/selector-healing';
 
 test('heal stale selector failures automatically', async ({ page }) => {
   await page.goto('/dashboard');
@@ -122,9 +111,7 @@ test('heal stale selector failures automatically', async ({ page }) => {
   } catch (error: any) {
     if (isSelectorFailure(error)) {
       const badSelector = extractSelector(error.message);
-      const suggestion = badSelector
-        ? suggestBetterSelector(badSelector)
-        : null;
+      const suggestion = badSelector ? suggestBetterSelector(badSelector) : null;
 
       console.log('HEALING SUGGESTION:', suggestion);
 
@@ -184,12 +171,7 @@ export function isTimingFailure(error: Error): boolean {
  * Detect hard wait anti-pattern
  */
 export function hasHardWait(testCode: string): boolean {
-  const hardWaitPatterns = [
-    /page\.waitForTimeout\(/,
-    /cy\.wait\(\d+\)/,
-    /await.*sleep\(/,
-    /setTimeout\(/,
-  ];
+  const hardWaitPatterns = [/page\.waitForTimeout\(/, /cy\.wait\(\d+\)/, /await.*sleep\(/, /setTimeout\(/];
 
   return hardWaitPatterns.some((pattern) => pattern.test(testCode));
 }
@@ -238,16 +220,9 @@ await responsePromise
 ```typescript
 // tests/healing/timing-healing.spec.ts
 import { test, expect } from '@playwright/test';
-import {
-  isTimingFailure,
-  hasHardWait,
-  suggestDeterministicWait,
-} from '../../src/testing/healing/timing-healing';
+import { isTimingFailure, hasHardWait, suggestDeterministicWait } from '../../src/testing/healing/timing-healing';
 
-test('heal race condition with network-first pattern', async ({
-  page,
-  context,
-}) => {
+test('heal race condition with network-first pattern', async ({ page, context }) => {
   // Setup interception BEFORE navigation (prevent race)
   await context.route('**/api/products', (route) => {
     route.fulfill({
@@ -506,10 +481,7 @@ test('heal network failure with route mocking', async ({ page, context }) => {
 test('heal 500 error with error state mocking', async ({ page, context }) => {
   // Mock API failure scenario
   await context.route('**/api/products', (route) => {
-    route.fulfill({
-      status: 500,
-      body: JSON.stringify({ error: 'Internal Server Error' }),
-    });
+    route.fulfill({ status: 500, body: JSON.stringify({ error: 'Internal Server Error' }) });
   });
 
   await page.goto('/products');
@@ -541,19 +513,12 @@ test('heal 500 error with error state mocking', async ({ page, context }) => {
 /**
  * Detect hard wait anti-pattern in test code
  */
-export function detectHardWaits(
-  testCode: string
-): Array<{ line: number; code: string }> {
+export function detectHardWaits(testCode: string): Array<{ line: number; code: string }> {
   const lines = testCode.split('\n');
   const violations: Array<{ line: number; code: string }> = [];
 
   lines.forEach((line, index) => {
-    if (
-      line.includes('page.waitForTimeout(') ||
-      /cy\.wait\(\d+\)/.test(line) ||
-      line.includes('sleep(') ||
-      line.includes('setTimeout(')
-    ) {
+    if (line.includes('page.waitForTimeout(') || /cy\.wait\(\d+\)/.test(line) || line.includes('sleep(') || line.includes('setTimeout(')) {
       violations.push({ line: index + 1, code: line.trim() });
     }
   });
@@ -610,9 +575,7 @@ test('heal hard wait with deterministic wait', async ({ page }) => {
   await page.getByTestId('loading-spinner').waitFor({ state: 'detached' });
 
   // OR wait for specific network response
-  await page.waitForResponse(
-    (resp) => resp.url().includes('/api/dashboard') && resp.ok()
-  );
+  await page.waitForResponse((resp) => resp.url().includes('/api/dashboard') && resp.ok());
 
   await expect(page.getByText('Dashboard ready')).toBeVisible();
 });

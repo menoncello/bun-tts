@@ -86,21 +86,18 @@ Located in `game-types/` folder, these markdown files contain sections specific 
 ## Workflow Flow
 
 1. **Router Detection** (instructions-router.md):
-
    - Step 3 asks for project type
    - If "Game" selected → sets `workflow_type = "gdd"`
    - Skips standard level classification
    - Jumps to GDD-specific assessment
 
 2. **Game Type Selection** (instructions-gdd.md Step 1):
-
    - Presents 9 common game types + "Other"
    - Maps selection to `game-types.csv`
    - Loads corresponding fragment file
    - Stores `game_type` for injection
 
 3. **Universal GDD Sections** (Steps 2-5, 7-13):
-
    - Platform and target audience
    - Goals and context
    - Core gameplay (pillars, loop, win/loss)
@@ -112,7 +109,6 @@ Located in `game-types/` folder, these markdown files contain sections specific 
    - Epics and metrics
 
 4. **Game-Type Injection** (Step 6):
-
    - Loads fragment from `game-types/{game_type}.md`
    - For each `{{placeholder}}` in fragment, elicits details
    - Injects completed sections into `{{GAME_TYPE_SPECIFIC_SECTIONS}}`

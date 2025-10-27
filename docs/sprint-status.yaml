@@ -39,7 +39,7 @@ development_status:
   # Epic 1: Core Foundation & Document Processing
   epic-1: backlog
   1-1-project-infrastructure-cli-foundation: done
-  1-2-markdown-document-parser: backlog
+  1-2-markdown-document-parser: drafted
   1-3-pdf-document-parser: backlog
   1-4-epub-document-parser: backlog
   1-5-document-structure-analyzer: backlog

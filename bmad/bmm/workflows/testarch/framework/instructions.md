@@ -28,14 +28,12 @@ Initialize a production-ready test framework architecture (Playwright or Cypress
 ### Actions
 
 1. **Validate package.json**
-
    - Read `{project-root}/package.json`
    - Extract project type (React, Vue, Angular, Next.js, Node, etc.)
    - Identify bundler (Vite, Webpack, Rollup, esbuild)
    - Note existing test dependencies
 
 2. **Check for Existing Framework**
-
    - Search for `playwright.config.*`, `cypress.config.*`, `cypress.json`
    - Check `package.json` for `@playwright/test` or `cypress` dependencies
    - If found, HALT with message: "Existing test framework detected. Use workflow `upgrade-framework` instead."
@@ -56,9 +54,7 @@ Initialize a production-ready test framework architecture (Playwright or Cypress
 1. **Framework Selection**
 
    **Default Logic:**
-
    - **Playwright** (recommended for):
-
      - Large repositories (100+ files)
      - Performance-critical applications
      - Multi-browser support needed
@@ -72,7 +68,6 @@ Initialize a production-ready test framework architecture (Playwright or Cypress
      - Simpler setup requirements
 
    **Detection Strategy:**
-
    - Check `package.json` for existing preference
    - Consider `project_size` variable from workflow config
    - Use `framework_preference` variable if set
@@ -121,11 +116,7 @@ Initialize a production-ready test framework architecture (Playwright or Cypress
        navigationTimeout: 30 * 1000, // Navigation timeout: 30s
      },
 
-     reporter: [
-       ['html', { outputFolder: 'test-results/html' }],
-       ['junit', { outputFile: 'test-results/junit.xml' }],
-       ['list'],
-     ],
+     reporter: [['html', { outputFolder: 'test-results/html' }], ['junit', { outputFile: 'test-results/junit.xml' }], ['list']],
 
      projects: [
        { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
@@ -319,24 +310,20 @@ Initialize a production-ready test framework architecture (Playwright or Cypress
 ### Primary Artifacts Created
 
 1. **Configuration File**
-
    - `playwright.config.ts` or `cypress.config.ts`
    - Timeouts: action 15s, navigation 30s, test 60s
    - Reporters: HTML + JUnit XML
 
 2. **Directory Structure**
-
    - `tests/` with `e2e/`, `api/`, `support/` subdirectories
    - `support/fixtures/` for test fixtures
    - `support/helpers/` for utility functions
 
 3. **Environment Configuration**
-
    - `.env.example` with `TEST_ENV`, `BASE_URL`, `API_URL`
    - `.nvmrc` with Node version
 
 4. **Test Infrastructure**
-
    - Fixture architecture (`mergeTests` pattern)
    - Data factories (faker-based, with auto-cleanup)
    - Sample tests demonstrating patterns
