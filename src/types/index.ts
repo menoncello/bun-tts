@@ -171,6 +171,22 @@ export interface BunTtsError extends Error {
 // CLI types
 
 /**
+ * Interface defining the structure of a CLI command.
+ * Commands are registered in the command registry and provide
+ * a consistent interface for CLI operations.
+ */
+export interface Command {
+  /** Unique identifier for the command */
+  name: string;
+  /** Human-readable description of what the command does */
+  description: string;
+  /** Async function that executes the command logic */
+  handler: (context: CliContext) => Promise<void>;
+  /** Optional array of usage examples for the command */
+  examples?: string[];
+}
+
+/**
  * Command-line interface flags and options.
  * Represents parsed command-line arguments from the CLI tool.
  */

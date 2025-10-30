@@ -59,10 +59,13 @@ export interface ListData {
 export interface DocumentMetadata {
   title?: string;
   author?: string;
+  publisher?: string;
+  identifier?: string;
   date?: string;
   wordCount?: number;
   paragraphCount?: number;
   chapterCount?: number;
+  customMetadata?: Record<string, unknown>;
 }
 
 /**
@@ -136,7 +139,7 @@ export const createCodeBlocks = (
 export const createCodeBlock = (index: number): CodeBlockData => ({
   type: 'fenced',
   language: 'javascript',
-  content: `function test${index}() {\n  console.log("Test code block ${index}");\n  return true;\n}`,
+  content: `function test${index}() {\n  return true;\n}`,
   startPosition: index * 25,
   endPosition: index * 25 + 15,
 });
@@ -186,10 +189,16 @@ export const createList = (index: number): ListData => ({
 export const createDocumentMetadata = (): DocumentMetadata => ({
   title: 'Test Document',
   author: 'Test Author',
+  publisher: 'Test Publisher',
+  identifier: 'test-identifier-123',
   date: '2025-10-27',
   wordCount: 250,
   paragraphCount: 5,
   chapterCount: 2,
+  customMetadata: {
+    description: 'Test document description',
+    tags: ['test', 'document'],
+  },
 });
 
 /**
@@ -227,7 +236,7 @@ function addChaptersAndContent(doc: any): string {
   let content = '';
   let paraIndex = 0;
 
-  chapters.forEach((chapter: any, i: number) => {
+  for (const [i, chapter] of chapters.entries()) {
     content += `## ${chapter.title}\n\n`;
     content += `${chapter.content}\n\n`;
 
@@ -245,7 +254,7 @@ function addChaptersAndContent(doc: any): string {
 
     // Add a table
     content += addTable(tables[i]);
-  });
+  }
 
   return content;
 }
@@ -260,10 +269,10 @@ function addList(list: any): string {
   if (!list) return '';
 
   let content = '';
-  list.items.forEach((item: string) => {
+  for (const item of list.items) {
     const prefix = list.type === 'ordered' ? '1. ' : '* ';
     content += `${prefix}${item}\n`;
-  });
+  }
   return `${content}\n`;
 }
 
@@ -274,9 +283,9 @@ function addTable(table: any): string {
   const separatorRow = `| ${table.headers.map(() => '---').join(' | ')} |`;
   let content = `${headerRow}\n${separatorRow}\n`;
 
-  table.rows.forEach((row: string[]) => {
+  for (const row of table.rows) {
     content += `| ${row.join(' | ')} |\n`;
-  });
+  }
 
   return `${content}\n`;
 }
@@ -291,7 +300,7 @@ export const createMalformedMarkdownContent = (): string => {
 
 \`\`\`javascript
 function unclosed() {
-  console.log("This code block never closes
+  return true;
 
 | Column 1 | Column 2
 | --- (incomplete separator)

@@ -18,8 +18,8 @@ export interface ParsedToken {
 
 /**
  * Check if a line is a heading
- * @param line - The line to check
- * @returns True if the line is a heading
+ * @param {string} line - The line to check
+ * @returns {boolean} True if the line is a heading
  */
 const isHeading = (line: string): boolean => {
   return line.match(/^#{1,6}\s/) !== null;
@@ -27,10 +27,10 @@ const isHeading = (line: string): boolean => {
 
 /**
  * Handle code block boundaries
- * @param line - The current line being processed
- * @param inCodeBlock - Whether we're currently in a code block
- * @param resultLines - Array to push processed lines to
- * @returns Updated inCodeBlock status
+ * @param {string} line - The current line being processed
+ * @param {boolean} inCodeBlock - Whether we're currently in a code block
+ * @param {string[]} resultLines - Array to push processed lines to
+ * @returns {boolean} Updated inCodeBlock status
  */
 const handleCodeBlockBoundary = (
   line: string,
@@ -46,9 +46,9 @@ const handleCodeBlockBoundary = (
 
 /**
  * Handle heading inside code block
- * @param line - The current line being processed
- * @param resultLines - Array to push processed lines to
- * @returns True if a heading was found inside a code block
+ * @param {string} line - The current line being processed
+ * @param {string[]} resultLines - Array to push processed lines to
+ * @returns {boolean} True if a heading was found inside a code block
  */
 const handleHeadingInCodeBlock = (
   line: string,
@@ -64,10 +64,10 @@ const handleHeadingInCodeBlock = (
 
 /**
  * Process a single line of markdown
- * @param line - The line to process
- * @param inCodeBlock - Whether we're currently in a code block
- * @param resultLines - Array to push processed lines to
- * @returns Updated inCodeBlock status
+ * @param {string} line - The line to process
+ * @param {boolean} inCodeBlock - Whether we're currently in a code block
+ * @param {string[]} resultLines - Array to push processed lines to
+ * @returns {boolean} Updated inCodeBlock status
  */
 const processLine = (
   line: string,
@@ -98,8 +98,8 @@ const processLine = (
 
 /**
  * Close any remaining open code block
- * @param inCodeBlock - Whether there's an open code block
- * @param resultLines - Array to push closing code block to
+ * @param {boolean} inCodeBlock - Whether there's an open code block
+ * @param {string[]} resultLines - Array to push closing code block to
  */
 const closeOpenCodeBlock = (
   inCodeBlock: boolean,
@@ -112,8 +112,8 @@ const closeOpenCodeBlock = (
 
 /**
  * Preprocess malformed markdown to make it more recoverable
- * @param content - The raw markdown content to preprocess
- * @returns Preprocessed markdown content
+ * @param {string} content - The raw markdown content to preprocess
+ * @returns {string} Preprocessed markdown content
  */
 const preprocessMalformedMarkdown = (content: string): string => {
   const lines = content.split('\n');
@@ -131,8 +131,8 @@ const preprocessMalformedMarkdown = (content: string): string => {
 
 /**
  * Tokenize markdown content
- * @param content - The markdown content to tokenize
- * @returns Array of parsed tokens or a MarkdownParseError if tokenization fails
+ * @param {string} content - The markdown content to tokenize
+ * @returns {ParsedToken[] | MarkdownParseError} Array of parsed tokens or a MarkdownParseError if tokenization fails
  */
 export const tokenizeMarkdown = (
   content: string
@@ -151,8 +151,8 @@ export const tokenizeMarkdown = (
 
 /**
  * Convert a single marked Token to ParsedToken format
- * @param token - The marked library token to convert
- * @returns Converted ParsedToken object
+ * @param {Token} token - The marked library token to convert
+ * @returns {ParsedToken} Converted ParsedToken object
  */
 const convertSingleToken = (token: Token): ParsedToken => {
   const parsedToken: ParsedToken = {
@@ -176,8 +176,8 @@ const convertSingleToken = (token: Token): ParsedToken => {
 
 /**
  * Preserve additional properties from token to parsedToken
- * @param token - The source token
- * @param parsedToken - The target parsed token
+ * @param {Token} token - The source token
+ * @param {ParsedToken} parsedToken - The target parsed token
  */
 const preserveAdditionalProperties = (
   token: Token,
@@ -196,8 +196,8 @@ const preserveAdditionalProperties = (
 
 /**
  * Convert marked Tokens to ParsedToken format
- * @param tokens - The marked library tokens to convert
- * @returns Array of converted ParsedToken objects
+ * @param {Token[]} tokens - The marked library tokens to convert
+ * @returns {ParsedToken[]} Array of converted ParsedToken objects
  */
 const convertTokens = (tokens: Token[]): ParsedToken[] => {
   return tokens.map(convertSingleToken);

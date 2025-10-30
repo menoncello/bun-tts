@@ -3,19 +3,17 @@
  * Tests performance characteristics and dependency injection.
  */
 
-import { describe, test, expect, beforeEach, mock } from 'bun:test';
-import type { Logger } from '../../../src/interfaces/logger.js';
+import { describe, test, expect, beforeEach } from 'bun:test';
 import type { ConfigManager } from '../../../src/config/config-manager.js';
-import type { Result } from '../../../src/errors/result.js';
-import { BunTtsError } from '../../../src/errors/bun-tts-error.js';
-import { container } from '../../../src/di/container.js';
 import { MarkdownParser } from '../../../src/core/document-processing/parsers/markdown-parser.js';
+import { container } from '../../../src/di/container.js';
+import { BunTtsError } from '../../../src/errors/bun-tts-error.js';
+import type { Result } from '../../../src/errors/result.js';
+import type { Logger } from '../../../src/interfaces/logger.js';
 import {
   MockLoggerFactory,
   MockConfigManagerFactory,
   MarkdownContentFactory,
-  TestIdGenerator,
-  BDDTemplateFactory,
 } from '../../support/document-processing-factories.js';
 
 // Sample markdown content for testing

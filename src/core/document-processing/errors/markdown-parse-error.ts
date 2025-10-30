@@ -83,10 +83,10 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Create a new MarkdownParseError
    *
-   * @param code - Error code from MARKDOWN_PARSE_ERROR_CODES
-   * @param message - Human-readable error message
-   * @param config - Error configuration options
-   * @returns A new MarkdownParseError instance
+   * @param {any} code - Error code from MARKDOWN_PARSE_ERROR_CODES
+   * @param {string} message - Human-readable error message
+   * @param {object} config - Error configuration options
+   * @returns {MarkdownParseError} A new MarkdownParseError instance
    */
   constructor(
     code: MarkdownParseErrorCode,
@@ -125,29 +125,29 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Create error for invalid syntax
    *
-   * @param message - Description of syntax issue
-   * @param location - Location of syntax error
-   * @param confidence - Confidence score
-   * @returns A new MarkdownParseError instance
+   * @param {string} message - Description of syntax issue
+   * @param {ErrorLocation} location - Location of syntax error
+   * @param {any} _confidence - Confidence score
+   * @returns {MarkdownParseError} A new MarkdownParseError instance
    */
   static invalidSyntax(
     message: string,
     location?: ErrorLocation,
-    confidence = 1.0
+    _confidence = 1.0
   ): MarkdownParseError {
     return new MarkdownParseError(
       'INVALID_SYNTAX',
       `Invalid Markdown syntax: ${message}`,
-      { location, confidence }
+      { location, confidence: _confidence }
     );
   }
 
   /**
    * Create error for malformed header
    *
-   * @param message - Description of header issue
-   * @param location - Location of header error
-   * @returns A new MarkdownParseError instance
+   * @param {string} message - Description of header issue
+   * @param {ErrorLocation} location - Location of header error
+   * @returns {MarkdownParseError} A new MarkdownParseError instance
    */
   static malformedHeader(
     message: string,
@@ -163,8 +163,8 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Create error for unclosed code block
    *
-   * @param location - Location where code block starts
-   * @returns A new MarkdownParseError instance
+   * @param {ErrorLocation} location - Location where code block starts
+   * @returns {MarkdownParseError} A new MarkdownParseError instance
    */
   static unclosedCodeBlock(location?: ErrorLocation): MarkdownParseError {
     return new MarkdownParseError(
@@ -177,9 +177,9 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Create error for invalid table format
    *
-   * @param message - Description of table issue
-   * @param location - Location of table error
-   * @returns A new MarkdownParseError instance
+   * @param {string} message - Description of table issue
+   * @param {ErrorLocation} location - Location of table error
+   * @returns {MarkdownParseError} A new MarkdownParseError instance
    */
   static invalidTable(
     message: string,
@@ -195,9 +195,9 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Create error for malformed list
    *
-   * @param message - Description of list issue
-   * @param location - Location of list error
-   * @returns A new MarkdownParseError instance
+   * @param {string} message - Description of list issue
+   * @param {ErrorLocation} location - Location of list error
+   * @returns {MarkdownParseError} A new MarkdownParseError instance
    */
   static malformedList(
     message: string,
@@ -213,9 +213,9 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Create error for structure nesting too deep
    *
-   * @param message - Description of nesting issue
-   * @param location - Location of nesting error
-   * @returns A new MarkdownParseError instance
+   * @param {string} message - Description of nesting issue
+   * @param {ErrorLocation} location - Location of nesting error
+   * @returns {MarkdownParseError} A new MarkdownParseError instance
    */
   static nestingTooDeep(
     message: string,
@@ -231,9 +231,9 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Create error for file too large
    *
-   * @param size - File size in bytes
-   * @param maxSize - Maximum allowed size
-   * @returns A new MarkdownParseError instance
+   * @param {number} size - File size in bytes
+   * @param {number} maxSize - Maximum allowed size
+   * @returns {MarkdownParseError} A new MarkdownParseError instance
    */
   static fileTooLarge(size: number, maxSize: number): MarkdownParseError {
     return new MarkdownParseError(
@@ -245,9 +245,9 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Create error for encoding issues
    *
-   * @param message - Description of encoding issue
-   * @param cause - Original encoding error
-   * @returns A new MarkdownParseError instance
+   * @param {string} message - Description of encoding issue
+   * @param {Error} cause - Original encoding error
+   * @returns {MarkdownParseError} A new MarkdownParseError instance
    */
   static encodingError(message: string, cause?: Error): MarkdownParseError {
     return new MarkdownParseError(
@@ -260,9 +260,9 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Create error for memory allocation failure
    *
-   * @param message - Description of memory issue
-   * @param cause - Original memory error
-   * @returns A new MarkdownParseError instance
+   * @param {string} message - Description of memory issue
+   * @param {Error} cause - Original memory error
+   * @returns {MarkdownParseError} A new MarkdownParseError instance
    */
   static memoryError(message: string, cause?: Error): MarkdownParseError {
     return new MarkdownParseError('MEMORY_ERROR', `Memory error: ${message}`, {
@@ -273,9 +273,9 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Create generic parse failure error
    *
-   * @param message - Description of failure
-   * @param cause - Original error
-   * @returns A new MarkdownParseError instance
+   * @param {string} message - Description of failure
+   * @param {Error} cause - Original error
+   * @returns {MarkdownParseError} A new MarkdownParseError instance
    */
   static parseFailed(message: string, cause?: Error): MarkdownParseError {
     return new MarkdownParseError('PARSE_FAILED', `Parse failed: ${message}`, {
@@ -286,10 +286,10 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Create error for low confidence in structure detection
    *
-   * @param confidence - Actual confidence score
-   * @param threshold - Required threshold
-   * @param location - Location where low confidence detected
-   * @returns A new MarkdownParseError instance
+   * @param {number} confidence - Actual confidence score
+   * @param {number} threshold - Required threshold
+   * @param {ErrorLocation} location - Location where low confidence detected
+   * @returns {MarkdownParseError} A new MarkdownParseError instance
    */
   static lowConfidence(
     confidence: number,
@@ -306,9 +306,9 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Create error for invalid input type
    *
-   * @param inputType - The invalid input type received
-   * @param expectedType - Expected input type
-   * @returns A new MarkdownParseError instance
+   * @param {any} inputType - The invalid input type received
+   * @param {any} expectedType - Expected input type
+   * @returns {MarkdownParseError} A new MarkdownParseError instance
    */
   static invalidInput(
     inputType: string,
@@ -323,7 +323,7 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Get a user-friendly description of this error
    *
-   * @returns User-friendly error description
+   * @returns {string} User-friendly error description
    */
   getUserDescription(): string {
     const descriptions: Record<MarkdownParseErrorCode, string> = {
@@ -354,7 +354,7 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Get suggested actions to resolve this error
    *
-   * @returns Array of suggested actions to resolve the error
+   * @returns {string[]} Array of suggested actions to resolve the error
    */
   getSuggestedActions(): string[] {
     const actionMap = this.getActionMap();
@@ -364,7 +364,7 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Get the complete action mapping for all error codes
    *
-   * @returns Record mapping error codes to their suggested actions
+   * @returns {Record<MarkdownParseErrorCode | 'default', string[]>} Record mapping error codes to their suggested actions
    */
   private getActionMap(): Record<MarkdownParseErrorCode | 'default', string[]> {
     const syntaxActions = this.getSyntaxActions();
@@ -392,7 +392,7 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Get syntax-related error actions
    *
-   * @returns Array of syntax-related actions
+   * @returns {string[]} Array of syntax-related actions
    */
   private getSyntaxActions(): string[] {
     return [
@@ -405,7 +405,7 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Get code block error actions
    *
-   * @returns Array of code block-related actions
+   * @returns {string[]} Array of code block-related actions
    */
   private getCodeBlockActions(): string[] {
     return [
@@ -418,7 +418,7 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Get nesting error actions
    *
-   * @returns Array of nesting-related actions
+   * @returns {string[]} Array of nesting-related actions
    */
   private getNestingActions(): string[] {
     return [
@@ -431,7 +431,7 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Get file-related error actions
    *
-   * @returns Array of file-related actions
+   * @returns {string[]} Array of file-related actions
    */
   private getFileActions(): string[] {
     return [
@@ -444,7 +444,7 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Get confidence error actions
    *
-   * @returns Array of confidence-related actions
+   * @returns {string[]} Array of confidence-related actions
    */
   private getConfidenceActions(): string[] {
     return [
@@ -457,7 +457,7 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Get encoding error actions
    *
-   * @returns Array of encoding-related actions
+   * @returns {string[]} Array of encoding-related actions
    */
   private getEncodingActions(): string[] {
     return [
@@ -470,7 +470,7 @@ export class MarkdownParseError extends BunTtsError {
   /**
    * Get default error actions
    *
-   * @returns Array of default actions
+   * @returns {string[]} Array of default actions
    */
   private getDefaultActions(): string[] {
     return [

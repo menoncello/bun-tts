@@ -60,7 +60,7 @@ export class ErrorRecoveryManager {
 
   /**
    * Gets the singleton instance of the ErrorRecoveryManager
-   * @returns The singleton instance of ErrorRecoveryManager
+   * @returns {any} The singleton instance of ErrorRecoveryManager
    */
   public static getInstance(): ErrorRecoveryManager {
     if (!ErrorRecoveryManager.instance) {
@@ -79,8 +79,8 @@ export class ErrorRecoveryManager {
 
   /**
    * Registers a recovery strategy for a specific error type
-   * @param errorType - The type of error this strategy can handle
-   * @param strategy - The recovery strategy to register
+   * @param {string} errorType - The type of error this strategy can handle
+   * @param {RecoveryStrategy} strategy - The recovery strategy to register
    */
   public registerStrategy(errorType: string, strategy: RecoveryStrategy): void {
     if (!this.strategies.has(errorType)) {
@@ -94,8 +94,8 @@ export class ErrorRecoveryManager {
 
   /**
    * Logs recovery attempt information
-   * @param error - The error to recover from
-   * @param context - Recovery context containing attempt information
+   * @param {BunTtsError} error - The error to recover from
+   * @param {RecoveryContext} context - Recovery context containing attempt information
    */
   private logRecoveryAttempt(
     error: BunTtsError,
@@ -111,9 +111,9 @@ export class ErrorRecoveryManager {
 
   /**
    * Attempts recovery using registered strategies
-   * @param error - The error to recover from
-   * @param context - Recovery context containing attempt information
-   * @returns Result of strategy recovery attempt
+   * @param {BunTtsError} error - The error to recover from
+   * @param {RecoveryContext} context - Recovery context containing attempt information
+   * @returns {Promise<Result<T, BunTtsError>>} Result of strategy recovery attempt
    */
   private async attemptStrategyRecovery<T>(
     error: BunTtsError,
@@ -132,10 +132,10 @@ export class ErrorRecoveryManager {
 
   /**
    * Attempts recovery using fallback function
-   * @param fallback - Optional fallback recovery function
-   * @param context - Recovery context containing attempt information
-   * @param error - The error to recover from
-   * @returns Result of fallback recovery attempt
+   * @param {(() => Promise<Result<T, BunTtsError>>) | undefined} fallback - Optional fallback recovery function
+   * @param {RecoveryContext} context - Recovery context containing attempt information
+   * @param {BunTtsError} error - The error to recover from
+   * @returns {Promise<Result<T, BunTtsError>>} Result of fallback recovery attempt
    */
   private async attemptFallbackRecovery<T>(
     fallback: (() => Promise<Result<T, BunTtsError>>) | undefined,
@@ -147,10 +147,10 @@ export class ErrorRecoveryManager {
 
   /**
    * Attempts to recover from an error using registered strategies and fallback options
-   * @param error - The error to attempt recovery from
-   * @param context - Recovery context containing attempt information
-   * @param fallback - Optional fallback recovery function
-   * @returns Result of the recovery attempt
+   * @param {BunTtsError} error - The error to attempt recovery from
+   * @param {RecoveryContext} context - Recovery context containing attempt information
+   * @param {() => Promise<Result<T, BunTtsError>>} [fallback] - Optional fallback recovery function
+   * @returns {Promise<Result<T, BunTtsError>>} Result of the recovery attempt
    */
   public async attemptRecovery<T>(
     error: BunTtsError,
@@ -181,11 +181,11 @@ export class ErrorRecoveryManager {
 
   /**
    * Executes an operation with automatic recovery attempts on failure
-   * @param operation - The operation to execute
-   * @param operationName - Name of the operation for logging purposes
-   * @param maxAttempts - Maximum number of attempts (default: 3)
-   * @param metadata - Optional metadata to include with error reporting
-   * @returns Result of the operation with recovery attempts
+   * @param {() => Promise<Result<T, BunTtsError>>} operation - The operation to execute
+   * @param {string} operationName - Name of the operation for logging purposes
+   * @param {number} [maxAttempts] - Maximum number of attempts (default: 3)
+   * @param {Record<string, unknown>} [metadata] - Optional metadata to include with error reporting
+   * @returns {Promise<Result<T, BunTtsError>>} Result of the operation with recovery attempts
    */
   public async executeWithRecovery<T>(
     operation: () => Promise<Result<T, BunTtsError>>,
@@ -216,8 +216,8 @@ export class ErrorRecoveryManager {
 
   /**
    * Executes an operation and attempts recovery if it fails
-   * @param params - Operation execution parameters
-   * @returns Result of operation execution and recovery attempt
+   * @param {OperationParams<T>} params - Operation execution parameters
+   * @returns {Promise<Result<T, BunTtsError>>} Result of operation execution and recovery attempt
    */
   private async executeOperationWithRecovery<T>(
     params: OperationParams<T>
@@ -238,8 +238,8 @@ export class ErrorRecoveryManager {
 
   /**
    * Executes a single operation attempt with error handling
-   * @param params - Operation execution parameters
-   * @returns Result of the operation execution
+   * @param {OperationParams<T>} params - Operation execution parameters
+   * @returns {Promise<Result<T, BunTtsError>>} Result of the operation execution
    */
   private async executeOperation<T>(
     params: OperationParams<T>
@@ -253,8 +253,8 @@ export class ErrorRecoveryManager {
 
   /**
    * Creates a delay for the specified number of milliseconds
-   * @param ms - Number of milliseconds to delay
-   * @returns Promise that resolves after the delay
+   * @param {number} ms - Number of milliseconds to delay
+   * @returns {Promise<void>} Promise that resolves after the delay
    */
   private delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -266,7 +266,7 @@ let _recoveryManager: ErrorRecoveryManager | null = null;
 
 /**
  * Gets the recovery manager instance with default strategies registered
- * @returns The ErrorRecoveryManager instance with default strategies
+ * @returns {ErrorRecoveryManager} The ErrorRecoveryManager instance with default strategies
  */
 export const recoveryManager = (): ErrorRecoveryManager => {
   if (!_recoveryManager) {
@@ -277,7 +277,7 @@ export const recoveryManager = (): ErrorRecoveryManager => {
 
 /**
  * Creates a new recovery manager instance and registers default strategies
- * @returns A new ErrorRecoveryManager instance with strategies registered
+ * @returns {ErrorRecoveryManager} A new ErrorRecoveryManager instance with strategies registered
  */
 const createRecoveryManager = (): ErrorRecoveryManager => {
   const manager = ErrorRecoveryManager.getInstance();
@@ -296,7 +296,7 @@ const createRecoveryManager = (): ErrorRecoveryManager => {
 
 /**
  * Registers all configuration-related recovery strategies
- * @param manager - The recovery manager to register strategies with
+ * @param {ErrorRecoveryManager} manager - The recovery manager to register strategies with
  */
 const registerConfigurationStrategies = (
   manager: ErrorRecoveryManager
@@ -310,7 +310,7 @@ const registerConfigurationStrategies = (
 
 /**
  * Registers all file system-related recovery strategies
- * @param manager - The recovery manager to register strategies with
+ * @param {ErrorRecoveryManager} manager - The recovery manager to register strategies with
  */
 const registerFileSystemStrategies = (manager: ErrorRecoveryManager): void => {
   const fileStrategy = new FileSystemRecoveryStrategy();
@@ -323,7 +323,7 @@ const registerFileSystemStrategies = (manager: ErrorRecoveryManager): void => {
 
 /**
  * Registers all network-related recovery strategies
- * @param manager - The recovery manager to register strategies with
+ * @param {ErrorRecoveryManager} manager - The recovery manager to register strategies with
  */
 const registerNetworkStrategies = (manager: ErrorRecoveryManager): void => {
   const networkStrategy = new NetworkRecoveryStrategy();
@@ -344,11 +344,11 @@ export {
 
 /**
  * Convenience function to execute an operation with recovery using the default recovery manager
- * @param operation - The operation to execute
- * @param operationName - Name of the operation for logging purposes
- * @param maxAttempts - Maximum number of attempts (optional)
- * @param metadata - Optional metadata to include with error reporting
- * @returns Result of the operation with recovery attempts
+ * @param {() => Promise<Result<T, BunTtsError>>} operation - The operation to execute
+ * @param {string} operationName - Name of the operation for logging purposes
+ * @param {number} [maxAttempts] - Maximum number of attempts (optional)
+ * @param {Record<string, unknown>} [metadata] - Optional metadata to include with error reporting
+ * @returns {Promise<Result<T, BunTtsError>>} Result of the operation with recovery attempts
  */
 export const executeWithRecovery = async <T>(
   operation: () => Promise<Result<T, BunTtsError>>,
@@ -362,3 +362,9 @@ export const executeWithRecovery = async <T>(
     maxAttempts,
     metadata
   );
+
+/**
+ * Alias for recoveryManager function for backward compatibility
+ * @returns {any} The ErrorRecoveryManager instance with default strategies
+ */
+export const getRecoveryManager = recoveryManager;

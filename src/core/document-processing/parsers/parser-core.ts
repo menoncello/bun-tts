@@ -29,11 +29,11 @@ export { buildDocumentStructure } from './document-builder.js';
 
 /**
  * Main parsing orchestration function
- * @param content - The markdown content to parse
- * @param config - Parser configuration
- * @param logger - Logger instance
- * @param chapterExtractor - Function to extract chapters from tokens
- * @returns Promise<Document structure or error>
+ * @param {string} content - The markdown content to parse
+ * @param {MarkdownParserConfig} config - Parser configuration
+ * @param {Logger} logger - Logger instance
+ * @param {Function} chapterExtractor - Function to extract chapters from tokens
+ * @returns {Promise<DocumentStructure|MarkdownParseError>} Promise<Document structure or error>
  */
 export const parseMarkdownDocument = async (
   content: string,

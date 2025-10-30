@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach } from 'bun:test';
 import {
   HelpCommand,
   ConsoleOutputWriter,
-} from '../../../src/cli/commands/help-command';
-import { createMockLogger, createTestCliContext } from '../di/test-utils';
+} from '../../../src/cli/commands/help-command.js';
+import { createMockLogger, createTestCliContext } from '../di/test-utils.js';
 
 function createMockOutputWriter() {
   return {
@@ -158,13 +158,13 @@ describe('HelpCommand Constructor Validation', () => {
   describe('Error Scenarios', () => {
     it('should fail without logger dependency', () => {
       expect(() => {
-        new HelpCommand(null as any, mockOutputWriter);
+        return new HelpCommand(null as any, mockOutputWriter);
       }).toThrow('Logger is required for HelpCommand');
     });
 
     it('should fail without outputWriter dependency', () => {
       expect(() => {
-        new HelpCommand(mockLogger, null as any);
+        return new HelpCommand(mockLogger, null as any);
       }).toThrow('OutputWriter is required for HelpCommand');
     });
   });

@@ -13,14 +13,14 @@ export class ConfigAccess {
    * Retrieves a configuration value using dot notation for nested keys.
    * Returns the provided default value if the key is not found.
    *
-   * @param config - The configuration object to search in
-   * @param key - The configuration key to retrieve (supports dot notation)
-   * @param defaultValue - Default value to return if key is not found
-   * @returns The configuration value or default
+   * @param {object} config - The configuration object to search in
+   * @param {any} _key - The configuration key to retrieve (supports dot notation)
+   * @param {T} [defaultValue] - Default value to return if key is not found
+   * @returns {T} The configuration value or default
    */
   get<T = unknown>(
     config: BunTtsConfig | undefined,
-    key: string,
+    _key: string,
     defaultValue?: T
   ): T {
     if (!config) {
@@ -28,7 +28,7 @@ export class ConfigAccess {
     }
 
     // Support dot notation for nested keys
-    const keys = key.split('.');
+    const keys = _key.split('.');
     let value: unknown = config;
 
     for (const k of keys) {
@@ -47,22 +47,22 @@ export class ConfigAccess {
    *
    * Sets a configuration value using dot notation for nested keys.
    *
-   * @param config - The configuration object to modify
-   * @param key - The configuration key to set (supports dot notation)
-   * @param value - The value to set
-   * @returns The modified configuration object
+   * @param {object} config - The configuration object to modify
+   * @param {any} _key - The configuration key to set (supports dot notation)
+   * @param {any} _value - The value to set
+   * @returns {BunTtsConfig} The modified configuration object
    */
   set(
     config: BunTtsConfig | undefined,
-    key: string,
-    value: unknown
+    _key: string,
+    _value: unknown
   ): BunTtsConfig {
     if (!config) {
       config = {} as BunTtsConfig;
     }
 
     // Support dot notation for nested keys
-    const keys = key.split('.');
+    const keys = _key.split('.');
     let current: Record<string, unknown> = config as unknown as Record<
       string,
       unknown
@@ -80,7 +80,7 @@ export class ConfigAccess {
 
     const lastKey = keys[keys.length - 1];
     if (lastKey) {
-      current[lastKey] = value;
+      current[lastKey] = _value;
     }
 
     return config;
@@ -89,11 +89,11 @@ export class ConfigAccess {
   /**
    * Check if configuration key exists
    *
-   * @param config - The configuration object to search in
-   * @param key - The configuration key to check (supports dot notation)
-   * @returns True if the key exists, false otherwise
+   * @param {object} config - The configuration object to search in
+   * @param {any} _key - The configuration key to check (supports dot notation)
+   * @returns {boolean} True if the key exists, false otherwise
    */
-  has(config: BunTtsConfig | undefined, key: string): boolean {
-    return this.get(config, key) !== undefined;
+  has(config: BunTtsConfig | undefined, _key: string): boolean {
+    return this.get(config, _key) !== undefined;
   }
 }

@@ -14,10 +14,10 @@ import {
 
 /**
  * Extract paragraph from token
- * @param token - The parsed token to extract paragraph content from
- * @param position - The position index of the paragraph in the document
- * @param config - Configuration settings for paragraph extraction
- * @returns A paragraph object or null if token type is not supported
+ * @param {ParsedToken} token - The parsed token to extract paragraph content from
+ * @param {number} position - The position index of the paragraph in the document
+ * @param {MarkdownParserConfig} config - Configuration settings for paragraph extraction
+ * @returns {Paragraph | null} A paragraph object or null if token type is not supported
  */
 export function extractParagraphFromToken(
   token: ParsedToken,
@@ -42,10 +42,10 @@ export function extractParagraphFromToken(
 
 /**
  * Extract text paragraph from token
- * @param token - The parsed token of type 'paragraph' to extract content from
- * @param position - The position index of the paragraph in the document
- * @param config - Configuration settings for sentence extraction
- * @returns A paragraph object containing extracted sentences and metadata
+ * @param {ParsedToken} token - The parsed token of type 'paragraph' to extract content from
+ * @param {number} position - The position index of the paragraph in the document
+ * @param {MarkdownParserConfig} config - Configuration settings for sentence extraction
+ * @returns {Paragraph} A paragraph object containing extracted sentences and metadata
  */
 export function extractTextParagraph(
   token: ParsedToken,
@@ -66,6 +66,7 @@ export function extractTextParagraph(
     position,
     wordCount: countWords(text),
     rawText: text,
+    text: text, // For compatibility with Paragraph interface
     includeInAudio: true,
     confidence: calculateParagraphConfidence(sentences),
   };
@@ -73,10 +74,10 @@ export function extractTextParagraph(
 
 /**
  * Extract code paragraph from token
- * @param token - The parsed token of type 'code' to extract content from
- * @param position - The position index of the paragraph in the document
- * @param config - Configuration settings for code block inclusion
- * @returns A paragraph object representing a code block
+ * @param {ParsedToken} token - The parsed token of type 'code' to extract content from
+ * @param {number} position - The position index of the paragraph in the document
+ * @param {MarkdownParserConfig} config - Configuration settings for code block inclusion
+ * @returns {Paragraph} A paragraph object representing a code block
  */
 export function extractCodeParagraph(
   token: ParsedToken,
@@ -92,6 +93,7 @@ export function extractCodeParagraph(
     position,
     wordCount: 0,
     rawText: text,
+    text: text, // For compatibility with Paragraph interface
     includeInAudio: config.includeCodeBlocks,
     confidence: PARSER_CONSTANTS.MAX_CONFIDENCE, // Code is always confidently identified
   };
@@ -99,10 +101,10 @@ export function extractCodeParagraph(
 
 /**
  * Extract blockquote paragraph from token
- * @param token - The parsed token of type 'blockquote' to extract content from
- * @param position - The position index of the paragraph in the document
- * @param config - Configuration settings for blockquote inclusion
- * @returns A paragraph object representing a blockquote
+ * @param {ParsedToken} token - The parsed token of type 'blockquote' to extract content from
+ * @param {number} position - The position index of the paragraph in the document
+ * @param {MarkdownParserConfig} config - Configuration settings for blockquote inclusion
+ * @returns {Paragraph} A paragraph object representing a blockquote
  */
 export function extractBlockquoteParagraph(
   token: ParsedToken,
@@ -123,6 +125,7 @@ export function extractBlockquoteParagraph(
     position,
     wordCount: countWords(text),
     rawText: text,
+    text: text, // For compatibility with Paragraph interface
     includeInAudio: config.includeBlockquotes,
     confidence: calculateParagraphConfidence(sentences),
   };
@@ -130,10 +133,10 @@ export function extractBlockquoteParagraph(
 
 /**
  * Extract list paragraph from token
- * @param token - The parsed token of type 'list' to extract content from
- * @param position - The position index of the paragraph in the document
- * @param config - Configuration settings for list inclusion
- * @returns A paragraph object representing a list
+ * @param {ParsedToken} token - The parsed token of type 'list' to extract content from
+ * @param {number} position - The position index of the paragraph in the document
+ * @param {MarkdownParserConfig} config - Configuration settings for list inclusion
+ * @returns {Paragraph} A paragraph object representing a list
  */
 export function extractListParagraph(
   token: ParsedToken,
@@ -154,6 +157,7 @@ export function extractListParagraph(
     position,
     wordCount: countWords(listText),
     rawText: listText,
+    text: listText, // For compatibility with Paragraph interface
     includeInAudio: config.includeLists,
     confidence: calculateParagraphConfidence(sentences),
   };
@@ -161,10 +165,10 @@ export function extractListParagraph(
 
 /**
  * Extract table paragraph from token
- * @param _token - The parsed token of type 'table' (parameter prefixed with _ to indicate unused)
- * @param position - The position index of the paragraph in the document
- * @param config - Configuration settings for table inclusion
- * @returns A paragraph object representing a table
+ * @param {ParsedToken} _token - The parsed token of type 'table' (parameter prefixed with _ to indicate unused)
+ * @param {number} position - The position index of the paragraph in the document
+ * @param {MarkdownParserConfig} config - Configuration settings for table inclusion
+ * @returns {Paragraph} A paragraph object representing a table
  */
 export function extractTableParagraph(
   _token: ParsedToken,
@@ -178,6 +182,7 @@ export function extractTableParagraph(
     position,
     wordCount: 0,
     rawText: PARSER_CONSTANTS.TABLE_PLACEHOLDER,
+    text: PARSER_CONSTANTS.TABLE_PLACEHOLDER, // For compatibility with Paragraph interface
     includeInAudio: config.includeTables,
     confidence: PARSER_CONSTANTS.MAX_CONFIDENCE, // Tables are always confidently identified
   };
@@ -185,8 +190,8 @@ export function extractTableParagraph(
 
 /**
  * Extract text content from list token
- * @param token - The parsed token of type 'list' to extract text from
- * @returns Concatenated text content from all list items
+ * @param {ParsedToken} token - The parsed token of type 'list' to extract text from
+ * @returns {string} Concatenated text content from all list items
  */
 export function extractListText(token: ParsedToken): string {
   const items: string[] = [];
@@ -207,8 +212,8 @@ export function extractListText(token: ParsedToken): string {
 
 /**
  * Extract text from nested tokens
- * @param tokens - Array of parsed tokens to extract text content from
- * @returns Concatenated text content from all tokens
+ * @param {ParsedToken[]} tokens - Array of parsed tokens to extract text content from
+ * @returns {string} Concatenated text content from all tokens
  */
 export function extractTextFromTokens(tokens: ParsedToken[]): string {
   const textParts: string[] = [];

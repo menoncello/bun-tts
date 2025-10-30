@@ -11,15 +11,19 @@ import { ErrorReporter } from '../src/utils/error-reporter.js';
 import { createSilentLogger } from './mocks/logger-mock.js';
 
 // Global test utilities
-declare global {
-  namespace Bun {
-    interface TestGlobals {
-      // Test utilities for logger injection
-      createMockLogger(): MockLogger;
-      createDebugManager(options?: any, logger?: MockLogger): DebugManager;
-      createErrorReporter(options?: any, logger?: MockLogger): ErrorReporter;
-      resetSingletons(): void;
-    }
+declare module 'bun:test' {
+  interface TestGlobals {
+    // Test utilities for logger injection
+    createMockLogger: () => MockLogger;
+    createDebugManager: (
+      options?: Record<string, unknown>,
+      logger?: MockLogger
+    ) => DebugManager;
+    createErrorReporter: (
+      options?: Record<string, unknown>,
+      logger?: MockLogger
+    ) => ErrorReporter;
+    resetSingletons: () => void;
   }
 }
 
@@ -45,16 +49,22 @@ const silentDebugManager = DebugManager.createInstance(
 );
 
 // Create global test utilities
-(globalThis as any).BunTestGlobals = {
+(globalThis as Record<string, unknown>).BunTestGlobals = {
   createMockLogger: (): MockLogger => {
     return new MockLogger();
   },
 
-  createDebugManager: (options?: any, logger?: MockLogger): DebugManager => {
+  createDebugManager: (
+    options?: Record<string, unknown>,
+    logger?: MockLogger
+  ): DebugManager => {
     return DebugManager.createInstance(options, logger || silentLogger);
   },
 
-  createErrorReporter: (options?: any, logger?: MockLogger): ErrorReporter => {
+  createErrorReporter: (
+    options?: Record<string, unknown>,
+    logger?: MockLogger
+  ): ErrorReporter => {
     return ErrorReporter.createInstance(options, logger || silentLogger);
   },
 
@@ -72,11 +82,17 @@ const silentDebugManager = DebugManager.createInstance(
 // Test utilities are available via exports from this setup file
 
 // Global helper functions for backward compatibility
-export const createMockLogger = (globalThis as any).BunTestGlobals
-  .createMockLogger;
-export const createDebugManager = (globalThis as any).BunTestGlobals
-  .createDebugManager;
-export const createErrorReporter = (globalThis as any).BunTestGlobals
-  .createErrorReporter;
-export const resetSingletons = (globalThis as any).BunTestGlobals
-  .resetSingletons;
+declare global {
+  var BunTestGlobals: {
+    createMockLogger?: () => unknown;
+    createDebugManager?: () => unknown;
+    createErrorReporter?: () => unknown;
+    resetSingletons?: () => unknown;
+  };
+}
+
+export const createMockLogger = globalThis.BunTestGlobals?.createMockLogger;
+export const createDebugManager = globalThis.BunTestGlobals?.createDebugManager;
+export const createErrorReporter =
+  globalThis.BunTestGlobals?.createErrorReporter;
+export const resetSingletons = globalThis.BunTestGlobals?.resetSingletons;

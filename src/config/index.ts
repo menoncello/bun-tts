@@ -47,10 +47,10 @@ export class ConfigManager {
    * Searches for configuration files using cosmiconfig or loads from specified path.
    * Merges configuration with defaults in the correct priority order.
    *
-   * @param options - Configuration loading options
-   * @param options.configPath - Optional specific path to configuration file
-   * @param options.defaults - Optional default values to merge with loaded config
-   * @returns Promise resolving to Result containing loaded configuration or error
+   * @param {any} options - Configuration loading options
+   * @param {string} [options.configPath] - Optional specific path to configuration file
+   * @param {Partial<ConfigOptions>} [options.defaults] - Optional default values to merge with loaded config
+   * @returns {Promise<Result<ConfigOptions>>} Promise resolving to Result containing loaded configuration or error
    */
   public async loadConfig(
     options: ConfigManagerOptions = {}
@@ -79,7 +79,7 @@ export class ConfigManager {
    * Gets the currently loaded configuration.
    * Returns null if no configuration has been loaded yet.
    *
-   * @returns Current configuration or null if not loaded
+   * @returns {ConfigOptions | null} Current configuration or null if not loaded
    */
   public getConfig(): ConfigOptions | null {
     return this.config;
@@ -90,8 +90,8 @@ export class ConfigManager {
    * Clears the current configuration and loads fresh configuration.
    * Useful for configuration hot-reloading scenarios.
    *
-   * @param options - Configuration loading options
-   * @returns Promise resolving to Result containing reloaded configuration or error
+   * @param {any} options - Configuration loading options
+   * @returns {Promise<Result<ConfigOptions>>} Promise resolving to Result containing reloaded configuration or error
    */
   public async reloadConfig(
     options: ConfigManagerOptions = {}
@@ -104,8 +104,8 @@ export class ConfigManager {
    * Loads configuration file using cosmiconfig.
    * Handles both specific path loading and search-based loading.
    *
-   * @param options - Configuration loading options
-   * @returns Promise resolving to cosmiconfig result or null
+   * @param {any} options - Configuration loading options
+   * @returns {any} Promise<{ config: unknown  | null>} Promise resolving to cosmiconfig result or null
    */
   private async loadConfigFile(
     options: ConfigManagerOptions
@@ -120,9 +120,9 @@ export class ConfigManager {
    * Merges configuration with defaults in the correct priority order.
    * Priority order: defaults < loaded config < runtime defaults
    *
-   * @param loadedConfig - Configuration loaded from file (optional)
-   * @param runtimeDefaults - Runtime default values (optional)
-   * @returns Merged configuration object
+   * @param {ConfigOptions} [loadedConfig] - Configuration loaded from file (optional)
+   * @param {Partial<ConfigOptions>} [runtimeDefaults] - Runtime default values (optional)
+   * @returns {ConfigOptions} Merged configuration object
    */
   private mergeConfigurations(
     loadedConfig?: ConfigOptions,
@@ -139,9 +139,9 @@ export class ConfigManager {
    * Handles errors that occur during configuration loading.
    * Converts various error types to appropriate Result objects.
    *
-   * @param error - The error that occurred
-   * @param configPath - Optional configuration path for error context
-   * @returns Result containing the appropriate error
+   * @param {Error} error - The error that occurred
+   * @param {string} [configPath] - Optional configuration path for error context
+   * @returns {Result<ConfigOptions>} Result containing the appropriate error
    */
   private handleConfigLoadError(
     error: unknown,
@@ -166,7 +166,7 @@ export class ConfigManager {
    * Gets the default configuration values.
    * Provides sensible defaults for all configuration options.
    *
-   * @returns Default configuration object
+   * @returns {ConfigOptions} Default configuration object
    */
   private getDefaultConfig(): ConfigOptions {
     return {
@@ -192,9 +192,9 @@ export class ConfigManager {
    * Validates a configuration object against schema requirements.
    * Ensures all configuration values are within acceptable ranges and types.
    *
-   * @param config - Configuration object to validate
-   * @returns Validated configuration object
-   * @throws Error if configuration is invalid
+   * @param {object} config - Configuration object to validate
+   * @returns {ConfigOptions} Validated configuration object
+   * @throws {Error} Error if configuration is invalid
    */
   private validateConfig(config: unknown): ConfigOptions {
     if (!config || typeof config !== 'object') {
@@ -215,8 +215,8 @@ export class ConfigManager {
    * Validates the TTS engine configuration.
    * Ensures the specified engine is supported.
    *
-   * @param engine - TTS engine to validate
-   * @throws Error if engine is invalid
+   * @param {any} engine - TTS engine to validate
+   * @throws {Error} Error if engine is invalid
    */
   private validateTtsEngine(engine: unknown): void {
     if (
@@ -233,8 +233,8 @@ export class ConfigManager {
    * Validates the output format configuration.
    * Ensures the specified format is supported.
    *
-   * @param format - Output format to validate
-   * @throws Error if format is invalid
+   * @param {any} format - Output format to validate
+   * @throws {Error} Error if format is invalid
    */
   private validateOutputFormat(format: unknown): void {
     if (
@@ -253,8 +253,8 @@ export class ConfigManager {
    * Validates numeric configuration values.
    * Ensures sample rate, channels, and bitrate are within acceptable ranges.
    *
-   * @param config - Configuration object containing numeric values
-   * @throws Error if any numeric value is invalid
+   * @param {Record<string, unknown>} config - Configuration object containing numeric values
+   * @throws {Error} Error if any numeric value is invalid
    */
   private validateNumericValues(config: Record<string, unknown>): void {
     if (
@@ -285,8 +285,8 @@ export class ConfigManager {
    * Validates voice settings configuration.
    * Ensures all voice parameters are within acceptable ranges.
    *
-   * @param voiceSettings - Voice settings object to validate
-   * @throws Error if any voice setting is invalid
+   * @param {any} voiceSettings - Voice settings object to validate
+   * @throws {Error} Error if any voice setting is invalid
    */
   private validateVoiceSettings(voiceSettings: unknown): void {
     if (!voiceSettings || typeof voiceSettings !== 'object') {
@@ -304,8 +304,8 @@ export class ConfigManager {
   /**
    * Validates the voice speed setting.
    *
-   * @param speed - Speed value to validate
-   * @throws Error if speed is invalid
+   * @param {any} speed - Speed value to validate
+   * @throws {Error} Error if speed is invalid
    */
   private validateSpeedSetting(speed: unknown): void {
     if (
@@ -323,8 +323,8 @@ export class ConfigManager {
   /**
    * Validates the voice pitch setting.
    *
-   * @param pitch - Pitch value to validate
-   * @throws Error if pitch is invalid
+   * @param {any} pitch - Pitch value to validate
+   * @throws {Error} Error if pitch is invalid
    */
   private validatePitchSetting(pitch: unknown): void {
     if (
@@ -342,8 +342,8 @@ export class ConfigManager {
   /**
    * Validates the voice volume setting.
    *
-   * @param volume - Volume value to validate
-   * @throws Error if volume is invalid
+   * @param {any} volume - Volume value to validate
+   * @throws {Error} Error if volume is invalid
    */
   private validateVolumeSetting(volume: unknown): void {
     if (
@@ -362,8 +362,8 @@ export class ConfigManager {
    * Validates emotion settings configuration.
    * Ensures emotion parameters are within acceptable ranges.
    *
-   * @param emotion - Emotion settings object to validate
-   * @throws Error if any emotion setting is invalid
+   * @param {any} emotion - Emotion settings object to validate
+   * @throws {Error} Error if any emotion setting is invalid
    */
   private validateEmotionSettings(emotion: unknown): void {
     if (!emotion || typeof emotion !== 'object') {
@@ -399,7 +399,7 @@ export class ConfigManager {
    * Creates a sample configuration file template.
    * Provides a comprehensive example with inline comments explaining each option.
    *
-   * @returns YAML formatted configuration template string
+   * @returns {string} YAML formatted configuration template string
    */
   public createSampleConfig(): string {
     return this.generateConfigTemplate();
@@ -409,7 +409,7 @@ export class ConfigManager {
    * Generates the complete configuration template string.
    * Includes all available configuration options with descriptive comments.
    *
-   * @returns Complete YAML configuration template
+   * @returns {string} Complete YAML configuration template
    */
   private generateConfigTemplate(): string {
     return [
@@ -423,7 +423,7 @@ export class ConfigManager {
   /**
    * Gets the template header section with file description.
    *
-   * @returns Header comment section
+   * @returns {string} Header comment section
    */
   private getTemplateHeader(): string {
     return `# bun-tts Configuration File
@@ -433,7 +433,7 @@ export class ConfigManager {
   /**
    * Gets the TTS engine configuration section.
    *
-   * @returns TTS engine configuration with comments
+   * @returns {string} TTS engine configuration with comments
    */
   private getTtsEngineSection(): string {
     return `# TTS engine to use for audio generation
@@ -444,7 +444,7 @@ ttsEngine: "kokoro"`;
   /**
    * Gets the voice settings configuration section.
    *
-   * @returns Voice settings configuration with comments
+   * @returns {string} Voice settings configuration with comments
    */
   private getVoiceSettingsSection(): string {
     return `# Voice settings for audio generation
@@ -474,7 +474,7 @@ voiceSettings:
   /**
    * Gets the audio output configuration section.
    *
-   * @returns Audio output configuration with comments
+   * @returns {string} Audio output configuration with comments
    */
   private getAudioOutputSection(): string {
     return `# Audio output format

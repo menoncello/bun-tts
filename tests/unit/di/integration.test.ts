@@ -1,14 +1,14 @@
 import { describe, it, expect, beforeEach } from 'bun:test';
-import { DEPENDENCIES } from '../../../src/di/types';
-import type { CliContext } from '../../../src/types';
-import { createTestContainer, resolveFromContainer } from './test-utils';
+import { DEPENDENCIES } from '../../../src/di/types.js';
+import type { CliContext } from '../../../src/types/index.js';
+import { createTestContainer, resolveFromContainer } from './test-utils.js';
 
 describe('DI Integration Tests', () => {
-  let mockContext: CliContext;
+  let _mockContext: CliContext;
   let testContainer: any;
 
   beforeEach(() => {
-    mockContext = {
+    _mockContext = {
       input: ['test.md'],
       flags: {
         verbose: false,

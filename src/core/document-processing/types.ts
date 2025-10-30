@@ -4,6 +4,172 @@
  */
 
 /**
+ * Generic document parser interface
+ */
+export interface DocumentParser {
+  /** Parser name identifier */
+  name: string;
+  /** Parser version */
+  version: string;
+  /**
+   * Parse method for document processing
+   * @param {input} - Input data to parse
+   * @param {any} options - Optional parse configuration
+   * @returns {any} Promise resolving to parse result
+   */
+  parse: (input: unknown, options?: unknown) => Promise<ParseResult>;
+  /**
+   * Update parser options
+   * @param {any} options - Partial options to merge
+   */
+  setOptions?: (options: Partial<unknown>) => void;
+  /**
+   * Get parser statistics
+   * @returns {any} Parser performance statistics
+   */
+  getStats?: () => PerformanceStats;
+}
+
+/**
+ * Generic parse result interface
+ */
+export interface ParseResult<T = unknown> {
+  /** Whether parsing was successful */
+  success: boolean;
+  /** Parsed document data if successful */
+  data?: T;
+  /** Error information if parsing failed - can be an Error object or structured error */
+  error?:
+    | Error
+    | {
+        /** Error message */
+        message: string;
+        /** Error code if available */
+        code?: string;
+        /** Stack trace for debugging */
+        stack?: string;
+        /** Whether the error is recoverable */
+        recoverable?: boolean;
+        /** Additional error details */
+        details?: Record<string, unknown> | unknown;
+        /** Error severity level */
+        severity?: string;
+        /** Error category */
+        category?: string;
+        /** Error timestamp */
+        timestamp?: string;
+        /** Error context */
+        context?: Record<string, unknown>;
+      };
+}
+
+// Base parse options for all document processors
+export interface ParseOptions {
+  /** Whether to enable detailed logging */
+  verbose?: boolean;
+  /** Custom configuration for parsing */
+  config?: Record<string, unknown>;
+}
+
+// EPUB-specific types
+export interface EmbeddedAssets {
+  images: Array<{
+    id: string;
+    href: string;
+    mediaType: string;
+    size: number;
+    type?: string;
+    properties?: string[];
+  }>;
+  styles: Array<{
+    id: string;
+    href: string;
+    mediaType: string;
+    size: number;
+    type?: string;
+    properties?: string[];
+  }>;
+  fonts: Array<{
+    id: string;
+    href: string;
+    mediaType: string;
+    size: number;
+    type?: string;
+    properties?: string[];
+  }>;
+  other: Array<{
+    id: string;
+    href: string;
+    mediaType: string;
+    size: number;
+    type?: string;
+    properties?: string[];
+  }>;
+  audio: Array<{
+    id: string;
+    href: string;
+    mediaType: string;
+    size: number;
+    type?: string;
+    properties?: string[];
+  }>;
+  video: Array<{
+    id: string;
+    href: string;
+    mediaType: string;
+    size: number;
+    type?: string;
+    properties?: string[];
+  }>;
+}
+
+export interface TableOfContentsItem {
+  id: string;
+  title: string;
+  href: string;
+  level: number;
+  children: TableOfContentsItem[];
+}
+
+export interface DocumentStatistics {
+  totalParagraphs: number;
+  totalSentences: number;
+  totalWords: number;
+  estimatedReadingTime: number;
+  chapterCount: number;
+  imageCount: number;
+  tableCount: number;
+}
+
+export interface PerformanceStats {
+  // Document content statistics
+  totalParagraphs: number;
+  totalSentences: number;
+  totalWords: number;
+  estimatedReadingTime: number;
+  chapterCount: number;
+  imageCount: number;
+  tableCount: number;
+  // Performance metrics
+  parseTimeMs: number;
+  parseTime?: number; // For backward compatibility
+  memoryUsageMB: number;
+  memoryUsage?: number; // For backward compatibility
+  throughputMBs: number;
+  validationTimeMs?: number;
+  chaptersPerSecond: number;
+  cacheHits: number;
+  cacheMisses: number;
+}
+
+export interface ParagraphMatch {
+  text: string;
+  startIndex: number;
+  endIndex: number;
+  sentences: Array<{ text: string; startIndex: number; endIndex: number }>;
+}
+
+/**
  * Token interface for parsed Markdown elements
  */
 export interface ParsedToken {
@@ -24,15 +190,25 @@ export interface DocumentMetadata {
   title: string;
   /** Author information if available */
   author?: string;
+  /** Publisher information if available */
+  publisher?: string;
+  /** Document identifier (ISBN, UUID, etc.) */
+  identifier?: string;
   /** Document creation/modification dates */
   created?: Date;
   modified?: Date;
+  /** Document publication date */
+  date?: string;
   /** Total word count in document */
   wordCount: number;
   /** Document language detection result */
   language?: string;
   /** Additional custom metadata */
   customMetadata: Record<string, unknown>;
+  /** EPUB version (for EPUB documents) */
+  version?: string;
+  /** Document description or summary */
+  description?: string;
 }
 
 /**
@@ -73,6 +249,8 @@ export interface Paragraph {
   includeInAudio: boolean;
   /** Confidence score for paragraph structure detection (0-1) */
   confidence: number;
+  /** Paragraph text (for compatibility) */
+  text: string;
 }
 
 /**
@@ -97,6 +275,8 @@ export interface Chapter {
   startPosition: number;
   /** Chapter ends at this character position in source */
   endPosition: number;
+  /** Chapter start index (for compatibility) */
+  startIndex: number;
 }
 
 /**
@@ -107,12 +287,16 @@ export interface DocumentStructure {
   metadata: DocumentMetadata;
   /** All chapters in the document */
   chapters: Chapter[];
+  /** Table of contents structure */
+  tableOfContents?: TableOfContentsItem[];
   /** Total paragraph count in document */
   totalParagraphs: number;
   /** Total sentence count in document */
   totalSentences: number;
   /** Total word count in document */
   totalWordCount: number;
+  /** Total chapter count in document */
+  totalChapters: number;
   /** Estimated total duration for TTS processing (seconds) */
   estimatedTotalDuration: number;
   /** Overall confidence score for structure detection (0-1) */

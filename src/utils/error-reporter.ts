@@ -35,8 +35,8 @@ class ErrorReporter {
 
   /**
    * Create a new ErrorReporter instance with the specified options and logger.
-   * @param options - Configuration options for the error reporter
-   * @param logger - Optional custom logger instance (defaults to PinoLoggerAdapter)
+   * @param {ErrorReporterOptions} options - Configuration options for the error reporter
+   * @param {Logger} logger - Optional custom logger instance (defaults to PinoLoggerAdapter)
    */
   private constructor(options: ErrorReporterOptions = {}, logger?: Logger) {
     this.options = {
@@ -57,9 +57,9 @@ class ErrorReporter {
 
   /**
    * Get the singleton instance of ErrorReporter.
-   * @param options - Configuration options (only used on first call)
-   * @param logger - Optional custom logger (only used on first call)
-   * @returns The singleton ErrorReporter instance
+   * @param {ErrorReporterOptions} options - Configuration options (only used on first call)
+   * @param {Logger} logger - Optional custom logger (only used on first call)
+   * @returns {ErrorReporter} The singleton ErrorReporter instance
    */
   public static getInstance(
     options?: ErrorReporterOptions,
@@ -75,9 +75,9 @@ class ErrorReporter {
   /**
    * Create a new ErrorReporter instance with custom options and logger.
    * Useful for testing when you need a fresh instance.
-   * @param options - Configuration options for the error reporter
-   * @param logger - Optional custom logger instance
-   * @returns A new ErrorReporter instance
+   * @param {ErrorReporterOptions} options - Configuration options for the error reporter
+   * @param {Logger} logger - Optional custom logger instance
+   * @returns {ErrorReporter} A new ErrorReporter instance
    */
   public static createInstance(
     options?: ErrorReporterOptions,
@@ -97,8 +97,8 @@ class ErrorReporter {
 
   /**
    * Creates error context with system information
-   * @param context - Additional context information for the error report
-   * @returns Enhanced context with system information
+   * @param {Record<string, unknown>} context - Additional context information for the error report
+   * @returns {Record<string, unknown>} Enhanced context with system information
    */
   private createErrorContext(
     context: Record<string, unknown>
@@ -113,8 +113,8 @@ class ErrorReporter {
 
   /**
    * Extracts user information from context or defaults
-   * @param context - Context information
-   * @returns User ID from context or default
+   * @param {Record<string, unknown>} context - Context information
+   * @returns {string} User ID from context or default
    */
   private extractUserId(context: Record<string, unknown>): string {
     return (
@@ -125,8 +125,8 @@ class ErrorReporter {
 
   /**
    * Extracts session information from context or defaults
-   * @param context - Context information
-   * @returns Session ID from context or default
+   * @param {Record<string, unknown>} context - Context information
+   * @returns {string} Session ID from context or default
    */
   private extractSessionId(context: Record<string, unknown>): string {
     return (
@@ -137,8 +137,8 @@ class ErrorReporter {
 
   /**
    * Extracts environment information from context or defaults
-   * @param context - Context information
-   * @returns Environment from context, process env, or default
+   * @param {Record<string, unknown>} context - Context information
+   * @returns {string} Environment from context, process env, or default
    */
   private extractEnvironment(context: Record<string, unknown>): string {
     return (
@@ -150,9 +150,9 @@ class ErrorReporter {
 
   /**
    * Creates a structured error report
-   * @param error - Normalized error
-   * @param context - Additional context information
-   * @returns Structured error report
+   * @param {BunTtsError} error - Normalized error
+   * @param {Record<string, unknown>} context - Additional context information
+   * @returns {ErrorReport} Structured error report
    */
   private createErrorReport(
     error: BunTtsError,
@@ -171,7 +171,7 @@ class ErrorReporter {
 
   /**
    * Reports an error through all configured channels
-   * @param report - Error report to send
+   * @param {ErrorReport} report - Error report to send
    */
   private reportThroughChannels(report: ErrorReport): void {
     this.logError(report);
@@ -183,9 +183,9 @@ class ErrorReporter {
 
   /**
    * Report an error with optional context information.
-   * @param error - The error to report (can be Error, BunTtsError, or unknown)
-   * @param context - Additional context information for the error report
-   * @returns A structured error report containing all error details
+   * @param {BunTtsError | Error | unknown} error - The error to report (can be Error, BunTtsError, or unknown)
+   * @param {Record<string, unknown>} context - Additional context information for the error report
+   * @returns {ErrorReport} A structured error report containing all error details
    */
   public reportError(
     error: BunTtsError | Error | unknown,
@@ -201,8 +201,8 @@ class ErrorReporter {
 
   /**
    * Report a warning message with optional context information.
-   * @param message - The warning message to report
-   * @param context - Additional context information for the warning
+   * @param {string} message - The warning message to report
+   * @param {Record<string, unknown>} context - Additional context information for the warning
    */
   public reportWarning(
     message: string,
@@ -213,8 +213,8 @@ class ErrorReporter {
 
   /**
    * Report an informational message with optional context information.
-   * @param message - The info message to report
-   * @param context - Additional context information for the message
+   * @param {string} message - The info message to report
+   * @param {Record<string, unknown>} context - Additional context information for the message
    */
   public reportInfo(
     message: string,
@@ -225,8 +225,8 @@ class ErrorReporter {
 
   /**
    * Normalize different error types into a standardized BunTtsError format.
-   * @param error - The error to normalize (can be any type)
-   * @returns A normalized BunTtsError object
+   * @param {unknown} error - The error to normalize (can be any type)
+   * @returns {BunTtsError} A normalized BunTtsError object
    */
   private normalizeError(error: unknown): BunTtsError {
     if (this.isBunTtsError(error)) {
@@ -263,8 +263,8 @@ class ErrorReporter {
 
   /**
    * Type guard to check if an error is a BunTtsError.
-   * @param error - The error to check
-   * @returns True if the error is a BunTtsError, false otherwise
+   * @param {unknown} error - The error to check
+   * @returns {boolean} True if the error is a BunTtsError, false otherwise
    */
   private isBunTtsError(error: unknown): error is BunTtsError {
     return (
@@ -280,7 +280,7 @@ class ErrorReporter {
 
   /**
    * Log error information using the configured logger.
-   * @param report - The error report to log
+   * @param {ErrorReport} report - The error report to log
    */
   private logError(report: ErrorReport): void {
     const logData = {
@@ -308,7 +308,7 @@ class ErrorReporter {
    * Display error information to the console.
    * In development mode, shows detailed error information.
    * In production mode, shows a simplified error message.
-   * @param report - The error report to display
+   * @param {ErrorReport} report - The error report to display
    */
   private consoleError(report: ErrorReport): void {
     if (this.options.environment === 'development') {
@@ -320,42 +320,44 @@ class ErrorReporter {
 
   /**
    * Display detailed error information for development environment.
-   * @param report - The error report to display
+   * @param {ErrorReport} report - The error report to display
    */
   private displayDetailedError(report: ErrorReport): void {
-    console.error(`\n🚨 ${report.error.name} [${report.error.code}]`);
-    console.error(`📋 Message: ${report.error.message}`);
-    console.error(`🏷️  Category: ${report.error.category}`);
-    console.error(`🔄 Recoverable: ${report.error.recoverable ? 'Yes' : 'No'}`);
+    this.logger.error(`\n🚨 ${report.error.name} [${report.error.code}]`);
+    this.logger.error(`📋 Message: ${report.error.message}`);
+    this.logger.error(`🏷️  Category: ${report.error.category}`);
+    this.logger.error(
+      `🔄 Recoverable: ${report.error.recoverable ? 'Yes' : 'No'}`
+    );
 
     this.displayErrorDetails(report.error.details);
     this.displayContext(report.context);
 
-    console.error(`⏰ Time: ${report.timestamp}`);
-    console.error(`🔧 Environment: ${report.environment}`);
-    console.error(`📦 Version: ${report.version}`);
+    this.logger.error(`⏰ Time: ${report.timestamp}`);
+    this.logger.error(`🔧 Environment: ${report.environment}`);
+    this.logger.error(`📦 Version: ${report.version}`);
 
     if (report.error.stack) {
-      console.error('📚 Stack trace:');
-      console.error(report.error.stack);
+      this.logger.error('📚 Stack trace:');
+      this.logger.error(report.error.stack);
     }
 
-    console.error('─'.repeat(CONSOLE_SEPARATOR_LENGTH));
+    this.logger.error('─'.repeat(CONSOLE_SEPARATOR_LENGTH));
   }
 
   /**
    * Display simple error information for production environment.
-   * @param report - The error report to display
+   * @param {ErrorReport} report - The error report to display
    */
   private displaySimpleError(report: ErrorReport): void {
-    console.error(
+    this.logger.error(
       `[${report.error.category.toUpperCase()}] ${report.error.message}`
     );
   }
 
   /**
    * Display error details if they exist.
-   * @param details - The error details to display
+   * @param {unknown} details - The error details to display
    */
   private displayErrorDetails(details: unknown): void {
     if (
@@ -364,16 +366,16 @@ class ErrorReporter {
       details !== null &&
       Object.keys(details).length > 0
     ) {
-      console.error('📊 Details:');
+      this.logger.error('📊 Details:');
       for (const [key, value] of Object.entries(details)) {
-        console.error(`   ${key}: ${JSON.stringify(value)}`);
+        this.logger.error(`   ${key}: ${JSON.stringify(value)}`);
       }
     }
   }
 
   /**
    * Display context information if it exists.
-   * @param context - The context information to display
+   * @param {unknown} context - The context information to display
    */
   private displayContext(context: unknown): void {
     if (
@@ -382,16 +384,16 @@ class ErrorReporter {
       context !== null &&
       Object.keys(context).length > 0
     ) {
-      console.error('🌍 Context:');
+      this.logger.error('🌍 Context:');
       for (const [key, value] of Object.entries(context)) {
-        console.error(`   ${key}: ${JSON.stringify(value)}`);
+        this.logger.error(`   ${key}: ${JSON.stringify(value)}`);
       }
     }
   }
 
   /**
    * Get the application version from package.json.
-   * @returns The version string or default if unavailable
+   * @returns {string} The version string or default if unavailable
    */
   private getVersion(): string {
     try {
@@ -404,7 +406,7 @@ class ErrorReporter {
   /**
    * Generate a unique session ID for tracking user sessions.
    * Uses cryptographically secure UUID generation to ensure uniqueness and prevent predictability.
-   * @returns A unique session identifier string in UUID format
+   * @returns {string} A unique session identifier string in UUID format
    */
   private generateSessionId(): string {
     // Using cryptographically secure random UUID generation for session IDs
@@ -414,7 +416,7 @@ class ErrorReporter {
 
   /**
    * Update the current session information.
-   * @param userId - Optional new user ID for the session
+   * @param {string} userId - Optional new user ID for the session
    */
   public updateSession(userId?: string): void {
     if (userId) {
@@ -425,7 +427,7 @@ class ErrorReporter {
 
   /**
    * Set the environment mode for the error reporter.
-   * @param environment - The environment to set ('development', 'production', or 'test')
+   * @param {'development' | 'production' | 'test'} environment - The environment to set ('development', 'production', or 'test')
    */
   public setEnvironment(
     environment: 'development' | 'production' | 'test'
@@ -435,7 +437,7 @@ class ErrorReporter {
 
   /**
    * Gets the logger instance used by this ErrorReporter.
-   * @returns The logger instance
+   * @returns {Logger} The logger instance
    */
   public getLogger(): Logger {
     return this.logger;

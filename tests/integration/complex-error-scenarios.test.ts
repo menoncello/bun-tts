@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect } from 'bun:test';
 import {
   ConfigurationError,
   TTSError,
@@ -6,7 +6,10 @@ import {
   failure,
 } from '../../src/errors/index.js';
 import { debugManager, DebugManager } from '../../src/utils/debug.js';
-import { executeWithRecovery } from '../../src/utils/error-recovery.js';
+import {
+  executeWithRecovery,
+  getRecoveryManager,
+} from '../../src/utils/error-recovery.js';
 import { errorReporter } from '../../src/utils/error-reporter.js';
 import {
   setupErrorHandlingTests,
@@ -90,8 +93,7 @@ function createRecoveryTestSetup() {
     }
   })();
 
-  const recoveryManager =
-    require('../../src/utils/error-recovery.js').recoveryManager();
+  const recoveryManager = getRecoveryManager();
   recoveryManager.registerStrategy('TTSError', strategy);
 
   const operation = async () => {

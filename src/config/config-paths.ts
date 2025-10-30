@@ -15,7 +15,7 @@ export class ConfigPaths {
    *
    * Returns the path to the global configuration directory in the user's home directory.
    *
-   * @returns The absolute path to the global config directory
+   * @returns {string} The absolute path to the global config directory
    */
   getGlobalConfigDir(): string {
     return join(homedir(), '.bun-tts');
@@ -26,7 +26,7 @@ export class ConfigPaths {
    *
    * Returns the full path to the global configuration file.
    *
-   * @returns The absolute path to the global config file
+   * @returns {string} The absolute path to the global config file
    */
   getGlobalConfigPath(): string {
     return join(this.getGlobalConfigDir(), 'config.json');

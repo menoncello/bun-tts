@@ -1,28 +1,12 @@
 import { resolve } from '../../di/container.js';
 import { DEPENDENCIES, type DIContainer } from '../../di/types.js';
-import type { CliContext } from '../../types/index.js';
+import type { Command } from '../../types/index.js';
 
 /** Maximum allowed length for command names */
 const MAX_COMMAND_NAME_LENGTH = 50;
 
 /** Regular expression pattern for valid command names */
 const COMMAND_NAME_PATTERN = /^[A-Za-z][\w-]*$/;
-
-/**
- * Interface defining the structure of a CLI command.
- * Commands are registered in the command registry and provide
- * a consistent interface for CLI operations.
- */
-export interface Command {
-  /** Unique identifier for the command */
-  name: string;
-  /** Human-readable description of what the command does */
-  description: string;
-  /** Async function that executes the command logic */
-  handler: (context: CliContext) => Promise<void>;
-  /** Optional array of usage examples for the command */
-  examples?: string[];
-}
 
 /**
  * Type-safe command registry interface that provides compile-time
@@ -107,7 +91,7 @@ export const commands: Record<string, Command> = {
  * Formats a command's help information as a readable string.
  * Includes the command name, description, and any available usage examples.
  *
- * @param {Command} command - The command object to format help text for
+ * @param {any} command - The command object to format help text for
  * @returns {string} Formatted help string containing command information and examples
  *
  * @example
@@ -159,7 +143,7 @@ export class TypeSafeCommandRegistry implements CommandRegistry {
   /**
    * Gets the readonly commands registry.
    *
-   * @returns {Readonly<Record<string, Command>>} Read-only copy of the commands registry
+   * @returns {any} Readonly<Record<string, Command>> Read-only copy of the commands registry
    */
   get commands(): Readonly<Record<string, Command>> {
     return { ...this._commands };
@@ -168,7 +152,7 @@ export class TypeSafeCommandRegistry implements CommandRegistry {
   /**
    * Retrieves a command by name with validation.
    *
-   * @param {string} name - The command name to retrieve
+   * @param {any} name - The command name to retrieve
    * @returns {Command | undefined} The command if found, undefined otherwise
    */
   get(name: string): Command | undefined {
@@ -192,7 +176,7 @@ export class TypeSafeCommandRegistry implements CommandRegistry {
   /**
    * Registers a new command with validation.
    *
-   * @param {Command} command - The command to register
+   * @param {any} command - The command to register
    * @throws {Error} If command validation fails
    */
   register(command: Command): void {
@@ -210,7 +194,7 @@ export class TypeSafeCommandRegistry implements CommandRegistry {
   /**
    * Validates a command object before registration.
    *
-   * @param {Command} command - The command to validate
+   * @param {any} command - The command to validate
    * @throws {Error} If validation fails
    */
   private validateCommand(command: Command): void {
@@ -247,12 +231,12 @@ export class TypeSafeCommandRegistry implements CommandRegistry {
  * Default command registry instance containing all available commands.
  * This is the main registry used throughout the application.
  */
-export const defaultCommandRegistry = new TypeSafeCommandRegistry(commands);
+export const _defaultCommandRegistry = new TypeSafeCommandRegistry(commands);
 
 /**
  * Validates command names and throws descriptive errors for invalid inputs.
  *
- * @param {string} name - The command name to validate
+ * @param {any} name - The command name to validate
  * @throws {Error} If the command name is invalid
  */
 export function validateCommandName(name: string): void {
@@ -281,7 +265,7 @@ export function validateCommandName(name: string): void {
  * Retrieves a command from the registry by name.
  * Performs case-insensitive lookup to support various command name formats.
  *
- * @param {string} name - The name of the command to retrieve (case-insensitive)
+ * @param {any} name - The name of the command to retrieve (case-insensitive)
  * @returns {Command | undefined} The command definition if found, undefined otherwise
  *
  * @example

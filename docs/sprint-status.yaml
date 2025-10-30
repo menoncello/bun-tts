@@ -29,7 +29,8 @@
 # - SM typically drafts next story after previous one is 'done' to incorporate learnings
 # - Dev moves story to 'review', SM reviews, then Dev moves to 'done'
 
-generated: 2025-10-26
+generated: 2025-10-29
+# Updated: 2025-10-30 - Story 1.4 third review completed, APPROVED for production deployment, status set to done
 project: bun-tts
 project_key: bun-tts
 tracking_system: file-system
@@ -41,7 +42,7 @@ development_status:
   1-1-project-infrastructure-cli-foundation: done
   1-2-markdown-document-parser: done
   1-3-pdf-document-parser: backlog
-  1-4-epub-document-parser: backlog
+  1-4-epub-document-parser: done
   1-5-document-structure-analyzer: backlog
   1-6-configuration-management-system: backlog
   epic-1-retrospective: optional

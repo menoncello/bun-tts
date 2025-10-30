@@ -34,8 +34,8 @@ export class ConfigManager {
    * Searches for configuration files using cosmiconfig or loads from a specified path.
    * Merges the loaded configuration with default values and validates the result.
    *
-   * @param configPath - Optional path to a specific configuration file to load
-   * @returns Promise resolving to a Result containing the loaded configuration or a ConfigurationError
+   * @param {string} [configPath] - Optional path to a specific configuration file to load
+   * @returns {any} Promise<Result<BunTtsConfig, ConfigurationError>> Promise resolving to a Result containing the loaded configuration or a ConfigurationError
    */
   async load(
     configPath?: string
@@ -73,9 +73,9 @@ export class ConfigManager {
    *
    * Provides a compatible interface for code expecting an options parameter.
    *
-   * @param options - Options object containing optional configPath
-   * @param options.configPath - Optional path to a specific configuration file to load
-   * @returns Promise resolving to a Result containing the loaded configuration or a ConfigurationError
+   * @param {object} [options] - Options object containing optional configPath
+   * @param {string} [options.configPath] - Optional path to a specific configuration file to load
+   * @returns {any} Promise<Result<BunTtsConfig, ConfigurationError>> Promise resolving to a Result containing the loaded configuration or a ConfigurationError
    */
   async loadConfig(options?: {
     configPath?: string;
@@ -89,8 +89,8 @@ export class ConfigManager {
    * Returns the currently loaded configuration. Throws an error if no configuration
    * has been loaded yet.
    *
-   * @returns The current BunTtsConfig object
-   * @throws ConfigurationError if no configuration has been loaded
+   * @returns {BunTtsConfig} The current BunTtsConfig object
+   * @throws {ConfigurationError} if no configuration has been loaded
    */
   getConfig(): BunTtsConfig {
     if (!this.config) {
@@ -107,7 +107,7 @@ export class ConfigManager {
    * Returns the path to the configuration file that was loaded, or undefined
    * if no configuration file was found (using defaults).
    *
-   * @returns The configuration file path or undefined
+   * @returns {string | undefined} The configuration file path or undefined
    */
   getConfigPath(): string | undefined {
     return this.configPath;
@@ -118,7 +118,7 @@ export class ConfigManager {
    *
    * Returns a deep copy of the default configuration values.
    *
-   * @returns A new BunTtsConfig object with default values
+   * @returns {Promise<BunTtsConfig>} A new BunTtsConfig object with default values
    */
   private async getDefaultConfig(): Promise<BunTtsConfig> {
     // Import DEFAULT_CONFIG dynamically to avoid circular dependencies
@@ -133,8 +133,8 @@ export class ConfigManager {
    * Performs a deep merge of user-provided configuration with default values,
    * ensuring all required properties are present.
    *
-   * @param userConfig - The user-provided configuration object
-   * @returns A merged BunTtsConfig object
+   * @param {Partial<BunTtsConfig>} userConfig - The user-provided configuration object
+   * @returns {Promise<BunTtsConfig>} A merged BunTtsConfig object
    */
   private async mergeWithDefaults(
     userConfig: Partial<BunTtsConfig>
@@ -149,8 +149,8 @@ export class ConfigManager {
    * Validates that all configuration values are within acceptable ranges and
    * have valid types. Returns a Result indicating success or failure.
    *
-   * @param config - The configuration object to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
+   * @param {Partial<BunTtsConfig>} config - The configuration object to validate
+   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
    */
   validate(config: Partial<BunTtsConfig>): Result<true, ConfigurationError> {
     return this.validator.validate(config);
@@ -161,7 +161,7 @@ export class ConfigManager {
    *
    * Returns the path to the global configuration directory in the user's home directory.
    *
-   * @returns The absolute path to the global config directory
+   * @returns {string} The absolute path to the global config directory
    */
   getGlobalConfigDir(): string {
     return this.paths.getGlobalConfigDir();
@@ -172,7 +172,7 @@ export class ConfigManager {
    *
    * Returns the full path to the global configuration file.
    *
-   * @returns The absolute path to the global config file
+   * @returns {string} The absolute path to the global config file
    */
   getGlobalConfigPath(): string {
     return this.paths.getGlobalConfigPath();
@@ -184,7 +184,7 @@ export class ConfigManager {
    * Returns a formatted JSON string containing sample configuration values
    * to help users understand the configuration format.
    *
-   * @returns A JSON string containing sample configuration
+   * @returns {Promise<string>} A JSON string containing sample configuration
    */
   async createSampleConfig(): Promise<string> {
     const defaultConfig = await this.getDefaultConfig();
@@ -205,9 +205,9 @@ export class ConfigManager {
    * Retrieves a configuration value using dot notation for nested keys.
    * Returns the provided default value if the key is not found.
    *
-   * @param key - The configuration key to retrieve (supports dot notation)
-   * @param defaultValue - Default value to return if key is not found
-   * @returns The configuration value or default
+   * @param {any} key - The configuration key to retrieve (supports dot notation)
+   * @param {T} [defaultValue] - Default value to return if key is not found
+   * @returns {T} The configuration value or default
    */
   get<T = unknown>(key: string, defaultValue?: T): T {
     return this.access.get(this.config, key, defaultValue);
@@ -218,8 +218,9 @@ export class ConfigManager {
    *
    * Sets a configuration value using dot notation for nested keys.
    *
-   * @param key - The configuration key to set (supports dot notation)
-   * @param value - The value to set
+   * @param {any} key - The configuration key to set (supports dot notation)
+   * @param {any} value - The value to set
+   * @returns {void}
    */
   set(key: string, value: unknown): void {
     if (this.config) {
@@ -230,8 +231,8 @@ export class ConfigManager {
   /**
    * Check if configuration key exists
    *
-   * @param key - The configuration key to check (supports dot notation)
-   * @returns True if the key exists, false otherwise
+   * @param {any} key - The configuration key to check (supports dot notation)
+   * @returns {boolean} True if the key exists, false otherwise
    */
   has(key: string): boolean {
     return this.access.has(this.config, key);
@@ -239,6 +240,8 @@ export class ConfigManager {
 
   /**
    * Clear all configuration
+   *
+   * @returns {void}
    */
   clear(): void {
     this.config = undefined;
@@ -251,9 +254,9 @@ export class ConfigManager {
    * Validates the provided configuration and saves it to the specified file path
    * as a JSON file with proper formatting.
    *
-   * @param config - The configuration object to save
-   * @param filePath - The path where the configuration should be saved
-   * @returns A Result indicating success or containing a ConfigurationError on failure
+   * @param {object} config - The configuration object to save
+   * @param {any} filePath - The path where the configuration should be saved
+   * @returns {any} Promise<Result<void, ConfigurationError>> A Result indicating success or containing a ConfigurationError on failure
    */
   async save(
     config: BunTtsConfig,

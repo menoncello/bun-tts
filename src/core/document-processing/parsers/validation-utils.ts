@@ -32,8 +32,8 @@ interface SentenceValidationParams {
 /**
  * Validate basic document structure
  *
- * @param structure - Document structure to validate containing chapters and metadata
- * @returns Array of validation errors found in the document structure
+ * @param {DocumentStructure} structure - Document structure to validate containing chapters and metadata
+ * @returns {ValidationError[]} Array of validation errors found in the document structure
  */
 export function validateBasicStructure(
   structure: DocumentStructure
@@ -64,10 +64,10 @@ export function validateBasicStructure(
 /**
  * Validate individual chapter
  *
- * @param chapter - Chapter to validate containing title and paragraphs
- * @param chapterIndex - Index of chapter in document (0-based)
- * @param _config - Parser configuration (currently unused but kept for future extensibility)
- * @returns Object containing validation errors and warnings found in the chapter
+ * @param {Chapter} chapter - Chapter to validate containing title and paragraphs
+ * @param {number} chapterIndex - Index of chapter in document (0-based)
+ * @param {MarkdownParserConfig} _config - Parser configuration (currently unused but kept for future extensibility)
+ * @returns {{errors: ValidationError[], warnings: ValidationWarning[]}} Object containing validation errors and warnings found in the chapter
  */
 export function validateChapter(
   chapter: Chapter,
@@ -101,11 +101,11 @@ export function validateChapter(
 /**
  * Validate paragraph
  *
- * @param paragraph - Paragraph to validate containing sentences and type information
- * @param chapterIndex - Index of chapter in document (0-based)
- * @param paragraphIndex - Index of paragraph in chapter (0-based)
- * @param _config - Parser configuration (currently unused but kept for future extensibility)
- * @returns Array of validation warnings found in the paragraph
+ * @param {Paragraph} paragraph - Paragraph to validate containing sentences and type information
+ * @param {number} chapterIndex - Index of chapter in document (0-based)
+ * @param {number} paragraphIndex - Index of paragraph in chapter (0-based)
+ * @param {MarkdownParserConfig} _config - Parser configuration (currently unused but kept for future extensibility)
+ * @returns {ValidationWarning[]} Array of validation warnings found in the paragraph
  */
 export function validateParagraph(
   paragraph: Paragraph,
@@ -130,13 +130,13 @@ export function validateParagraph(
 /**
  * Validate sentence
  *
- * @param params - Object containing all validation parameters
- * @param params.sentence - Sentence to validate containing text and metadata
- * @param params.chapterIndex - Index of chapter in document (0-based)
- * @param params.paragraphIndex - Index of paragraph in chapter (0-based)
- * @param params.sentenceIndex - Index of sentence in paragraph (0-based)
- * @param params.config - Parser configuration containing validation rules
- * @returns Object containing validation errors and warnings found in the sentence
+ * @param {SentenceValidationParams} params - Object containing all validation parameters
+ * @param {Sentence} params.sentence - Sentence to validate containing text and metadata
+ * @param {number} params.chapterIndex - Index of chapter in document (0-based)
+ * @param {number} params.paragraphIndex - Index of paragraph in chapter (0-based)
+ * @param {number} params.sentenceIndex - Index of sentence in paragraph (0-based)
+ * @param {MarkdownParserConfig} params.config - Parser configuration containing validation rules
+ * @returns {{errors: ValidationError[], warnings: ValidationWarning[]}} Object containing validation errors and warnings found in the sentence
  */
 export function validateSentence(params: SentenceValidationParams): {
   errors: ValidationError[];
@@ -165,13 +165,13 @@ export function validateSentence(params: SentenceValidationParams): {
 /**
  * Validate minimum sentence length
  *
- * @param sentence - Sentence to validate containing text content
- * @param config - Parser configuration containing minimum length rules
- * @param location - Object containing the position of the sentence in the document
- * @param location.chapter - Index of chapter in document (0-based)
- * @param location.paragraph - Index of paragraph in chapter (0-based)
- * @param location.sentence - Index of sentence in paragraph (0-based)
- * @returns Array of validation warnings for sentences that are too short
+ * @param {Sentence} sentence - Sentence to validate containing text content
+ * @param {MarkdownParserConfig} config - Parser configuration containing minimum length rules
+ * @param {{chapter: number, paragraph: number, sentence: number}} location - Object containing the position of the sentence in the document
+ * @param {number} location.chapter - Index of chapter in document (0-based)
+ * @param {number} location.paragraph - Index of paragraph in chapter (0-based)
+ * @param {number} location.sentence - Index of sentence in paragraph (0-based)
+ * @returns {ValidationWarning[]} Array of validation warnings for sentences that are too short
  */
 function validateSentenceLength(
   sentence: Sentence,
@@ -195,13 +195,13 @@ function validateSentenceLength(
 /**
  * Validate maximum sentence length
  *
- * @param sentence - Sentence to validate containing text content
- * @param config - Parser configuration containing maximum length rules
- * @param location - Object containing the position of the sentence in the document
- * @param location.chapter - Index of chapter in document (0-based)
- * @param location.paragraph - Index of paragraph in chapter (0-based)
- * @param location.sentence - Index of sentence in paragraph (0-based)
- * @returns Array of validation errors for sentences that exceed maximum length
+ * @param {Sentence} sentence - Sentence to validate containing text content
+ * @param {MarkdownParserConfig} config - Parser configuration containing maximum length rules
+ * @param {{chapter: number, paragraph: number, sentence: number}} location - Object containing the position of the sentence in the document
+ * @param {number} location.chapter - Index of chapter in document (0-based)
+ * @param {number} location.paragraph - Index of paragraph in chapter (0-based)
+ * @param {number} location.sentence - Index of sentence in paragraph (0-based)
+ * @returns {ValidationError[]} Array of validation errors for sentences that exceed maximum length
  */
 function validateSentenceMaxLength(
   sentence: Sentence,
@@ -225,10 +225,10 @@ function validateSentenceMaxLength(
 /**
  * Calculate validation score
  *
- * @param structure - Document structure containing chapters and metadata
- * @param errorCount - Number of errors found during validation
- * @param warningCount - Number of warnings found during validation
- * @returns Validation score between 0 and 1, where 1 indicates perfect validation
+ * @param {DocumentStructure} structure - Document structure containing chapters and metadata
+ * @param {number} errorCount - Number of errors found during validation
+ * @param {number} warningCount - Number of warnings found during validation
+ * @returns {number} Validation score between 0 and 1, where 1 indicates perfect validation
  */
 export function calculateValidationScore(
   structure: DocumentStructure,

@@ -64,15 +64,23 @@ container.register({
       lifetime: Lifetime.TRANSIENT,
     }
   ),
-  versionCommand: asFunction((cradle) => new VersionCommand(cradle.logger), {
-    lifetime: Lifetime.TRANSIENT,
-  }),
+  versionCommand: asFunction(
+    (cradle) => new VersionCommand(cradle.logger, cradle.outputWriter),
+    {
+      lifetime: Lifetime.TRANSIENT,
+    }
+  ),
   convertCommand: asFunction(
     (cradle) => new ConvertCommand(cradle.logger, cradle.configManager),
     { lifetime: Lifetime.TRANSIENT }
   ),
   configCommand: asFunction(
-    (cradle) => new ConfigCommand(cradle.logger, cradle.configManager),
+    (cradle) =>
+      new ConfigCommand(
+        cradle.logger,
+        cradle.configManager,
+        cradle.outputWriter
+      ),
     { lifetime: Lifetime.TRANSIENT }
   ),
 });
@@ -106,7 +114,7 @@ container.register({
  * This allows modules to register themselves as they're implemented.
  * Provides a flexible way to extend the DI container with new services.
  *
- * @param {string} name - The name to register the module under
+ * @param {any} name - The name to register the module under
  * @param {new (...args: any[]) => any} factory - The constructor function for the module
  * @param {Record<string, unknown>} options - Registration options including lifetime
  * @returns {void} This function does not return a value
@@ -116,7 +124,7 @@ container.register({
  * registerModule('myService', MyServiceClass, { lifetime: Lifetime.SINGLETON });
  * ```
  */
-export const registerModule = (
+export const _registerModule = (
   name: string,
   factory: new (...args: unknown[]) => unknown,
   options: Record<string, unknown> = {}
@@ -132,14 +140,14 @@ export const registerModule = (
  * Resolves a dependency from the DI container by name.
  * Provides type-safe access to registered services.
  *
- * @param {string} name - The name of the dependency to resolve
+ * @param {any} name - The name of the dependency to resolve
  * @returns {T} The resolved dependency instance
  * @template T The type of the dependency being resolved
  *
  * @example
  * ```typescript
  * const logger = resolve<Logger>('logger');
- * const config = resolve<ConfigManager>('configManager');
+ * const _config = resolve<ConfigManager>('configManager');
  * ```
  */
 export const resolve = <T>(name: string): T => container.resolve(name) as T;

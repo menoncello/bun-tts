@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, jest } from 'bun:test';
-import { ConfigManager } from '../../../src/config';
-import type { ConfigOptions } from '../../../src/types';
+import { describe, it, expect, beforeEach } from 'bun:test';
+import { ConfigManager } from '../../../src/config/index.js';
+import type { ConfigOptions } from '../../../src/types/index.js';
 import {
   createTestContainer,
   createMockTestContainer,
@@ -16,12 +16,12 @@ function setupConfigManager() {
 
 describe('ConfigManager DI Container Integration', () => {
   let configManager: ConfigManager;
-  let mockLogger: any;
+  let _mockLogger: any;
 
   beforeEach(() => {
     const setup = setupConfigManager();
     configManager = setup.configManager;
-    mockLogger = setup.mockLogger;
+    _mockLogger = setup.mockLogger;
   });
 
   describe('Basic DI Instantiation', () => {
@@ -53,12 +53,12 @@ describe('ConfigManager DI Container Integration', () => {
 
 describe('ConfigManager Basic Loading', () => {
   let configManager: ConfigManager;
-  let mockLogger: any;
+  let _mockLogger: any;
 
   beforeEach(() => {
     const setup = setupConfigManager();
     configManager = setup.configManager;
-    mockLogger = setup.mockLogger;
+    _mockLogger = setup.mockLogger;
   });
 
   describe('Default Configuration', () => {
@@ -91,12 +91,12 @@ describe('ConfigManager Basic Loading', () => {
 
 describe('ConfigManager Advanced Operations', () => {
   let configManager: ConfigManager;
-  let mockLogger: any;
+  let _mockLogger: any;
 
   beforeEach(() => {
     const setup = setupConfigManager();
     configManager = setup.configManager;
-    mockLogger = setup.mockLogger;
+    _mockLogger = setup.mockLogger;
   });
 
   describe('Configuration Reload', () => {
@@ -139,12 +139,12 @@ describe('ConfigManager Advanced Operations', () => {
 
 describe('ConfigManager Validation', () => {
   let configManager: ConfigManager;
-  let mockLogger: any;
+  let _mockLogger: any;
 
   beforeEach(() => {
     const setup = setupConfigManager();
     configManager = setup.configManager;
-    mockLogger = setup.mockLogger;
+    _mockLogger = setup.mockLogger;
   });
 
   it('should handle invalid configuration gracefully', async () => {
@@ -169,12 +169,12 @@ describe('ConfigManager Validation', () => {
 
 describe('ConfigManager Methods', () => {
   let configManager: ConfigManager;
-  let mockLogger: any;
+  let _mockLogger: any;
 
   beforeEach(() => {
     const setup = setupConfigManager();
     configManager = setup.configManager;
-    mockLogger = setup.mockLogger;
+    _mockLogger = setup.mockLogger;
   });
 
   describe('Sample Configuration', () => {
@@ -210,12 +210,12 @@ describe('ConfigManager Methods', () => {
 
 describe('ConfigManager Error Handling', () => {
   let configManager: ConfigManager;
-  let mockLogger: any;
+  let _mockLogger: any;
 
   beforeEach(() => {
     const setup = setupConfigManager();
     configManager = setup.configManager;
-    mockLogger = setup.mockLogger;
+    _mockLogger = setup.mockLogger;
   });
 
   describe('File System Errors', () => {

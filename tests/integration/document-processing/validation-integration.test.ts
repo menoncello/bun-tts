@@ -4,11 +4,11 @@
  */
 
 import { describe, test, expect, beforeEach } from 'bun:test';
-import type { Logger } from '../../../src/interfaces/logger.js';
 import type { ConfigManager } from '../../../src/config/config-manager.js';
-import type { Result } from '../../../src/errors/result.js';
-import { BunTtsError } from '../../../src/errors/bun-tts-error.js';
 import { MarkdownParser } from '../../../src/core/document-processing/parsers/markdown-parser.js';
+import { BunTtsError } from '../../../src/errors/bun-tts-error.js';
+import type { Result } from '../../../src/errors/result.js';
+import type { Logger } from '../../../src/interfaces/logger.js';
 import {
   MockLoggerFactory,
   MockConfigManagerFactory,
@@ -129,7 +129,7 @@ describe('Validation Integration', () => {
   });
 
   test(`${TestIdGenerator.generateIntegration('1.2', 3)} should validate parsed document successfully`, async () => {
-    const bddComment = setupValidationBdd();
+    setupValidationBdd();
     await executeDocumentValidation(parser, SAMPLE_MARKDOWN);
   });
 

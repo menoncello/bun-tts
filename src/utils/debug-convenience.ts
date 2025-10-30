@@ -5,7 +5,7 @@ let _debugManager: DebugManager | null = null;
 
 /**
  * Gets the singleton DebugManager instance.
- * @returns The singleton DebugManager instance
+ * @returns {any} The singleton DebugManager instance
  */
 export const debugManager = (): DebugManager => {
   if (!_debugManager) {
@@ -18,9 +18,9 @@ export const debugManager = (): DebugManager => {
 
 /**
  * Starts a performance timer using the debug manager singleton.
- * @param name - Unique identifier for the timer
- * @param metadata - Optional additional data to associate with the timer
- * @returns void
+ * @param {string} name - Unique identifier for the timer
+ * @param {Record<string, unknown>} metadata - Optional additional data to associate with the timer
+ * @returns {void}
  */
 export const startTimer = (
   name: string,
@@ -29,9 +29,9 @@ export const startTimer = (
 
 /**
  * Ends a performance timer using the debug manager singleton.
- * @param name - The unique identifier of the timer to end
- * @param metadata - Optional additional data to associate with the timer result
- * @returns The duration in milliseconds, or 0 if timer wasn't found
+ * @param {string} name - The unique identifier of the timer to end
+ * @param {Record<string, unknown>} metadata - Optional additional data to associate with the timer result
+ * @returns {number} The duration in milliseconds, or 0 if timer wasn't found
  */
 export const endTimer = (
   name: string,
@@ -40,10 +40,10 @@ export const endTimer = (
 
 /**
  * Measures the execution time of an async function using the debug manager singleton.
- * @param name - Unique identifier for the measurement
- * @param fn - The async function to measure
- * @param metadata - Optional additional data to associate with the measurement
- * @returns The result of the function execution
+ * @param {string} name - Unique identifier for the measurement
+ * @param {() => Promise<T>} fn - The async function to measure
+ * @param {Record<string, unknown>} metadata - Optional additional data to associate with the measurement
+ * @returns {Promise<T>} The result of the function execution
  */
 export const measureAsync = <T>(
   name: string,
@@ -53,10 +53,10 @@ export const measureAsync = <T>(
 
 /**
  * Measures the execution time of a synchronous function using the debug manager singleton.
- * @param name - Unique identifier for the measurement
- * @param fn - The synchronous function to measure
- * @param metadata - Optional additional data to associate with the measurement
- * @returns The result of the function execution
+ * @param {string} name - Unique identifier for the measurement
+ * @param {() => T} fn - The synchronous function to measure
+ * @param {Record<string, unknown>} metadata - Optional additional data to associate with the measurement
+ * @returns {T} The result of the function execution
  */
 export const measureSync = <T>(
   name: string,
@@ -66,9 +66,9 @@ export const measureSync = <T>(
 
 /**
  * Logs a debug message using the debug manager singleton.
- * @param message - The debug message to log
- * @param metadata - Optional additional data to include with the log
- * @returns void
+ * @param {string} message - The debug message to log
+ * @param {Record<string, unknown>} metadata - Optional additional data to include with the log
+ * @returns {void}
  */
 export const debugLog = (
   message: string,
@@ -77,9 +77,9 @@ export const debugLog = (
 
 /**
  * Logs a trace message using the debug manager singleton.
- * @param message - The trace message to log
- * @param metadata - Optional additional data to include with the log
- * @returns void
+ * @param {string} message - The trace message to log
+ * @param {Record<string, unknown>} metadata - Optional additional data to include with the log
+ * @returns {void}
  */
 export const traceLog = (
   message: string,

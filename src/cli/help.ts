@@ -15,10 +15,10 @@ const COMMAND_NAME_WIDTH = 10;
  * configuration options, and environment variables. Can display help for a specific
  * command or general help for the entire CLI.
  *
- * @param options - Configuration options for help generation
- * @param options.command - Optional specific command to get help for
- * @param options.verbose - Whether to include verbose debugging information
- * @returns Formatted help documentation string
+ * @param {any} options - Configuration options for help generation
+ * @param {string} [options.command] - Optional specific command to get help for
+ * @param {boolean} [options.verbose] - Whether to include verbose debugging information
+ * @returns {string} Formatted help documentation string
  */
 export function generateHelp(options: HelpOptions = {}): string {
   const { command, verbose } = options;
@@ -33,8 +33,8 @@ export function generateHelp(options: HelpOptions = {}): string {
 /**
  * Generates help information for a specific command.
  *
- * @param command - The command name to get help for
- * @returns Formatted command-specific help string
+ * @param {any} command - The command name to get help for
+ * @returns {string} Formatted command-specific help string
  */
 function generateCommandSpecificHelp(command: string): string {
   const cmd = getAllCommands().find((c) => c.name === command.toLowerCase());
@@ -47,8 +47,8 @@ function generateCommandSpecificHelp(command: string): string {
 /**
  * Generates general help information for the CLI tool.
  *
- * @param verbose - Whether to include verbose debugging information
- * @returns Formatted general help string
+ * @param {any} verbose - Whether to include verbose debugging information
+ * @returns {string} Formatted general help string
  */
 function generateGeneralHelp(verbose: boolean): string {
   let help = getBasicHelpHeader();
@@ -65,7 +65,7 @@ function generateGeneralHelp(verbose: boolean): string {
 /**
  * Creates the basic help header with tool description and usage.
  *
- * @returns Help header string
+ * @returns {string} Help header string
  */
 function getBasicHelpHeader(): string {
   return `bun-tts - Professional Audiobook Creation Tool
@@ -82,7 +82,7 @@ Commands:`;
 /**
  * Formats the list of available commands with proper alignment.
  *
- * @returns Formatted commands list string
+ * @returns {string} Formatted commands list string
  */
 function formatCommandsList(): string {
   const commands = getAllCommands();
@@ -98,7 +98,7 @@ function formatCommandsList(): string {
 /**
  * Creates the general help footer with options and examples.
  *
- * @returns Help footer string
+ * @returns {string} Help footer string
  */
 function getGeneralHelpFooter(): string {
   return `
@@ -133,7 +133,7 @@ For more information, visit: https://github.com/your-repo/bun-tts`;
 /**
  * Creates the verbose help section with debugging information.
  *
- * @returns Verbose help section string
+ * @returns {string} Verbose help section string
  */
 function getVerboseHelpSection(): string {
   return `
@@ -156,7 +156,7 @@ Environment Variables:
  * Provides detailed build information including Node.js version, platform details,
  * TypeScript version, dependencies, and feature list.
  *
- * @returns Formatted version information string
+ * @returns {string} Formatted version information string
  */
 export function generateVersionInfo(): string {
   return `bun-tts version 0.1.0

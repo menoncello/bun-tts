@@ -42,8 +42,8 @@ interface ApplyStrategyParams {
 
 /**
  * Handles successful operation execution with logging
- * @param params - Operation execution parameters
- * @returns Result of the operation execution
+ * @param {OperationParams<T>} params - Operation execution parameters
+ * @returns {Promise<Result<T, BunTtsError>>} Result of the operation execution
  */
 export const handleSuccessfulOperation = async <T>(
   params: OperationParams<T>
@@ -75,10 +75,10 @@ export const handleSuccessfulOperation = async <T>(
 
 /**
  * Handles operation execution errors with logging
- * @param error - The error that occurred
- * @param params - Operation execution parameters
- * @param normalizeError - Function to normalize errors
- * @returns Failure result with normalized error
+ * @param {unknown} error - The error that occurred
+ * @param {OperationParams<T>} params - Operation execution parameters
+ * @param {(error: unknown) => BunTtsError} normalizeError - Function to normalize errors
+ * @returns {Result<T, BunTtsError>} Failure result with normalized error
  */
 export const handleOperationError = <T>(
   error: unknown,
@@ -100,10 +100,10 @@ export const handleOperationError = <T>(
 
 /**
  * Logs operation failure details
- * @param operationName - Name of the operation
- * @param attempt - Current attempt number
- * @param error - The error that occurred
- * @param metadata - Optional metadata for logging
+ * @param {string} operationName - Name of the operation
+ * @param {number} attempt - Current attempt number
+ * @param {BunTtsError} error - The error that occurred
+ * @param {Record<string, unknown>} [metadata] - Optional metadata for logging
  */
 export const logOperationFailure = (
   operationName: string,
@@ -121,8 +121,8 @@ export const logOperationFailure = (
 
 /**
  * Normalizes various error types into a standardized BunTtsError format
- * @param error - The error to normalize
- * @returns A standardized BunTtsError object
+ * @param {unknown} error - The error to normalize
+ * @returns {BunTtsError} A standardized BunTtsError object
  */
 export const normalizeError = (error: unknown): BunTtsError => {
   if (isBunTtsError(error)) {
@@ -138,8 +138,8 @@ export const normalizeError = (error: unknown): BunTtsError => {
 
 /**
  * Normalizes a standard JavaScript Error into BunTtsError format
- * @param error - The standard Error to normalize
- * @returns A normalized BunTtsError
+ * @param {Error} error - The standard Error to normalize
+ * @returns {BunTtsError} A normalized BunTtsError
  */
 export const normalizeStandardError = (error: Error): BunTtsError => {
   return {
@@ -158,8 +158,8 @@ export const normalizeStandardError = (error: Error): BunTtsError => {
 
 /**
  * Normalizes an unknown error type into BunTtsError format
- * @param error - The unknown error to normalize
- * @returns A normalized BunTtsError
+ * @param {unknown} error - The unknown error to normalize
+ * @returns {BunTtsError} A normalized BunTtsError
  */
 export const normalizeUnknownError = (error: unknown): BunTtsError => {
   const errorMessage = String(error);
@@ -179,8 +179,8 @@ export const normalizeUnknownError = (error: unknown): BunTtsError => {
 
 /**
  * Type guard to check if an error is a BunTtsError
- * @param error - The error to check
- * @returns True if the error is a BunTtsError
+ * @param {unknown} error - The error to check
+ * @returns {boolean} True if the error is a BunTtsError
  */
 export const isBunTtsError = (error: unknown): error is BunTtsError => {
   return (
@@ -196,9 +196,9 @@ export const isBunTtsError = (error: unknown): error is BunTtsError => {
 
 /**
  * Gets all strategies that can handle the given error
- * @param error - The error to find strategies for
- * @param strategies - Map of error type to strategies
- * @returns Array of recovery strategies
+ * @param {BunTtsError} error - The error to find strategies for
+ * @param {Map<string, RecoveryStrategy[]>} strategies - Map of error type to strategies
+ * @returns {RecoveryStrategy[]} Array of recovery strategies
  */
 export const getStrategiesForError = (
   error: BunTtsError,
@@ -209,11 +209,11 @@ export const getStrategiesForError = (
 
 /**
  * Checks if a strategy can be applied for recovery
- * @param strategy - The recovery strategy to check
- * @param error - The error to recover from
- * @param attempt - Current attempt number
- * @param defaultMaxRetries - Default maximum retry attempts
- * @returns True if the strategy can be applied
+ * @param {RecoveryStrategy} strategy - The recovery strategy to check
+ * @param {BunTtsError} error - The error to recover from
+ * @param {number} attempt - Current attempt number
+ * @param {number} defaultMaxRetries - Default maximum retry attempts
+ * @returns {boolean} True if the strategy can be applied
  */
 const canApplyStrategy = (
   strategy: RecoveryStrategy,
@@ -231,8 +231,8 @@ const canApplyStrategy = (
 
 /**
  * Prepares and applies a recovery strategy with delay and execution
- * @param params - Strategy application parameters
- * @returns Result of strategy execution
+ * @param {ApplyStrategyParams} params - Strategy application parameters
+ * @returns {Promise<Result<T, BunTtsError>>} Result of strategy execution
  */
 const applyStrategy = async <T>(
   params: ApplyStrategyParams
@@ -254,8 +254,8 @@ const applyStrategy = async <T>(
 
 /**
  * Attempts recovery using the provided strategies
- * @param params - Strategy execution parameters
- * @returns Result of strategy recovery attempt
+ * @param {StrategyExecutionParams} params - Strategy execution parameters
+ * @returns {Promise<Result<T, BunTtsError>>} Result of strategy recovery attempt
  */
 export const tryStrategies = async <T>(
   params: StrategyExecutionParams
@@ -289,10 +289,10 @@ export const tryStrategies = async <T>(
 
 /**
  * Executes a single recovery strategy
- * @param strategy - The strategy to execute
- * @param error - The error to recover from
- * @param context - Recovery context
- * @returns Result of strategy execution
+ * @param {RecoveryStrategy} strategy - The strategy to execute
+ * @param {BunTtsError} error - The error to recover from
+ * @param {RecoveryContext} context - Recovery context
+ * @returns {Promise<Result<T, BunTtsError>>} Result of strategy execution
  */
 export const executeStrategy = async <T>(
   strategy: RecoveryStrategy,
@@ -321,10 +321,10 @@ export const executeStrategy = async <T>(
 
 /**
  * Attempts recovery using the provided fallback function
- * @param fallback - Optional fallback recovery function
- * @param context - Recovery context
- * @param error - The original error
- * @returns Result of fallback recovery attempt
+ * @param {(() => Promise<Result<T, BunTtsError>>) | undefined} fallback - Optional fallback recovery function
+ * @param {RecoveryContext} context - Recovery context
+ * @param {BunTtsError} error - The original error
+ * @returns {Promise<Result<T, BunTtsError>>} Result of fallback recovery attempt
  */
 export const tryFallbackRecovery = async <T>(
   fallback: (() => Promise<Result<T, BunTtsError>>) | undefined,
@@ -353,9 +353,9 @@ export const tryFallbackRecovery = async <T>(
 
 /**
  * Logs recovery failure and returns failure result
- * @param error - The error that failed to recover
- * @param context - Recovery context
- * @returns Failure result
+ * @param {BunTtsError} error - The error that failed to recover
+ * @param {RecoveryContext} context - Recovery context
+ * @returns {Result<T, BunTtsError>} Failure result
  */
 export const logRecoveryFailure = <T>(
   error: BunTtsError,
@@ -372,9 +372,9 @@ export const logRecoveryFailure = <T>(
 
 /**
  * Creates the final failure result when all attempts are exhausted
- * @param lastError - The last error that occurred
- * @param normalizeError - Function to normalize errors
- * @returns Final failure result
+ * @param {BunTtsError | null} lastError - The last error that occurred
+ * @param {(error: unknown) => BunTtsError} normalizeError - Function to normalize errors
+ * @returns {Result<T, BunTtsError>} Final failure result
  */
 export const createFinalFailureResult = <T>(
   lastError: BunTtsError | null,

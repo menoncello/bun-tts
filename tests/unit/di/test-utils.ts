@@ -15,18 +15,6 @@ import {
 import { VersionCommand } from '../../../src/cli/commands/version-command.js';
 import { ConfigManager } from '../../../src/config/index.js';
 import { Logger as LoggerClass } from '../../../src/utils/logger.js';
-import type { Logger } from '../../../src/interfaces/logger.js';
-
-function createMockFunction() {
-  const calls: any[] = [];
-  const fn = (...args: any[]) => {
-    calls.push(args);
-  };
-  fn.calls = calls;
-  fn.mockClear = () => (calls.length = 0);
-  fn.mockCalls = () => [...calls];
-  return fn;
-}
 
 function registerCoreDependencies(
   container: AwilixContainer,
@@ -58,15 +46,23 @@ function registerCommands(container: AwilixContainer) {
         lifetime: Lifetime.TRANSIENT,
       }
     ),
-    versionCommand: asFunction((cradle) => new VersionCommand(cradle.logger), {
-      lifetime: Lifetime.TRANSIENT,
-    }),
+    versionCommand: asFunction(
+      (cradle) => new VersionCommand(cradle.logger, cradle.outputWriter),
+      {
+        lifetime: Lifetime.TRANSIENT,
+      }
+    ),
     convertCommand: asFunction(
       (cradle) => new ConvertCommand(cradle.logger, cradle.configManager),
       { lifetime: Lifetime.TRANSIENT }
     ),
     configCommand: asFunction(
-      (cradle) => new ConfigCommand(cradle.logger, cradle.configManager),
+      (cradle) =>
+        new ConfigCommand(
+          cradle.logger,
+          cradle.configManager,
+          cradle.outputWriter
+        ),
       { lifetime: Lifetime.TRANSIENT }
     ),
   });
@@ -126,7 +122,7 @@ function createWriteMethod() {
   return fn;
 }
 
-function createAdvancedMethod(returnValue: any) {
+function createMockMethod(returnValue: any) {
   const calls: any[] = [];
   const fn = (...args: any[]) => {
     calls.push(args);
@@ -152,57 +148,66 @@ export const createMockLogger = () => {
 
   // Create the mock logger object
   const pinoLogger = {
-    info: () => {},
-    debug: () => {},
-    warn: () => {},
-    error: () => {},
-    fatal: () => {},
+    info: () => {
+      // Intentionally empty mock for testing
+    },
+    debug: () => {
+      // Intentionally empty mock for testing
+    },
+    warn: () => {
+      // Intentionally empty mock for testing
+    },
+    error: () => {
+      // Intentionally empty mock for testing
+    },
+    fatal: () => {
+      // Intentionally empty mock for testing
+    },
     child: () => pinoLogger,
   };
 
-  const mockLogger = {
+  return {
     info,
     debug,
     warn,
     error,
     fatal,
-    child: createAdvancedMethod(null), // Pass null initially to avoid circular reference
-    withContext: createAdvancedMethod(null),
-    logOperation: createAdvancedMethod(Promise.resolve()),
+    child: createMockMethod(null), // Pass null initially to avoid circular reference
+    withContext: createMockMethod(null),
+    logOperation: createMockMethod(Promise.resolve()),
     logPerformance: debug,
-    getPinoLogger: createAdvancedMethod(pinoLogger),
+    getPinoLogger: createMockMethod(pinoLogger),
     level: 'info',
     write,
   };
-
-  return mockLogger;
 };
 
-function createConfigMethod(returnValue: any) {
-  const calls: any[] = [];
-  const fn = (...args: any[]) => {
-    calls.push(args);
-    return returnValue;
+/**
+ * Mock OutputWriter for testing
+ */
+export const createMockOutputWriter = () => {
+  const write = createLoggingMethod();
+
+  return {
+    write,
+    clear: () => write.mockClear(),
+    getWrites: () => write.mockCalls(),
   };
-  fn.calls = calls;
-  fn.mockClear = () => (calls.length = 0);
-  fn.mockCalls = () => [...calls];
-  return fn;
-}
+};
 
 /**
  * Mock ConfigManager for testing
  */
 export const createMockConfigManager = () => {
   return {
-    loadConfig: createConfigMethod(
+    loadConfig: createMockMethod(
       Promise.resolve({ success: true, data: { sample: 'config' } })
     ),
-    getConfig: createConfigMethod({ sample: 'config' }),
-    reloadConfig: createConfigMethod(
+    getConfig: createMockMethod({ sample: 'config' }),
+    reloadConfig: createMockMethod(
       Promise.resolve({ success: true, data: { sample: 'config' } })
     ),
-    createSampleConfig: createConfigMethod('# Sample Config'),
+    createSampleConfig: createMockMethod('# Sample Config'),
   };
 };
 
@@ -238,7 +243,7 @@ export const createTestCliContext = (overrides: any = {}) => ({
 export const resetContainerMocks = (container: AwilixContainer): void => {
   const registrations = container.registrations;
 
-  Object.keys(registrations).forEach((key) => {
+  for (const key of Object.keys(registrations)) {
     const registration = registrations[key];
     if (
       registration &&
@@ -250,5 +255,5 @@ export const resetContainerMocks = (container: AwilixContainer): void => {
         mock.mockReset();
       }
     }
-  });
+  }
 };

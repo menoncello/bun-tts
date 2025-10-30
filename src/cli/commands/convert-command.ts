@@ -10,8 +10,8 @@ export class ConvertCommand {
   /**
    * Creates a new instance of the ConvertCommand.
    *
-   * @param logger - The logger instance for recording command execution details
-   * @param configManager - The configuration manager for handling configuration loading
+   * @param {Logger} logger - The logger instance for recording command execution details
+   * @param {any} configManager - The configuration manager for handling configuration loading
    */
   constructor(
     private logger: Logger,
@@ -21,8 +21,8 @@ export class ConvertCommand {
   /**
    * Executes the convert command with the provided CLI context.
    *
-   * @param context - The CLI context containing input file, flags, and log level
-   * @returns Promise that resolves when the command execution is complete
+   * @param {any} context - The CLI context containing input file, flags, and log level
+   * @returns {Promise<void>} Promise that resolves when the command execution is complete
    */
   public async execute(context: CliContext): Promise<void> {
     this.logCommandStart(context);
@@ -38,8 +38,9 @@ export class ConvertCommand {
   /**
    * Logs the start of the convert command execution.
    *
-   * @param context - The CLI context containing execution details
+   * @param {any} context - The CLI context containing execution details
    * @private
+   * @returns {void}
    */
   private logCommandStart(context: CliContext): void {
     this.logger.info('Convert command started', {
@@ -52,24 +53,24 @@ export class ConvertCommand {
   /**
    * Displays placeholder information about the convert command functionality.
    *
-   * @param context - The CLI context containing execution details
+   * @param {any} context - The CLI context containing execution details
    * @private
+   * @returns {void}
    */
   private displayPlaceholderInfo(context: CliContext): void {
-    console.log('Convert command - not yet implemented');
-    console.log(
-      'This will convert documents to audiobooks in future iterations'
-    );
-    console.log(
-      `Context: logLevel=${context.logLevel}, verbose=${context.flags.verbose}`
-    );
+    this.logger.info('Convert command functionality not yet implemented', {
+      inputFile: context.input[0],
+      outputDir: context.flags.output,
+      format: context.flags.format,
+    });
   }
 
   /**
    * Handles loading configuration if a config path is provided.
    *
-   * @param configPath - The path to the configuration file
+   * @param {any} configPath - The path to the configuration file
    * @private
+   * @returns {Promise<void>} Promise that resolves when configuration loading is complete
    */
   private async handleConfigurationLoading(configPath: string): Promise<void> {
     this.logger.debug('Loading configuration', {
@@ -82,7 +83,6 @@ export class ConvertCommand {
 
     if (configResult.success) {
       this.logger.info('Configuration loaded successfully');
-      console.log('Configuration loaded from:', configPath);
     } else {
       this.logger.error('Failed to load configuration', {
         message: configResult.error.message,
@@ -90,7 +90,6 @@ export class ConvertCommand {
         category: configResult.error.category,
         details: configResult.error.details,
       });
-      console.error('Error loading configuration:', configResult.error.message);
     }
   }
 }

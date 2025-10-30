@@ -46,25 +46,25 @@ export function handleCliError(error: Error): never {
     logger.error('BunTtsError occurred', { error });
 
     // User-friendly message
-    console.error(`\n❌ ${error.getUserMessage()}`);
+    logger.error(`\n❌ ${error.getUserMessage()}`);
 
     // Additional details if available
     if (error.details && Object.keys(error.details).length > 0) {
-      console.error('\nAdditional information:');
+      logger.error('\nAdditional information:');
       for (const [key, value] of Object.entries(error.details)) {
-        console.error(`  ${key}: ${value}`);
+        logger.error(`  ${key}: ${value}`);
       }
     }
 
     // Suggestion for common errors
-    console.error(getSuggestion(error));
+    logger.error(getSuggestion(error));
 
     process.exit(error.getExitCode());
   } else {
     // Unknown error
     logger.error('Unexpected error occurred', { error });
-    console.error('\n❌ An unexpected error occurred');
-    console.error('Please report this issue with the error details above');
+    logger.error('\n❌ An unexpected error occurred');
+    logger.error('Please report this issue with the error details above');
     process.exit(1);
   }
 }
@@ -72,7 +72,7 @@ export function handleCliError(error: Error): never {
 /**
  * Get helpful suggestion based on error type to guide users toward resolution
  *
- * @param {BunTtsError} error - The BunTtsError instance to generate suggestions for
+ * @param {Error} error - The BunTtsError instance to generate suggestions for
  * @returns {string} A helpful suggestion message for the specific error type
  *
  * @example
@@ -99,7 +99,7 @@ function getSuggestion(error: BunTtsError): string {
  * Wrap async functions to handle errors consistently by converting unknown errors to BunTtsError
  *
  * @param {(...args: T) => Promise<R>} fn - The async function to wrap with error handling
- * @returns {(...args: T) => Promise<R>} A wrapped function that converts unknown errors to BunTtsError
+ * @returns {any} (...args: T) => Promise<R> A wrapped function that converts unknown errors to BunTtsError
  *
  * @template T - Tuple type for function arguments
  * @template R - Return type of the function
@@ -141,9 +141,9 @@ export function withErrorHandling<T extends readonly unknown[], R>(
 /**
  * Performance monitoring wrapper that logs operation timing and handles errors consistently
  *
- * @param {string} operation - Descriptive name of the operation being monitored
+ * @param {any} operation - Descriptive name of the operation being monitored
  * @param {(...args: T) => Promise<R>} fn - The async function to monitor
- * @returns {(...args: T) => Promise<R>} A wrapped function with performance logging
+ * @returns {any} (...args: T) => Promise<R> A wrapped function with performance logging
  *
  * @template T - Tuple type for function arguments
  * @template R - Return type of the function

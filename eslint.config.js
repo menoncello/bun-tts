@@ -17,19 +17,28 @@ export default [
       '**/.stryker-tmp/**',
     ],
   },
-  // Main TypeScript configuration (excluding test files)
+  // Main TypeScript configuration
   {
-    files: ['**/*.ts', '**/*.tsx'],
-    ignores: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.spec.tsx', '**/tests/**'],
+    files: ['**/*.ts'],
     languageOptions: {
       parser: tsparser,
       parserOptions: {
         ecmaVersion: 2022,
         sourceType: 'module',
-        ecmaFeatures: {
-          jsx: true
-        }
       },
+    },
+    settings: {
+      'import/resolver': {
+        typescript: {
+          alwaysTryTypes: true,
+          project: './tsconfig.json',
+          extensions: ['.ts', '.js'],
+        },
+        node: {
+          extensions: ['.ts', '.js'],
+        },
+      },
+      'import/core-modules': ['bun:test', 'bun'],
     },
     plugins: {
       '@typescript-eslint': tseslint,
@@ -120,7 +129,7 @@ export default [
 
       // Import - Module Management
       'import/no-duplicates': 'error',
-      'import/no-unresolved': 'off', // TypeScript handles this
+      'import/no-unresolved': 'error',
       'import/order': [
         'error',
         {
@@ -136,15 +145,15 @@ export default [
       // JSDoc - Documentation Quality
       'jsdoc/check-alignment': 'error',
       'jsdoc/check-param-names': 'error',
-      'jsdoc/check-tag-names': 'off', // Allow custom tags like @nimata/adapters
+      'jsdoc/check-tag-names': 'error',
       'jsdoc/check-types': 'error',
       'jsdoc/require-description': 'error',
       'jsdoc/require-param': 'error',
       'jsdoc/require-param-description': 'error',
-      'jsdoc/require-param-type': 'off', // TypeScript provides types
+      'jsdoc/require-param-type': 'error',
       'jsdoc/require-returns': 'error',
       'jsdoc/require-returns-description': 'error',
-      'jsdoc/require-returns-type': 'off', // TypeScript provides types
+      'jsdoc/require-returns-type': 'error',
       'jsdoc/require-jsdoc': [
         'error',
         {
@@ -166,7 +175,7 @@ export default [
       'max-nested-callbacks': ['error', 3],
       'max-params': ['error', 4],
       'max-statements': ['error', 15],
-      'no-console': 'off', // CLI needs console
+      'no-console': 'error',
       'no-magic-numbers': [
         'error',
         { ignore: [0, 1, -1], ignoreArrayIndexes: true, ignoreDefaultValues: true },
@@ -184,86 +193,30 @@ export default [
       yoda: 'error',
     },
   },
-  // Test files - Restricted rules (still maintain code quality)
+  // Test files - Relaxed rules
   {
-    files: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.spec.tsx', '**/tests/**/*.ts', '**/tests/**/*.tsx'],
-    languageOptions: {
-      parser: tsparser,
-      parserOptions: {
-        ecmaVersion: 2022,
-        sourceType: 'module',
-        ecmaFeatures: {
-          jsx: true
-        }
-      },
-      globals: {
-        describe: 'readonly',
-        it: 'readonly',
-        test: 'readonly',
-        expect: 'readonly',
-        beforeEach: 'readonly',
-        afterEach: 'readonly',
-        beforeAll: 'readonly',
-        afterAll: 'readonly',
-        jest: 'readonly',
-        vi: 'readonly',
-      },
-    },
-    plugins: {
-      '@typescript-eslint': tseslint,
-      sonarjs: sonarjs,
-      unicorn: unicorn,
-      import: importPlugin,
-      jsdoc: jsdoc,
-    },
+    files: ['**/*.test.ts', '**/*.spec.ts', '**/tests/**/*.ts'],
     rules: {
-      // Allow some testing-specific flexibilities
-      '@typescript-eslint/no-explicit-any': 'off', // Mocks and test data often use any
-      '@typescript-eslint/no-non-null-assertion': 'off', // Test assertions
-      '@typescript-eslint/no-unused-vars': 'off', // Test utilities and setup
-      '@typescript-eslint/explicit-function-return-type': 'off', // Test functions
-      '@typescript-eslint/no-empty-function': 'off', // Empty test functions
+      // Apenas desabilita as regras de tamanho que você pediu
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
 
-      // Keep complexity and size limits for maintainability
-      'max-lines': ['error', { max: 500, skipBlankLines: true, skipComments: true }], // Slightly more lenient
-      'max-lines-per-function': ['error', { max: 50, skipBlankLines: true, skipComments: true }], // Slightly more lenient
-      'max-nested-callbacks': ['error', 4], // Slightly more lenient
-      'max-statements': ['error', 25], // Slightly more lenient
-      'max-params': ['error', 6], // Slightly more lenient
-
-      // Keep code quality rules
-      'sonarjs/no-duplicate-string': 'off', // Test messages can be repetitive
-      'sonarjs/no-identical-functions': 'off', // Test helpers can be similar
+      // Mantém algumas relaxações úteis para testes (opcional - pode remover se quiser)
+      '@typescript-eslint/no-explicit-any': 'off',
+      'sonarjs/no-duplicate-string': 'off',
       'jsdoc/require-jsdoc': 'off',
       'jsdoc/require-description': 'off',
       'jsdoc/require-param': 'off',
       'jsdoc/require-returns': 'off',
-      'no-magic-numbers': 'off', // Test assertions use magic numbers
-      'no-console': 'off', // Test debugging
-      'import/no-default-export': 'off', // Test files can use default exports
-
-      // Keep import rules
-      'import/no-duplicates': 'error',
-      'import/no-mutable-exports': 'error',
-      'import/order': 'error',
-      'import/newline-after-import': 'error',
-
-      // Keep unicorn rules for code quality
-      'unicorn/no-array-for-each': 'off', // Allow forEach in tests for readability
-      'unicorn/no-unused-properties': 'off', // Test objects may have unused props
-
-      // Keep most other rules for code quality
-      'no-duplicate-imports': 'error',
-      'no-else-return': 'error',
-      'no-lonely-if': 'error',
-      'no-negated-condition': 'error',
-      'no-nested-ternary': 'error',
-      'no-return-await': 'error',
-      'no-unneeded-ternary': 'error',
-      'no-useless-return': 'error',
-      'prefer-const': 'error',
-      'prefer-template': 'error',
-      yoda: 'error',
+      'no-magic-numbers': 'off',
+      'import/no-default-export': 'off',
+      'max-nested-callbacks': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      'sonarjs/no-nested-functions': 'off',
+      'max-statements': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      'max-depth': 'off',
     },
   },
 ];

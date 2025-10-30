@@ -19,9 +19,9 @@ const BYTES_PER_MEGABYTE = KILOBYTE * KILOBYTE;
 
 /**
  * Load configuration from ConfigManager
- * @param configManager - The configuration manager instance
- * @param logger - The logger instance for error reporting
- * @returns The loaded markdown parser configuration
+ * @param {ConfigManager} configManager - The configuration manager instance
+ * @param {Logger} logger - The logger instance for error reporting
+ * @returns {MarkdownParserConfig} The loaded markdown parser configuration
  */
 export const loadConfiguration = (
   configManager: ConfigManager,
@@ -53,7 +53,7 @@ export const loadConfiguration = (
 
 /**
  * Configure marked library with custom options
- * @param _config - The markdown parser configuration (currently unused but kept for future extensibility)
+ * @param {MarkdownParserConfig} _config - The markdown parser configuration (currently unused but kept for future extensibility)
  */
 export const configureMarked = (_config: MarkdownParserConfig): void => {
   marked.setOptions({
@@ -64,8 +64,8 @@ export const configureMarked = (_config: MarkdownParserConfig): void => {
 
 /**
  * Validate input before processing
- * @param input - The input string or Buffer to validate
- * @returns The validated string or a MarkdownParseError if invalid
+ * @param {string|Buffer} input - The input string or Buffer to validate
+ * @returns {string|MarkdownParseError} The validated string or a MarkdownParseError if invalid
  */
 export const validateInput = (
   input: string | Buffer
@@ -100,9 +100,9 @@ export const validateInput = (
 
 /**
  * Check file size limits
- * @param content - The content to check
- * @param config - The parser configuration containing size limits
- * @returns Undefined if size is valid, otherwise a MarkdownParseError
+ * @param {string} content - The content to check
+ * @param {MarkdownParserConfig} config - The parser configuration containing size limits
+ * @returns {void|MarkdownParseError} Undefined if size is valid, otherwise a MarkdownParseError
  */
 export const checkFileSize = (
   content: string,
@@ -117,9 +117,9 @@ export const checkFileSize = (
 
 /**
  * Validate confidence threshold
- * @param structure - The document structure to validate
- * @param config - The parser configuration containing confidence thresholds
- * @returns The original structure if valid, otherwise a MarkdownParseError
+ * @param {DocumentStructure} structure - The document structure to validate
+ * @param {MarkdownParserConfig} config - The parser configuration containing confidence thresholds
+ * @returns {DocumentStructure|MarkdownParseError} The original structure if valid, otherwise a MarkdownParseError
  */
 export const validateConfidenceThreshold = (
   structure: DocumentStructure,

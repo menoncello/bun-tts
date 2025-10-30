@@ -1,12 +1,10 @@
+import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
 import { writeFileSync, unlinkSync, mkdirSync, rmdirSync } from 'fs';
 import { join } from 'path';
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
 import { ConfigManager, configManager } from '../../src/config/index.js';
 import {
   InvalidConfigError,
   MissingConfigError,
-  success,
-  failure,
 } from '../../src/errors/index.js';
 
 function getTestDirectory(): string {
@@ -32,13 +30,13 @@ function cleanupTestFiles(testDir: string): void {
       join(testDir, 'package.json'),
     ];
 
-    testFiles.forEach((file) => {
+    for (const file of testFiles) {
       try {
         unlinkSync(file);
       } catch {
         // File doesn't exist, ignore
       }
-    });
+    }
 
     try {
       rmdirSync(testDir);
@@ -62,7 +60,7 @@ function validateDefaultConfig(config: any): void {
 }
 
 function validateCustomConfig(config: any, customValues: any): void {
-  Object.keys(customValues).forEach((key) => {
+  for (const key of Object.keys(customValues)) {
     if (
       typeof customValues[key] === 'object' &&
       !Array.isArray(customValues[key])
@@ -71,7 +69,7 @@ function validateCustomConfig(config: any, customValues: any): void {
     } else {
       expect(config[key]).toBe(customValues[key]);
     }
-  });
+  }
 }
 
 describe('ConfigManager Instance Management', () => {

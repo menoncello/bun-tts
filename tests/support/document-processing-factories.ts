@@ -6,36 +6,52 @@
  */
 
 import { mock } from 'bun:test';
-import type { Logger } from '../../src/interfaces/logger.js';
 import type { ConfigManager } from '../../src/config/config-manager.js';
-import type { DocumentStructure } from '../../src/core/document-processing/types.js';
 import type { MarkdownParserConfig } from '../../src/core/document-processing/config/markdown-parser-config.js';
+import type { Logger } from '../../src/interfaces/logger.js';
 
 /**
  * Factory for creating mock Logger instances
  */
 export class MockLoggerFactory {
+  /**
+   * Create a basic mock logger
+   * @returns {Logger} A mock logger instance
+   */
   static create(): Logger {
     return {
-      debug: mock(() => {}),
-      info: mock(() => {}),
-      warn: mock(() => {}),
-      error: mock(() => {}),
+      debug: mock(() => {
+        // Intentionally empty mock for testing
+      }),
+      info: mock(() => {
+        // Intentionally empty mock for testing
+      }),
+      warn: mock(() => {
+        // Intentionally empty mock for testing
+      }),
+      error: mock(() => {
+        // Intentionally empty mock for testing
+      }),
     } as any;
   }
 
+  /**
+   * Create a mock logger with expectations for testing
+   * @returns {Logger} A mock logger instance with expectation tracking
+   */
   static createWithExpectations(): Logger & {
     debug: ReturnType<typeof mock>;
     info: ReturnType<typeof mock>;
     warn: ReturnType<typeof mock>;
     error: ReturnType<typeof mock>;
   } {
-    return {
-      debug: mock(() => {}),
-      info: mock(() => {}),
-      warn: mock(() => {}),
-      error: mock(() => {}),
-    } as any;
+    // Reuse the basic mock logger but with expectation tracking type
+    return this.create() as Logger & {
+      debug: ReturnType<typeof mock>;
+      info: ReturnType<typeof mock>;
+      warn: ReturnType<typeof mock>;
+      error: ReturnType<typeof mock>;
+    };
   }
 }
 
@@ -43,6 +59,10 @@ export class MockLoggerFactory {
  * Factory for creating mock ConfigManager instances
  */
 export class MockConfigManagerFactory {
+  /**
+   * Create a default mock config manager
+   * @returns {ConfigManager} A mock config manager instance
+   */
   static createDefault(): ConfigManager {
     return {
       get: mock((key: string, defaultValue: unknown) => {
@@ -51,12 +71,21 @@ export class MockConfigManagerFactory {
         }
         return defaultValue;
       }),
-      set: mock(() => {}),
+      set: mock(() => {
+        // Intentionally empty mock for testing
+      }),
       has: mock(() => true),
-      clear: mock(() => {}),
+      clear: mock(() => {
+        // Intentionally empty mock for testing
+      }),
     } as any;
   }
 
+  /**
+   * Create a custom mock config manager with specific configuration
+   * @param {Partial<MarkdownParserConfig>} config - Custom configuration to use
+   * @returns {ConfigManager} A mock config manager instance with custom config
+   */
   static createCustom(config: Partial<MarkdownParserConfig>): ConfigManager {
     return {
       get: mock((key: string, defaultValue: unknown) => {
@@ -65,18 +94,30 @@ export class MockConfigManagerFactory {
         }
         return defaultValue;
       }),
-      set: mock(() => {}),
+      set: mock(() => {
+        // Intentionally empty mock for testing
+      }),
       has: mock(() => true),
-      clear: mock(() => {}),
+      clear: mock(() => {
+        // Intentionally empty mock for testing
+      }),
     } as any;
   }
 
+  /**
+   * Create an empty mock config manager
+   * @returns {ConfigManager} A mock config manager instance that returns empty values
+   */
   static createEmpty(): ConfigManager {
     return {
       get: mock(() => ({})),
-      set: mock(() => {}),
+      set: mock(() => {
+        // Intentionally empty mock for testing
+      }),
       has: mock(() => false),
-      clear: mock(() => {}),
+      clear: mock(() => {
+        // Intentionally empty mock for testing
+      }),
     } as any;
   }
 }
@@ -85,6 +126,10 @@ export class MockConfigManagerFactory {
  * Factory for creating MarkdownParserConfig instances
  */
 export class MarkdownParserConfigFactory {
+  /**
+   * Create a default markdown parser configuration
+   * @returns {MarkdownParserConfig} A default markdown parser configuration
+   */
   static createDefault(): MarkdownParserConfig {
     return {
       chapterDetectionPattern: '^#{1,6}\\s+(.+)$',
@@ -117,6 +162,11 @@ export class MarkdownParserConfigFactory {
     };
   }
 
+  /**
+   * Create a custom markdown parser configuration
+   * @param {Partial<MarkdownParserConfig>} overrides - Configuration overrides
+   * @returns {MarkdownParserConfig} A custom markdown parser configuration
+   */
   static createCustom(
     overrides: Partial<MarkdownParserConfig>
   ): MarkdownParserConfig {
@@ -126,18 +176,30 @@ export class MarkdownParserConfigFactory {
     };
   }
 
+  /**
+   * Create a markdown parser configuration with high confidence threshold
+   * @returns {MarkdownParserConfig} A markdown parser configuration with high threshold
+   */
   static createWithHighThreshold(): MarkdownParserConfig {
     return this.createCustom({
       confidenceThreshold: 0.99,
     });
   }
 
+  /**
+   * Create a markdown parser configuration with streaming disabled
+   * @returns {MarkdownParserConfig} A markdown parser configuration with streaming disabled
+   */
   static createWithStreamingDisabled(): MarkdownParserConfig {
     return this.createCustom({
       enableStreaming: false,
     });
   }
 
+  /**
+   * Create a markdown parser configuration with all content types included
+   * @returns {MarkdownParserConfig} A markdown parser configuration with all content included
+   */
   static createWithAllContentIncluded(): MarkdownParserConfig {
     return this.createCustom({
       includeCodeBlocks: true,
@@ -153,6 +215,10 @@ export class MarkdownParserConfigFactory {
  * Factory for creating Markdown test content
  */
 export class MarkdownContentFactory {
+  /**
+   * Create a simple markdown document for testing
+   * @returns {string} A simple markdown document
+   */
   static createSimpleDocument(): string {
     return `# Test Document
 
@@ -165,6 +231,10 @@ This is the first chapter. It contains multiple sentences.
 This is the second chapter with different content.`;
   }
 
+  /**
+   * Create a complex markdown document for testing
+   * @returns {string} A complex markdown document with multiple sections
+   */
   static createComplexDocument(): string {
     return [
       this.createDocumentHeader(),
@@ -179,10 +249,18 @@ This is the second chapter with different content.`;
     ].join('\n');
   }
 
+  /**
+   * Create document header section
+   * @returns {string} Document header markdown
+   */
   private static createDocumentHeader(): string {
     return `# Sample Technical Documentation`;
   }
 
+  /**
+   * Create overview section
+   * @returns {string} Overview section markdown
+   */
   private static createOverviewSection(): string {
     return `## Overview
 
@@ -214,10 +292,9 @@ const config = {
 async function fetchData(endpoint) {
   try {
     const response = await fetch(\`\${config.apiUrl}/\${endpoint}\`);
-    return await response.json();
+    return response.json();
   } catch (error) {
-    console.error('Failed to fetch data:', error);
-    throw error;
+        throw error;
   }
 }
 \`\`\``;
@@ -299,7 +376,7 @@ For more information, visit our website or check out the GitHub repository for c
 This has unclosed code blocks:
 \`\`\`javascript
 function test() {
-  console.log("hello");
+  return true;
 
 ## Chapter 2
 
@@ -362,7 +439,7 @@ const x = 1;
 | Cell 1   | Cell 2   |`;
   }
 
-  static createLargeDocument(repeatCount: number = 5): string {
+  static createLargeDocument(repeatCount = 5): string {
     return this.createComplexDocument().repeat(repeatCount);
   }
 
@@ -417,8 +494,6 @@ ${longSentence}`;
  */
 export class ErrorScenarioFactory {
   static createInvalidSyntaxError() {
-    // This should be used in test files that import MarkdownParseError
-    // return MarkdownParseError.invalidSyntax('Bad markdown', { line: 5, column: 10 });
     return {
       code: 'INVALID_SYNTAX',
       message: 'Invalid Markdown syntax: Bad markdown',
@@ -427,7 +502,6 @@ export class ErrorScenarioFactory {
   }
 
   static createMalformedHeaderError() {
-    // return MarkdownParseError.malformedHeader('Missing text');
     return {
       code: 'MALFORMED_HEADER',
       message: 'Malformed header: Missing text',
@@ -435,7 +509,6 @@ export class ErrorScenarioFactory {
   }
 
   static createUnclosedCodeBlockError() {
-    // return MarkdownParseError.unclosedCodeBlock({ line: 20, column: 1 });
     return {
       code: 'UNCLOSED_CODE_BLOCK',
       message: 'Unclosed code block detected',
@@ -444,7 +517,6 @@ export class ErrorScenarioFactory {
   }
 
   static createLowConfidenceError() {
-    // return MarkdownParseError.lowConfidence(0.6, 0.8);
     return {
       code: 'LOW_CONFIDENCE',
       message: 'Low confidence in structure detection: 0.6 (threshold: 0.8)',
@@ -453,7 +525,6 @@ export class ErrorScenarioFactory {
   }
 
   static createInvalidInputError() {
-    // return MarkdownParseError.invalidInput('number', 'string');
     return {
       code: 'INVALID_INPUT',
       message: 'Invalid input type: number (expected: string)',
@@ -461,7 +532,6 @@ export class ErrorScenarioFactory {
   }
 
   static createFileTooLargeError() {
-    // return MarkdownParseError.fileTooLarge(1000000, 500000);
     return {
       code: 'FILE_TOO_LARGE',
       message: 'File too large: 1000000 bytes (max: 500000 bytes)',
