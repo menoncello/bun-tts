@@ -3,6 +3,7 @@
  * Provides memory-efficient processing of large Markdown files.
  */
 
+import { logger, type LogContext } from '../../../utils/logger.js';
 import type {
   DocumentStructure,
   DocumentStream,
@@ -19,6 +20,9 @@ const DEFAULT_PROGRESS_PERCENTAGE = 0;
 const DEFAULT_CONFIDENCE = 1.0;
 const DEFAULT_STRUCTURE_CONFIDENCE = 0.8;
 const DEFAULT_ESTIMATED_DURATION = 60;
+const MAX_CHUNK_PROGRESS = 90;
+const SINGLE_CHAPTER_PROGRESS = 80;
+const MULTI_CHAPTER_MAX_PROGRESS = 85;
 
 // Interface for index tracking object
 interface IndexTracker {
@@ -27,9 +31,9 @@ interface IndexTracker {
 
 /**
  * Create metadata chunk with document information
- * @param content - The document content
- * @param parser - The parser instance to extract metadata
- * @returns A metadata chunk
+ * @param {string} content - The document content
+ * @param {MarkdownParser} parser - The parser instance to extract metadata
+ * @returns {DocumentChunk} A metadata chunk
  */
 const createMetadataChunk = (
   content: string,
@@ -49,8 +53,8 @@ const createMetadataChunk = (
 
 /**
  * Create a sentence object for a chunk
- * @param text - The sentence text
- * @returns A sentence object
+ * @param {string} text - The sentence text
+ * @returns {Sentence} A sentence object
  */
 const createSentence = (text: string): Sentence => ({
   id: 'sentence-1',
@@ -63,9 +67,9 @@ const createSentence = (text: string): Sentence => ({
 
 /**
  * Create a paragraph object for a chunk
- * @param chunkContent - The chunk content
- * @param chunkIndex - The chunk index
- * @returns A paragraph object
+ * @param {string} chunkContent - The chunk content
+ * @param {number} chunkIndex - The chunk index
+ * @returns {Paragraph} A paragraph object
  */
 const createParagraph = (
   chunkContent: string,
@@ -77,38 +81,51 @@ const createParagraph = (
   position: chunkIndex,
   wordCount: chunkContent.split(/\s+/).length,
   rawText: chunkContent,
+  text: chunkContent, // For compatibility with Paragraph interface
   includeInAudio: true,
   confidence: DEFAULT_CONFIDENCE,
 });
 
 /**
  * Create a content chunk from lines
- * @param lines - The lines to include in the chunk
- * @param currentIndex - Current index in the document
- * @param chunkSize - Size of the chunk
- * @returns A content chunk
+ * @param {string[]} lines - The lines to include in the chunk
+ * @param {number} currentIndex - Current index in the document
+ * @param {number} chunkSize - Size of the chunk
+ * @param {number} totalLines - Total number of lines in the document
+ * @returns {DocumentChunk} A content chunk
  */
 const createContentChunk = (
   lines: string[],
   currentIndex: number,
-  chunkSize: number
+  chunkSize: number,
+  totalLines: number
 ): DocumentChunk => {
   const chunkContent = lines.join('\n');
   const chunkIndex = Math.floor(currentIndex / chunkSize);
+
+  // Calculate progress ensuring it's always > 0 when there's content and capped below 100
+  const rawProgress =
+    lines.length > 0
+      ? ((currentIndex + lines.length) / totalLines) * MAX_PROGRESS_PERCENTAGE
+      : 0;
+  const progress =
+    lines.length > 0
+      ? Math.max(Math.min(rawProgress, MAX_CHUNK_PROGRESS), 1) // Cap at 90% to leave room for completion
+      : 0;
 
   return {
     id: `chunk-${chunkIndex}`,
     position: currentIndex,
     type: 'paragraphs',
-    progress: (currentIndex / lines.length) * MAX_PROGRESS_PERCENTAGE,
+    progress,
     paragraphs: [createParagraph(chunkContent, chunkIndex)],
   };
 };
 
 /**
  * Create completion chunk indicating processing is done
- * @param totalLines - Total number of lines in the document
- * @returns A completion chunk
+ * @param {number} totalLines - Total number of lines in the document
+ * @returns {DocumentChunk} A completion chunk
  */
 const createCompletionChunk = (totalLines: number): DocumentChunk => {
   return {
@@ -125,6 +142,7 @@ const createCompletionChunk = (totalLines: number): DocumentChunk => {
       estimatedDuration: 0,
       startPosition: 0,
       endPosition: totalLines,
+      startIndex: 0, // For compatibility with Chapter interface
       level: 1,
     },
   };
@@ -132,10 +150,10 @@ const createCompletionChunk = (totalLines: number): DocumentChunk => {
 
 /**
  * Generate content chunks from document lines
- * @param lines - All document lines
- * @param chunkSize - Size of each chunk in lines
- * @param currentIndex - Starting index object with value property (will be modified)
- * @returns Async generator of content chunks
+ * @param {string[]} lines - All document lines
+ * @param {number} chunkSize - Size of each chunk in lines
+ * @param {IndexTracker} currentIndex - Starting index object with value property (will be modified)
+ * @returns {AsyncGenerator<DocumentChunk>} Async generator of content chunks
  */
 async function* generateContentChunks(
   lines: string[],
@@ -148,7 +166,12 @@ async function* generateContentChunks(
       currentIndex.value + chunkSize
     );
 
-    yield createContentChunk(chunkLines, currentIndex.value, chunkSize);
+    yield createContentChunk(
+      chunkLines,
+      currentIndex.value,
+      chunkSize,
+      lines.length
+    );
 
     currentIndex.value += chunkSize;
   }
@@ -156,42 +179,53 @@ async function* generateContentChunks(
 
 /**
  * Generate chapter chunks from parsed content
- * @param content - The document content
- * @param parser - The parser instance to use for parsing
- * @returns Async generator of chapter chunks
+ * @param {string} content - The document content
+ * @param {MarkdownParser} parser - The parser instance to use for parsing
+ * @returns {AsyncGenerator<DocumentChunk>} Async generator of chapter chunks
  */
 async function* generateChapterChunks(
   content: string,
   parser: MarkdownParser
 ): AsyncGenerator<DocumentChunk> {
-  // Parse the content to get actual chapters
-  const result = await parser.parse(content);
+  try {
+    // Parse the content to get actual chapters
+    const result = await parser.parse(content);
 
-  if (result.success) {
-    const structure = result.data;
+    if (result.success) {
+      const structure = result.data;
 
-    // Yield a chunk for each chapter
-    for (let i = 0; i < structure.chapters.length; i++) {
-      const chapter = structure.chapters[i];
-      const progress =
-        ((i + 1) / structure.chapters.length) * MAX_PROGRESS_PERCENTAGE;
+      // Yield a chunk for each chapter
+      for (let i = 0; i < structure.chapters.length; i++) {
+        const chapter = structure.chapters[i];
+        // Calculate progress to leave room for completion chunk, ensuring intermediate progress is < 100
+        const progress =
+          structure.chapters.length === 1
+            ? SINGLE_CHAPTER_PROGRESS // Single chapter gets 80% to leave room for other chunks
+            : ((i + 1) / structure.chapters.length) *
+              MULTI_CHAPTER_MAX_PROGRESS; // Scale to max 85% to leave room for completion
 
-      yield {
-        id: `chapter-${i}`,
-        position: i,
-        type: 'chapter',
-        progress,
-        chapter,
-      };
+        yield {
+          id: `chapter-${i}`,
+          position: i,
+          type: 'chapter',
+          progress,
+          chapter,
+        };
+      }
     }
+  } catch (error) {
+    // Use logger instead of console for error handling
+    logger.warn('Chapter generation failed:', error as LogContext);
+    // Don't yield anything on error - let the stream continue with other chunks
+    // This prevents unhandled errors from breaking the stream
   }
 }
 
 /**
  * Create basic document structure
- * @param content - The document content
- * @param parser - The parser instance to extract metadata
- * @returns A document structure
+ * @param {string} content - The document content
+ * @param {MarkdownParser} parser - The parser instance to extract metadata
+ * @returns {DocumentStructure} A document structure
  */
 const createBasicDocumentStructure = (
   content: string,
@@ -218,14 +252,15 @@ const createBasicDocumentStructure = (
       processingErrors: [],
     },
     totalWordCount: wordCount,
+    totalChapters: 0, // For compatibility with DocumentStructure interface
   };
 };
 
 /**
  * Create a document stream for processing large files
- * @param input - The input content as string or Buffer to be processed
- * @param parser - The parser instance to use for processing
- * @returns A document stream that provides chunks and structure information
+ * @param {string|Buffer} input - The input content as string or Buffer to be processed
+ * @param {MarkdownParser} parser - The parser instance to use for processing
+ * @returns {DocumentStream} A document stream that provides chunks and structure information
  */
 export const createStream = (
   input: string | Buffer,
@@ -251,10 +286,18 @@ export const createStream = (
     },
 
     async getStructure(): Promise<DocumentStructure> {
-      // Return the actual parsed structure instead of a basic one
-      const result = await parser.parse(content);
-      if (result.success) {
-        return result.data;
+      try {
+        // Return the actual parsed structure instead of a basic one
+        const result = await parser.parse(content);
+        if (result.success) {
+          return result.data;
+        }
+      } catch (error) {
+        // Log error but continue with fallback
+        logger.warn(
+          'Failed to parse content for structure, using fallback',
+          error as LogContext
+        );
       }
       // Fallback to basic structure if parsing fails
       return createBasicDocumentStructure(content, parser);

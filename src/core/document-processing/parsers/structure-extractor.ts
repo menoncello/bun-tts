@@ -9,8 +9,8 @@ import { countWords } from './text-processing-utils.js';
 
 /**
  * Extract basic metadata for streaming
- * @param content - The raw content string to extract metadata from
- * @returns Document metadata including title and word count
+ * @param {string} content - The raw content string to extract metadata from
+ * @returns {DocumentMetadata} Document metadata including title and word count
  */
 export function extractBasicMetadata(content: string): DocumentMetadata {
   const lines = content.split('\n');
@@ -35,9 +35,9 @@ export function extractBasicMetadata(content: string): DocumentMetadata {
 
 /**
  * Extract document metadata
- * @param content - The raw content string to extract metadata from
- * @param tokens - Array of parsed tokens to analyze for title extraction
- * @returns Complete document metadata with title and word count
+ * @param {string} content - The raw content string to extract metadata from
+ * @param {ParsedToken[]} tokens - Array of parsed tokens to analyze for title extraction
+ * @returns {DocumentMetadata} Complete document metadata with title and word count
  */
 export function extractMetadata(
   content: string,
@@ -64,11 +64,11 @@ export function extractMetadata(
 
 /**
  * Create new chapter object
- * @param chapterNumber - The sequential number of the chapter
- * @param title - The title of the chapter
- * @param level - The heading level (1-6) of the chapter
- * @param position - The position index of the chapter in the document
- * @returns A new chapter object with initialized properties
+ * @param {number} chapterNumber - The sequential number of the chapter
+ * @param {string} title - The title of the chapter
+ * @param {number} level - The heading level (1-6) of the chapter
+ * @param {number} position - The position index of the chapter in the document
+ * @returns {Chapter} A new chapter object with initialized properties
  */
 export function createChapter(
   chapterNumber: number,
@@ -86,12 +86,13 @@ export function createChapter(
     estimatedDuration: 0,
     startPosition: 0,
     endPosition: 0,
+    startIndex: 0, // For compatibility with Chapter interface
   };
 }
 
 /**
  * Process chapter statistics after content extraction
- * @param chapters - Array of chapters to calculate statistics for
+ * @param {Chapter[]} chapters - Array of chapters to calculate statistics for
  */
 export function processChapterStatistics(chapters: Chapter[]): void {
   for (const chapter of chapters) {
@@ -105,8 +106,8 @@ export function processChapterStatistics(chapters: Chapter[]): void {
 
 /**
  * Estimate chapter duration for TTS
- * @param chapter - The chapter to estimate duration for
- * @returns Estimated duration in seconds for text-to-speech processing
+ * @param {Chapter} chapter - The chapter to estimate duration for
+ * @returns {number} Estimated duration in seconds for text-to-speech processing
  */
 export function estimateChapterDuration(chapter: Chapter): number {
   return chapter.paragraphs
@@ -124,8 +125,8 @@ export function estimateChapterDuration(chapter: Chapter): number {
 
 /**
  * Estimate total document duration for TTS
- * @param chapters - Array of chapters to calculate total duration for
- * @returns Total estimated duration in seconds for all chapters
+ * @param {Chapter[]} chapters - Array of chapters to calculate total duration for
+ * @returns {number} Total estimated duration in seconds for all chapters
  */
 export function estimateTotalDuration(chapters: Chapter[]): number {
   return chapters.reduce(
@@ -136,8 +137,8 @@ export function estimateTotalDuration(chapters: Chapter[]): number {
 
 /**
  * Calculate overall document confidence
- * @param chapters - Array of chapters to calculate confidence score for
- * @returns Overall confidence score between 0.0 and 1.0
+ * @param {Chapter[]} chapters - Array of chapters to calculate confidence score for
+ * @returns {number} Overall confidence score between 0.0 and 1.0
  */
 export function calculateOverallConfidence(chapters: Chapter[]): number {
   if (chapters.length === 0) return 0.0;

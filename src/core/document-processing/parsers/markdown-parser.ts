@@ -46,8 +46,8 @@ export class MarkdownParser {
   /**
    * Create a new MarkdownParser instance
    *
-   * @param logger - Logger instance for structured logging
-   * @param configManager - Configuration manager for parser settings
+   * @param {Logger} logger - Logger instance for structured logging
+   * @param {ConfigManager} configManager - Configuration manager for parser settings
    */
   constructor(logger: Logger, configManager: ConfigManager) {
     this.logger = logger;
@@ -65,8 +65,8 @@ export class MarkdownParser {
   /**
    * Parse Markdown content into structured document format
    *
-   * @param input - Markdown content as string or Buffer
-   * @returns Result containing DocumentStructure or MarkdownParseError
+   * @param {string|Buffer} input - Markdown content as string or Buffer
+   * @returns {Promise<Result<DocumentStructure, MarkdownParseError>>} Result containing DocumentStructure or MarkdownParseError
    */
   public async parse(
     input: string | Buffer
@@ -99,9 +99,9 @@ export class MarkdownParser {
   /**
    * Build document structure from content
    *
-   * @param content - Validated markdown content
-   * @param startTime - Parse start time
-   * @returns DocumentStructure or MarkdownParseError
+   * @param {string} content - Validated markdown content
+   * @param {Date} startTime - Parse start time
+   * @returns {Promise<DocumentStructure|MarkdownParseError>} DocumentStructure or MarkdownParseError
    */
   private async buildDocumentStructure(
     content: string,
@@ -118,8 +118,8 @@ export class MarkdownParser {
   /**
    * Validate parsed document structure
    *
-   * @param structure - Document structure to validate
-   * @returns Validation result with detailed information
+   * @param {DocumentStructure} structure - Document structure to validate
+   * @returns {Promise<ValidationResult>} Validation result with detailed information
    */
   public async validate(
     structure: DocumentStructure
@@ -154,8 +154,8 @@ export class MarkdownParser {
   /**
    * Create streaming parser for large documents
    *
-   * @param input - Markdown content as string or Buffer
-   * @returns DocumentStream for chunked processing
+   * @param {string|Buffer} input - Markdown content as string or Buffer
+   * @returns {DocumentStream} DocumentStream for chunked processing
    */
   public createStream(input: string | Buffer): DocumentStream {
     if (!this.config.enableStreaming) {
@@ -170,7 +170,7 @@ export class MarkdownParser {
   /**
    * Get parser configuration
    *
-   * @returns Current parser configuration
+   * @returns {MarkdownParserConfig} Current parser configuration
    */
   public getConfig(): MarkdownParserConfig {
     return this.config;
@@ -179,8 +179,8 @@ export class MarkdownParser {
   /**
    * Extract basic metadata for streaming (delegates to utility)
    *
-   * @param content - Content to analyze
-   * @returns Basic metadata
+   * @param {string} content - Content to analyze
+   * @returns {DocumentMetadata} Basic metadata
    */
   public extractBasicMetadata(content: string): DocumentMetadata {
     return extractBasicMetadata(content);
@@ -189,8 +189,8 @@ export class MarkdownParser {
   /**
    * Tokenize Markdown content using marked
    *
-   * @param content - Markdown content
-   * @returns Token array or MarkdownParseError
+   * @param {string} content - Markdown content
+   * @returns {ParsedToken[]|MarkdownParseError} Token array or MarkdownParseError
    */
   public tokenizeMarkdown(content: string): ParsedToken[] | MarkdownParseError {
     return tokenizeMarkdown(content);
@@ -199,8 +199,8 @@ export class MarkdownParser {
   /**
    * Extract chapters from tokens
    *
-   * @param tokens - Parsed tokens
-   * @returns Array of chapters
+   * @param {ParsedToken[]} tokens - Parsed tokens
+   * @returns {Promise<Chapter[]>} Array of chapters
    */
   public async extractChaptersFromTokens(
     tokens: ParsedToken[]
@@ -215,8 +215,8 @@ export class MarkdownParser {
   /**
    * Validate and prepare input content
    *
-   * @param input - Raw input content
-   * @returns Validated string content or MarkdownParseError
+   * @param {string|Buffer} input - Raw input content
+   * @returns {string|MarkdownParseError} Validated string content or MarkdownParseError
    */
   private validateAndPrepareInput(
     input: string | Buffer
@@ -227,7 +227,7 @@ export class MarkdownParser {
   /**
    * Log parsing start information
    *
-   * @param input - Input content
+   * @param {string|Buffer} input - Input content
    */
   private logParsingStart(input: string | Buffer): void {
     this.logger.info('Starting Markdown parsing', {
@@ -239,7 +239,7 @@ export class MarkdownParser {
   /**
    * Log parsing success
    *
-   * @param documentStructure - Parsed document structure
+   * @param {DocumentStructure} documentStructure - Parsed document structure
    */
   private logParsingSuccess(documentStructure: DocumentStructure): void {
     this.logger.info('Markdown parsing completed successfully', {
@@ -254,9 +254,9 @@ export class MarkdownParser {
   /**
    * Handle parsing errors
    *
-   * @param error - Error that occurred
-   * @param startTime - Parse start time
-   * @returns Result with error
+   * @param {unknown} error - Error that occurred
+   * @param {Date} startTime - Parse start time
+   * @returns {Result<DocumentStructure, MarkdownParseError>} Result with error
    */
   private handleParsingError(
     error: unknown,
@@ -268,8 +268,8 @@ export class MarkdownParser {
   /**
    * Perform comprehensive validation
    *
-   * @param structure - Document structure to validate
-   * @returns Validation errors and warnings
+   * @param {DocumentStructure} structure - Document structure to validate
+   * @returns {{errors: ValidationError[], warnings: ValidationWarning[]}} Validation errors and warnings
    */
   private performValidation(structure: DocumentStructure): {
     errors: ValidationError[];
@@ -281,8 +281,8 @@ export class MarkdownParser {
   /**
    * Check if token is a chapter header
    *
-   * @param token - Token to check
-   * @returns True if token is a chapter header
+   * @param {ParsedToken} token - Token to check
+   * @returns {boolean} True if token is a chapter header
    */
   private isChapterHeader(token: ParsedToken): boolean {
     return (

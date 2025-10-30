@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeEach } from 'bun:test';
-import { ConfigManager } from '../../../src/config';
+import { describe, it, expect } from 'bun:test';
+import { ConfigManager } from '../../../src/config/index.js';
 import {
   container,
   resolve,
   initializeContainer,
-} from '../../../src/di/container';
-import { DEPENDENCIES } from '../../../src/di/types';
-import { Logger } from '../../../src/utils/logger';
+} from '../../../src/di/container.js';
+import { DEPENDENCIES } from '../../../src/di/types.js';
+import { Logger } from '../../../src/utils/logger.js';
 
 describe('DI Container Singleton Dependencies', () => {
   it('should provide singleton ConfigManager', () => {

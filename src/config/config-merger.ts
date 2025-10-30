@@ -14,9 +14,9 @@ export class ConfigMerger {
    * Performs a deep merge of user-provided configuration with default values,
    * ensuring all required properties are present.
    *
-   * @param defaults - The default configuration object
-   * @param userConfig - The user-provided configuration object
-   * @returns A merged BunTtsConfig object
+   * @param {any} defaults - The default configuration object
+   * @param {Partial<BunTtsConfig>} userConfig - The user-provided configuration object
+   * @returns {BunTtsConfig} A merged BunTtsConfig object
    */
   mergeWithDefaults(
     defaults: BunTtsConfig,
@@ -34,9 +34,9 @@ export class ConfigMerger {
    * Recursively merges properties from the source object into the target object.
    * Arrays are replaced rather than merged. Objects are merged recursively.
    *
-   * @param target - The target object to merge into
-   * @param source - The source object to merge from
-   * @returns A new object containing the merged properties
+   * @param {any} target - The target object to merge into
+   * @param {Partial<T>} source - The source object to merge from
+   * @returns {T} A new object containing the merged properties
    */
   deepMerge<T extends Record<string, unknown>>(
     target: T,

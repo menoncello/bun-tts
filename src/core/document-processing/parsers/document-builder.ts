@@ -32,11 +32,11 @@ interface ProcessingMetrics {
 
 /**
  * Build document structure from tokens
- * @param content - The original markdown content
- * @param tokens - Parsed tokens or error from tokenization
- * @param startTime - Timestamp when processing started
- * @param chapterExtractor - Function to extract chapters from tokens
- * @returns Document structure or error if processing failed
+ * @param {string} content - The original markdown content
+ * @param {ParsedToken[] | MarkdownParseError} tokens - Parsed tokens or error from tokenization
+ * @param {Date} startTime - Timestamp when processing started
+ * @param {(tokens: ParsedToken[]) => Chapter[] | Promise<Chapter[]>} chapterExtractor - Function to extract chapters from tokens
+ * @returns {Promise<DocumentStructure | MarkdownParseError>} Document structure or error if processing failed
  */
 export const buildDocumentStructure = async (
   content: string,
@@ -65,9 +65,9 @@ export const buildDocumentStructure = async (
 
 /**
  * Extract metadata from content and tokens
- * @param content - The original markdown content
- * @param tokens - Parsed tokens to extract metadata from
- * @returns Document metadata object
+ * @param {string} content - The original markdown content
+ * @param {ParsedToken[]} tokens - Parsed tokens to extract metadata from
+ * @returns {DocumentMetadata} Document metadata object
  */
 const extractMetadata = (
   content: string,
@@ -94,11 +94,11 @@ const extractMetadata = (
 
 /**
  * Create the final document structure object
- * @param content - The original markdown content
- * @param metadata - Extracted document metadata
- * @param chapters - Array of processed chapters
- * @param metrics - Processing metrics including timestamps
- * @returns Complete document structure
+ * @param {string} content - The original markdown content
+ * @param {any} metadata - Extracted document metadata
+ * @param {Chapter[]} chapters - Array of processed chapters
+ * @param {any} metrics - Processing metrics including timestamps
+ * @returns {DocumentStructure} Complete document structure
  */
 const createDocumentStructure = (
   content: string,
@@ -121,6 +121,7 @@ const createDocumentStructure = (
     ...statistics,
     totalWordCount: metadata.wordCount,
     estimatedTotalDuration: estimatedDuration,
+    totalChapters: chapters.length,
     confidence,
     processingMetrics: metrics,
   };
@@ -129,9 +130,9 @@ const createDocumentStructure = (
 /**
  * Validate and prepare input content
  *
- * @param input - Raw input content
- * @param config - Parser configuration
- * @returns Validated string content or MarkdownParseError
+ * @param {string | Buffer} input - Raw input content
+ * @param {object} config - Parser configuration
+ * @returns {string | MarkdownParseError} Validated string content or MarkdownParseError
  */
 export function validateAndPrepareInput(
   input: string | Buffer,
@@ -153,10 +154,10 @@ export function validateAndPrepareInput(
 /**
  * Handle parsing errors
  *
- * @param error - Error that occurred
- * @param startTime - Parse start time
- * @param logger - Logger instance
- * @returns Result with error
+ * @param {Error} error - Error that occurred
+ * @param {Date} startTime - Parse start time
+ * @param {Logger} logger - Logger instance
+ * @returns {any} Result<DocumentStructure, MarkdownParseError> Result with error
  */
 export function handleParsingError(
   error: unknown,
@@ -179,11 +180,11 @@ export function handleParsingError(
 /**
  * Build document structure from content
  *
- * @param content - Validated markdown content
- * @param startTime - Parse start time
- * @param config - Parser configuration
- * @param extractChaptersCallback - Function to extract chapters from tokens
- * @returns DocumentStructure or MarkdownParseError
+ * @param {string} content - Validated markdown content
+ * @param {Date} startTime - Parse start time
+ * @param {object} config - Parser configuration
+ * @param {(tokens: ParsedToken[]) => Promise<Chapter[]>} extractChaptersCallback - Function to extract chapters from tokens
+ * @returns {Promise<DocumentStructure | MarkdownParseError>} DocumentStructure or MarkdownParseError
  */
 export async function buildDocument(
   content: string,

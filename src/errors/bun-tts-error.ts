@@ -34,8 +34,8 @@ export class BunTtsError extends Error {
   /**
    * Creates a new BunTtsError instance.
    *
-   * @param message - Human-readable error message
-   * @param options - Configuration options for the error
+   * @param {string} message - Human-readable error message
+   * @param {BunTtsErrorOptions} options - Configuration options for the error
    */
   constructor(message: string, options: BunTtsErrorOptions) {
     super(message);
@@ -54,7 +54,7 @@ export class BunTtsError extends Error {
   /**
    * Gets a user-friendly error message that includes the error code.
    *
-   * @returns A formatted error message with code
+   * @returns {any} A formatted error message with code
    */
   public getUserMessage(): string {
     return `${this.message} (Error code: ${this.code})`;
@@ -63,7 +63,7 @@ export class BunTtsError extends Error {
   /**
    * Determines whether this error should be logged with full details.
    *
-   * @returns True if the error should be logged with full details
+   * @returns {any} True if the error should be logged with full details
    */
   public shouldLogDetails(): boolean {
     return true;
@@ -72,7 +72,7 @@ export class BunTtsError extends Error {
   /**
    * Serializes the error to a JSON object for logging or API responses.
    *
-   * @returns A JSON representation of the error
+   * @returns {any} A JSON representation of the error
    */
   public toJSON(): Record<string, unknown> {
     return {
@@ -89,7 +89,7 @@ export class BunTtsError extends Error {
   /**
    * Gets the exit code for CLI applications when this error occurs.
    *
-   * @returns The exit code (1 for general error)
+   * @returns {any} The exit code (1 for general error)
    */
   public getExitCode(): number {
     return 1;

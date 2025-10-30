@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
 import {
   DebugManager,
-  debugManager,
   startTimer,
   endTimer,
   measureAsync,
@@ -9,11 +8,15 @@ import {
   debugLog,
   traceLog,
 } from '../../src/utils/debug.js';
+import { tick } from '../../src/utils/deterministic-timing.js';
 import { createMockLogger } from '../setup.js';
 
 function createDebugManager(): DebugManager {
   DebugManager.resetInstance();
-  const mockLogger = createMockLogger();
+  const mockLogger = createMockLogger?.();
+  if (!mockLogger) {
+    throw new Error('Mock logger is not available');
+  }
   return DebugManager.createInstance(
     {
       enableTrace: true,
@@ -22,7 +25,7 @@ function createDebugManager(): DebugManager {
       logLevel: 'debug',
       maxLogEntries: 100,
     },
-    mockLogger
+    mockLogger as any
   );
 }
 
@@ -33,15 +36,57 @@ function waitMs(ms: number): void {
   }
 }
 
+// Setup and cleanup functions moved to outer scope to fix ESLint errors
+function setupTimerManager(): DebugManager {
+  return createDebugManager();
+}
+
+function cleanupTimerManager(manager: DebugManager): void {
+  manager.clearPerformanceMetrics();
+}
+
+function setupLoggingManager(): DebugManager {
+  return createDebugManager();
+}
+
+function cleanupLoggingManager(manager: DebugManager): void {
+  manager.clearLogs();
+}
+
+function setupPerformanceManager(): DebugManager {
+  return createDebugManager();
+}
+
+function cleanupPerformanceManager(manager: DebugManager): void {
+  manager.clearPerformanceMetrics();
+}
+
+// Test functions moved to outer scope to fix ESLint errors
+const asyncFn = async (): Promise<string> => {
+  // Use deterministic timing instead of hard wait
+  await tick();
+  return 'result';
+};
+
+const asyncErrorFn = async (): Promise<never> => {
+  // Use deterministic timing instead of hard wait
+  await tick();
+  throw new Error('Test error');
+};
+
+const syncFn = (): number => {
+  let sum = 0;
+  for (let i = 0; i < 1000; i++) {
+    sum += i;
+  }
+  return sum;
+};
+
+const syncErrorFn = (): never => {
+  throw new Error('Sync error');
+};
+
 describe('DebugManager Timer Operations - Basic Operations', () => {
-  function setupTimerManager() {
-    return createDebugManager();
-  }
-
-  function cleanupTimerManager(manager: DebugManager) {
-    manager.clearPerformanceMetrics();
-  }
-
   let manager: DebugManager;
 
   beforeEach(() => {
@@ -88,14 +133,6 @@ describe('DebugManager Timer Operations - Basic Operations', () => {
 });
 
 describe('DebugManager Timer Operations - Error Handling', () => {
-  function setupTimerManager() {
-    return createDebugManager();
-  }
-
-  function cleanupTimerManager(manager: DebugManager) {
-    manager.clearPerformanceMetrics();
-  }
-
   let manager: DebugManager;
 
   beforeEach(() => {
@@ -124,14 +161,6 @@ describe('DebugManager Timer Operations - Error Handling', () => {
 });
 
 describe('DebugManager Timer Operations - Timer Limits', () => {
-  function setupTimerManager() {
-    return createDebugManager();
-  }
-
-  function cleanupTimerManager(manager: DebugManager) {
-    manager.clearPerformanceMetrics();
-  }
-
   let manager: DebugManager;
 
   beforeEach(() => {
@@ -195,14 +224,6 @@ describe('DebugManager Memory Tracking', () => {
 });
 
 describe('DebugManager Logging Operations - Basic Logging', () => {
-  function setupLoggingManager() {
-    return createDebugManager();
-  }
-
-  function cleanupLoggingManager(manager: DebugManager) {
-    manager.clearLogs();
-  }
-
   let manager: DebugManager;
 
   beforeEach(() => {
@@ -256,14 +277,6 @@ describe('DebugManager Logging Operations - Basic Logging', () => {
 });
 
 describe('DebugManager Logging Operations - Trace Logging', () => {
-  function setupLoggingManager() {
-    return createDebugManager();
-  }
-
-  function cleanupLoggingManager(manager: DebugManager) {
-    manager.clearLogs();
-  }
-
   let manager: DebugManager;
 
   beforeEach(() => {
@@ -298,14 +311,6 @@ describe('DebugManager Logging Operations - Trace Logging', () => {
 });
 
 describe('DebugManager Logging Operations - Log Limits', () => {
-  function setupLoggingManager() {
-    return createDebugManager();
-  }
-
-  function cleanupLoggingManager(manager: DebugManager) {
-    manager.clearLogs();
-  }
-
   let manager: DebugManager;
 
   beforeEach(() => {
@@ -328,14 +333,6 @@ describe('DebugManager Logging Operations - Log Limits', () => {
 });
 
 describe('DebugManager Performance Measurement - Async Measurement', () => {
-  function setupPerformanceManager() {
-    return createDebugManager();
-  }
-
-  function cleanupPerformanceManager(manager: DebugManager) {
-    manager.clearPerformanceMetrics();
-  }
-
   let manager: DebugManager;
 
   beforeEach(() => {
@@ -347,13 +344,6 @@ describe('DebugManager Performance Measurement - Async Measurement', () => {
   });
 
   it('should measure async operations', async () => {
-    const asyncFn = async () => {
-      // Use deterministic timing instead of hard wait
-      const { tick } = require('../../src/utils/deterministic-timing');
-      await tick();
-      return 'result';
-    };
-
     const result = await manager.measureAsync('async-test', asyncFn, {
       test: true,
     });
@@ -366,15 +356,8 @@ describe('DebugManager Performance Measurement - Async Measurement', () => {
   });
 
   it('should handle async operation errors', async () => {
-    const asyncFn = async () => {
-      // Use deterministic timing instead of hard wait
-      const { tick } = require('../../src/utils/deterministic-timing');
-      await tick();
-      throw new Error('Test error');
-    };
-
     await expect(
-      manager.measureAsync('async-error-test', asyncFn)
+      manager.measureAsync('async-error-test', asyncErrorFn)
     ).rejects.toThrow('Test error');
 
     const metrics = manager.getPerformanceMetrics('async-error-test');
@@ -384,14 +367,6 @@ describe('DebugManager Performance Measurement - Async Measurement', () => {
 });
 
 describe('DebugManager Performance Measurement - Sync Measurement', () => {
-  function setupPerformanceManager() {
-    return createDebugManager();
-  }
-
-  function cleanupPerformanceManager(manager: DebugManager) {
-    manager.clearPerformanceMetrics();
-  }
-
   let manager: DebugManager;
 
   beforeEach(() => {
@@ -403,14 +378,6 @@ describe('DebugManager Performance Measurement - Sync Measurement', () => {
   });
 
   it('should measure sync operations', () => {
-    const syncFn = () => {
-      let sum = 0;
-      for (let i = 0; i < 1000; i++) {
-        sum += i;
-      }
-      return sum;
-    };
-
     const result = manager.measureSync('sync-test', syncFn, {
       iterations: 1000,
     });
@@ -423,11 +390,7 @@ describe('DebugManager Performance Measurement - Sync Measurement', () => {
   });
 
   it('should handle sync operation errors', () => {
-    const syncFn = () => {
-      throw new Error('Sync error');
-    };
-
-    expect(() => manager.measureSync('sync-error-test', syncFn)).toThrow(
+    expect(() => manager.measureSync('sync-error-test', syncErrorFn)).toThrow(
       'Sync error'
     );
 
@@ -514,7 +477,7 @@ describe('Global Convenience Functions', () => {
     });
 
     it('should use global trace logging', () => {
-      const traceManager = DebugManager.getInstance({ enableTrace: true });
+      DebugManager.getInstance({ enableTrace: true });
       expect(() => traceLog('Global trace message')).not.toThrow();
     });
   });

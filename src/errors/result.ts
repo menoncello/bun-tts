@@ -16,8 +16,8 @@ export type Result<T, E extends BunTtsError = BunTtsError> =
  * Creates a successful result containing the provided data.
  *
  * @template T - The type of the data
- * @param data - The success value to wrap in a Result
- * @returns A Result representing success
+ * @param {T} data - The success value to wrap in a Result
+ * @returns {Result<T>} A Result representing success
  */
 export function Ok<T>(data: T): Result<T> {
   return { success: true, data };
@@ -27,8 +27,8 @@ export function Ok<T>(data: T): Result<T> {
  * Creates an error result containing the provided error.
  *
  * @template E - The type of the error
- * @param error - The error to wrap in a Result
- * @returns A Result representing failure
+ * @param {E} error - The error to wrap in a Result
+ * @returns {Result<never, E>} A Result representing failure
  */
 export function Err<E extends BunTtsError>(error: E): Result<never, E> {
   return { success: false, error };
@@ -41,9 +41,9 @@ export function Err<E extends BunTtsError>(error: E): Result<never, E> {
  * @template T - The original data type
  * @template U - The transformed data type
  * @template E - The error type
- * @param result - The Result to map over
- * @param fn - The transformation function to apply to successful data
- * @returns A new Result with transformed data or the original error
+ * @param {Result<T, E>} result - The Result to map over
+ * @param {(value: T) => U} fn - The transformation function to apply to successful data
+ * @returns {Result<U, E>} A new Result with transformed data or the original error
  */
 export function map<T, U, E extends BunTtsError>(
   result: Result<T, E>,
@@ -63,9 +63,9 @@ export function map<T, U, E extends BunTtsError>(
  * @template T - The original data type
  * @template U - The new data type
  * @template E - The error type
- * @param result - The Result to chain operations on
- * @param fn - A function that takes successful data and returns a new Result
- * @returns A new Result from the chained operation or the original error
+ * @param {Result<T, E>} result - The Result to chain operations on
+ * @param {(value: T) => Result<U, E>} fn - A function that takes successful data and returns a new Result
+ * @returns {Result<U, E>} A new Result from the chained operation or the original error
  */
 export function chain<T, U, E extends BunTtsError>(
   result: Result<T, E>,
@@ -84,10 +84,10 @@ export function chain<T, U, E extends BunTtsError>(
  * @template T - The success data type
  * @template U - The result type
  * @template E - The error type
- * @param result - The Result to match against
- * @param onSuccess - Function to apply when the Result is successful
- * @param onError - Function to apply when the Result is an error
- * @returns The result of applying the appropriate function
+ * @param {Result<T, E>} result - The Result to match against
+ * @param {(value: T) => U} onSuccess - Function to apply when the Result is successful
+ * @param {(error: E) => U} onError - Function to apply when the Result is an error
+ * @returns {U} The result of applying the appropriate function
  */
 export function match<T, U, E extends BunTtsError>(
   result: Result<T, E>,
@@ -107,9 +107,9 @@ export function match<T, U, E extends BunTtsError>(
  *
  * @template T - The success data type
  * @template E - The error type
- * @param result - The Result to unwrap
- * @returns The data if the result is successful
- * @throws The error if the result is a failure
+ * @param {Result<T, E>} result - The Result to unwrap
+ * @returns {T} The data if the result is successful
+ * @throws {E} The error if the result is a failure
  */
 export function unwrap<T, E extends BunTtsError>(result: Result<T, E>): T {
   if (result.success) {
@@ -124,9 +124,9 @@ export function unwrap<T, E extends BunTtsError>(result: Result<T, E>): T {
  *
  * @template T - The success data type
  * @template E - The error type
- * @param result - The Result to unwrap
- * @param defaultValue - The default value to return if the result is a failure
- * @returns The data if the result is successful, otherwise the default value
+ * @param {Result<T, E>} result - The Result to unwrap
+ * @param {T} defaultValue - The default value to return if the result is a failure
+ * @returns {T} The data if the result is successful, otherwise the default value
  */
 export function unwrapOr<T, E extends BunTtsError>(
   result: Result<T, E>,

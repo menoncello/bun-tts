@@ -10,10 +10,10 @@ import { extractParagraphFromToken } from './token-processors.js';
 /**
  * Extract chapters from tokens
  *
- * @param tokens - Parsed tokens
- * @param config - Parser configuration
- * @param isChapterHeader - Function to check if token is a chapter header
- * @returns Array of chapters
+ * @param {ParsedToken[]} tokens - Parsed tokens
+ * @param {object} config - Parser configuration
+ * @param {(token: ParsedToken) => boolean} isChapterHeader - Function to check if token is a chapter header
+ * @returns {Promise<Chapter[]>} Array of chapters
  */
 export async function extractChaptersFromTokens(
   tokens: ParsedToken[],
@@ -53,11 +53,11 @@ export async function extractChaptersFromTokens(
 /**
  * Handle new chapter creation (synchronous version)
  *
- * @param chapters - Existing chapters array
- * @param currentChapter - Current chapter being processed
- * @param token - Header token
- * @param chapterPosition - Position of chapter
- * @returns New chapter object
+ * @param {Chapter[]} chapters - Existing chapters array
+ * @param {Chapter | null} currentChapter - Current chapter being processed
+ * @param {any} token - Header token
+ * @param {any} chapterPosition - Position of chapter
+ * @returns {Chapter} New chapter object
  */
 function handleNewChapterSync(
   chapters: Chapter[],
@@ -81,16 +81,18 @@ function handleNewChapterSync(
     estimatedDuration: 0,
     startPosition: 0,
     endPosition: 0,
+    startIndex: 0,
   };
 }
 
 /**
  * Process content within chapter
  *
- * @param currentChapter - Current chapter
- * @param token - Token to process
- * @param paragraphPosition - Position in chapter
- * @param config - Parser configuration
+ * @param {any} currentChapter - Current chapter
+ * @param {any} token - Token to process
+ * @param {any} paragraphPosition - Position in chapter
+ * @param {object} config - Parser configuration
+ * @returns {void}
  */
 function processChapterContent(
   currentChapter: Chapter,

@@ -5,9 +5,9 @@
  * for better test management and maintainability.
  */
 
-import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
-import type { Logger } from '../../src/interfaces/logger.js';
+import { describe, test, beforeEach, afterEach, mock } from 'bun:test';
 import type { ConfigManager } from '../../src/config/config-manager.js';
+import type { Logger } from '../../src/interfaces/logger.js';
 
 /**
  * Test priority levels for classification and execution ordering
@@ -43,6 +43,7 @@ export class TestCleanupManager {
 
   /**
    * Register a cleanup task to be executed after each test
+   * @param {() => Promise<void> | void} task - The cleanup task to register
    */
   static registerCleanup(task: () => Promise<void> | void): void {
     this.cleanupTasks.push(task);
@@ -50,6 +51,7 @@ export class TestCleanupManager {
 
   /**
    * Register a mock instance for cleanup
+   * @param {any} mockInstance - The mock instance to register for cleanup
    */
   static registerMock(mockInstance: any): void {
     this.mockInstances.push(mockInstance);
@@ -57,6 +59,7 @@ export class TestCleanupManager {
 
   /**
    * Execute all cleanup tasks and reset mocks
+   * @returns {Promise<void>} Promise that resolves when all cleanup tasks are complete
    */
   static async cleanup(): Promise<void> {
     // Reset all mocks
@@ -70,8 +73,8 @@ export class TestCleanupManager {
     for (const task of this.cleanupTasks) {
       try {
         await task();
-      } catch (error) {
-        console.error('Cleanup task failed:', error);
+      } catch {
+        // Silently handle cleanup task failures
       }
     }
 
@@ -93,12 +96,24 @@ export class TestCleanupManager {
  * Enhanced mock factory with automatic cleanup registration
  */
 export class EnhancedMockFactory {
+  /**
+   * Create a mock logger with automatic cleanup registration
+   * @returns {Logger & { mock: ReturnType<typeof mock> }} A mock logger with tracking capabilities
+   */
   static createLogger(): Logger & { mock: ReturnType<typeof mock> } {
     const logger = {
-      debug: mock(() => {}),
-      info: mock(() => {}),
-      warn: mock(() => {}),
-      error: mock(() => {}),
+      debug: mock(() => {
+        // Empty mock function for testing
+      }),
+      info: mock(() => {
+        // Empty mock function for testing
+      }),
+      warn: mock(() => {
+        // Empty mock function for testing
+      }),
+      error: mock(() => {
+        // Empty mock function for testing
+      }),
     } as any;
 
     // Register for automatic cleanup
@@ -110,6 +125,11 @@ export class EnhancedMockFactory {
     return logger;
   }
 
+  /**
+   * Create a mock config manager with automatic cleanup registration
+   * @param {any} defaultConfig - Optional default configuration to return
+   * @returns {ConfigManager & { mock: ReturnType<typeof mock> }} A mock config manager with tracking capabilities
+   */
   static createConfigManager(
     defaultConfig?: any
   ): ConfigManager & { mock: ReturnType<typeof mock> } {
@@ -120,9 +140,13 @@ export class EnhancedMockFactory {
         }
         return defaultValue;
       }),
-      set: mock(() => {}),
+      set: mock(() => {
+        // Empty mock function for testing
+      }),
       has: mock(() => true),
-      clear: mock(() => {}),
+      clear: mock(() => {
+        // Empty mock function for testing
+      }),
     } as any;
 
     // Register for automatic cleanup
@@ -141,6 +165,13 @@ export class EnhancedMockFactory {
 export class TestClassifier {
   /**
    * Classify a test based on its metadata
+   * @param {TestMetadata} metadata - The test metadata to classify
+   * @returns {{
+     priority: TestPriority;
+     shouldRunInCI: boolean;
+     estimatedDuration: 'fast' | 'medium' | 'slow';
+     requirements: string[];
+   }} Object containing classification information
    */
   static classify(metadata: TestMetadata): {
     priority: TestPriority;
@@ -174,6 +205,9 @@ export class TestClassifier {
 
   /**
    * Generate test description with metadata
+   * @param {string} baseDescription - The base description for the test
+   * @param {Partial<TestMetadata>} metadata - Partial test metadata to include in the description
+   * @returns {string} Formatted test description with priority and tags
    */
   static describeTest(
     baseDescription: string,

@@ -9,10 +9,10 @@ export class DocumentParseError extends Error {
   /**
    * Creates a new DocumentParseError instance
    *
-   * @param message - Human-readable error message
-   * @param code - Machine-readable error code (default: 'PARSE_ERROR')
-   * @param details - Additional error context as key-value pairs (default: {})
-   * @param recoverable - Whether the error is recoverable (default: false)
+   * @param {string} message - Human-readable error message
+   * @param {string} code - Machine-readable error code (default: 'PARSE_ERROR')
+   * @param {Record<string, unknown>} details - Additional error context as key-value pairs (default: {})
+   * @param {boolean} recoverable - Whether the error is recoverable (default: false)
    */
   constructor(
     message: string,
@@ -33,9 +33,25 @@ export class DocumentParseError extends Error {
   }
 
   /**
+   * Returns string representation including error code for test compatibility
+   * @returns {string} String representation of the error
+   */
+  public override toString(): string {
+    return `${this.name}: ${this.message} (${this.code})`;
+  }
+
+  /**
+   * Returns string representation with error code for logging
+   * @returns {string} String representation with error code
+   */
+  public toStringWithCode(): string {
+    return `${this.name}: ${this.message} (${this.code})`;
+  }
+
+  /**
    * Creates a formatted error message suitable for logging
    *
-   * @returns Formatted log message string
+   * @returns {any} Formatted log message string
    */
   public toLogMessage(): string {
     return `${this.name} [${this.code}]: ${this.message} | Details: ${JSON.stringify(this.details)} | Recoverable: ${this.recoverable}`;
@@ -44,7 +60,7 @@ export class DocumentParseError extends Error {
   /**
    * Converts the error to a serializable format suitable for API responses
    *
-   * @returns Serializable error object
+   * @returns {any} Serializable error object
    */
   public toJSON(): Record<string, unknown> {
     return {
@@ -65,9 +81,9 @@ export class EPUBParseError extends DocumentParseError {
   /**
    * Creates a new EPUBParseError instance
    *
-   * @param message - Human-readable error message
-   * @param code - Machine-readable error code (default: 'EPUB_PARSE_ERROR')
-   * @param details - Additional error context as key-value pairs (default: {})
+   * @param {string} message - Human-readable error message
+   * @param {string} code - Machine-readable error code (default: 'EPUB_PARSE_ERROR')
+   * @param {Record<string, unknown>} details - Additional error context as key-value pairs (default: {})
    */
   constructor(
     message: string,
@@ -86,10 +102,25 @@ export class EPUBFormatError extends EPUBParseError {
   /**
    * Creates a new EPUBFormatError instance
    *
-   * @param details - Additional error context as key-value pairs (default: {})
+   * @param {string | Record<string, unknown>} messageOrDetails - Error message or details object
+   * @param {Record<string, unknown>} details - Additional error context as key-value pairs (default: {})
    */
-  constructor(details: Record<string, unknown> = {}) {
-    super('Invalid EPUB file format', 'EPUB_FORMAT_ERROR', details);
+  constructor(
+    messageOrDetails?: string | Record<string, unknown>,
+    details: Record<string, unknown> = {}
+  ) {
+    let message: string;
+    let finalDetails: Record<string, unknown>;
+
+    if (typeof messageOrDetails === 'string') {
+      message = messageOrDetails;
+      finalDetails = details;
+    } else {
+      message = 'Invalid EPUB file format';
+      finalDetails = messageOrDetails || {};
+    }
+
+    super(message, 'EPUB_FORMAT_ERROR', finalDetails);
     this.name = 'EPUBFormatError';
   }
 }
@@ -101,7 +132,7 @@ export class EPUBStructureError extends EPUBParseError {
   /**
    * Creates a new EPUBStructureError instance
    *
-   * @param details - Additional error context as key-value pairs (default: {})
+   * @param {Record<string, unknown>} details - Additional error context as key-value pairs (default: {})
    */
   constructor(details: Record<string, unknown> = {}) {
     super('Invalid EPUB structure', 'EPUB_STRUCTURE_ERROR', details);
@@ -116,7 +147,7 @@ export class EPUBEncryptionError extends EPUBParseError {
   /**
    * Creates a new EPUBEncryptionError instance
    *
-   * @param details - Additional error context as key-value pairs (default: {})
+   * @param {Record<string, unknown>} details - Additional error context as key-value pairs (default: {})
    */
   constructor(details: Record<string, unknown> = {}) {
     super('EPUB file is encrypted', 'EPUB_ENCRYPTION_ERROR', details);
@@ -131,8 +162,8 @@ export class EPUBVersionError extends EPUBParseError {
   /**
    * Creates a new EPUBVersionError instance
    *
-   * @param version - The unsupported EPUB version
-   * @param details - Additional error context as key-value pairs (default: {})
+   * @param {string} version - The unsupported EPUB version
+   * @param {Record<string, unknown>} details - Additional error context as key-value pairs (default: {})
    */
   constructor(version: string, details: Record<string, unknown> = {}) {
     super(`Unsupported EPUB version: ${version}`, 'EPUB_VERSION_ERROR', {

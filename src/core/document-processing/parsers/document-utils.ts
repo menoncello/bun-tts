@@ -23,10 +23,10 @@ export interface ChapterData {
 
 /**
  * Convert a sentence to the proper format
- * @param sentence - The sentence to convert
- * @param sentIndex - The sentence position index
- * @param paragraphId - The parent paragraph ID
- * @returns Formatted sentence object
+ * @param {any} sentence - The sentence to convert
+ * @param {any} sentIndex - The sentence position index
+ * @param {any} paragraphId - The parent paragraph ID
+ * @returns {object} Formatted sentence object
  */
 export const convertSentenceToFormat = (
   sentence: unknown,
@@ -56,10 +56,10 @@ export const convertSentenceToFormat = (
 
 /**
  * Process sentences from a paragraph
- * @param para - The paragraph containing sentences with optional sentences array
- * @param para.sentences - Array of sentences in the paragraph
- * @param paragraphId - The paragraph ID for sentence IDs
- * @returns Array of processed sentences
+ * @param {{sentences?: unknown[]}} para - The paragraph containing sentences with optional sentences array
+ * @param {unknown[]} para.sentences - Array of sentences in the paragraph
+ * @param {any} paragraphId - The paragraph ID for sentence IDs
+ * @returns {Array<object>} Array of processed sentences
  */
 export const processParagraphSentences = (
   para: { sentences?: unknown[] },
@@ -72,8 +72,8 @@ export const processParagraphSentences = (
 
 /**
  * Calculate paragraph statistics
- * @param sentences - Array of processed sentences
- * @returns Object with word count and raw text
+ * @param {Array<object>} sentences - Array of processed sentences
+ * @returns {any} {rawText: string, wordCount: number} Object with word count and raw text
  */
 export const calculateParagraphStats = (
   sentences: Array<ReturnType<typeof convertSentenceToFormat>>
@@ -85,11 +85,11 @@ export const calculateParagraphStats = (
 
 /**
  * Convert a paragraph to the proper format
- * @param para - The paragraph to convert
- * @param para.sentences - Array of sentences in the paragraph
- * @param paraIndex - The paragraph position index
- * @param chapterId - The parent chapter ID
- * @returns Formatted paragraph object
+ * @param {{sentences?: unknown[]}} para - The paragraph to convert
+ * @param {unknown[]} para.sentences - Array of sentences in the paragraph
+ * @param {any} paraIndex - The paragraph position index
+ * @param {any} chapterId - The parent chapter ID
+ * @returns {object} Formatted paragraph object
  */
 export const convertParagraphToFormat = (
   para: { sentences?: unknown[] },
@@ -102,6 +102,7 @@ export const convertParagraphToFormat = (
   position: number;
   wordCount: number;
   rawText: string;
+  text: string;
   includeInAudio: boolean;
   confidence: number;
 } => {
@@ -116,6 +117,7 @@ export const convertParagraphToFormat = (
     position: paraIndex,
     wordCount,
     rawText,
+    text: rawText,
     includeInAudio: true,
     confidence: DEFAULT_PARAGRAPH_CONFIDENCE,
   };
@@ -123,8 +125,8 @@ export const convertParagraphToFormat = (
 
 /**
  * Calculate estimated duration for paragraphs
- * @param paragraphs - Array of paragraphs
- * @returns Total estimated duration in seconds
+ * @param {Array<object>} paragraphs - Array of paragraphs
+ * @returns {number} Total estimated duration in seconds
  */
 export const calculateParagraphsDuration = (
   paragraphs: Array<{ sentences: Array<{ estimatedDuration: number }> }>
@@ -139,9 +141,9 @@ export const calculateParagraphsDuration = (
 
 /**
  * Convert ChapterData to Chapter format
- * @param chapterData - The chapter data to convert
- * @param index - The chapter position in the document
- * @returns Converted Chapter object
+ * @param {any} chapterData - The chapter data to convert
+ * @param {any} index - The chapter position in the document
+ * @returns {Chapter} Converted Chapter object
  */
 export const convertChapterDataToChapter = (
   chapterData: ChapterData,
@@ -170,13 +172,14 @@ export const convertChapterDataToChapter = (
     estimatedDuration,
     startPosition: 0, // Could be enhanced with actual position tracking
     endPosition: 0, // Could be enhanced with actual position tracking
+    startIndex: 0, // For compatibility with Chapter interface
   };
 };
 
 /**
  * Calculate document statistics from chapters
- * @param chapters - Array of chapters to calculate statistics from
- * @returns Object containing total paragraphs and sentences
+ * @param {ChapterData[]} chapters - Array of chapters to calculate statistics from
+ * @returns {any} {totalParagraphs: number, totalSentences: number} Object containing total paragraphs and sentences
  */
 export const calculateStatistics = (
   chapters: ChapterData[]
@@ -201,8 +204,8 @@ export const calculateStatistics = (
 
 /**
  * Calculate document statistics from Chapter objects
- * @param chapters - Array of Chapter objects to calculate statistics from
- * @returns Object containing total paragraphs and sentences
+ * @param {Chapter[]} chapters - Array of Chapter objects to calculate statistics from
+ * @returns {any} {totalParagraphs: number, totalSentences: number} Object containing total paragraphs and sentences
  */
 export const calculateStatisticsFromChapters = (
   chapters: Chapter[]
@@ -226,8 +229,8 @@ export const calculateStatisticsFromChapters = (
 
 /**
  * Calculate estimated total duration from chapters
- * @param chapters - Array of chapters to calculate duration from
- * @returns Total estimated duration in seconds
+ * @param {ChapterData[]} chapters - Array of chapters to calculate duration from
+ * @returns {number} Total estimated duration in seconds
  */
 export const calculateEstimatedDuration = (chapters: ChapterData[]): number => {
   return chapters.reduce(
@@ -238,8 +241,8 @@ export const calculateEstimatedDuration = (chapters: ChapterData[]): number => {
 
 /**
  * Calculate estimated total duration from Chapter objects
- * @param chapters - Array of Chapter objects to calculate duration from
- * @returns Total estimated duration in seconds
+ * @param {Chapter[]} chapters - Array of Chapter objects to calculate duration from
+ * @returns {number} Total estimated duration in seconds
  */
 export const calculateEstimatedDurationFromChapters = (
   chapters: Chapter[]

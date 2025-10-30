@@ -30,7 +30,6 @@ export function createOPFContent(params: {
     date,
     version,
     customFields,
-    metadata,
   } = params;
 
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -112,6 +111,77 @@ export function createNAVContent(
 </html>`;
 }
 
+function generateMalformedContent(): string {
+  return `<invalid>This is malformed XML content</invalid>`;
+}
+
+function generateMultiParagraphContent(): string {
+  return Array.from({ length: 3 }, () => faker.lorem.paragraph()).join('\n\n');
+}
+
+function applyFormatting(content: string): string {
+  return `<p><strong>This is bold text</strong> and <em>this is italic text</em>.</p><p>${content}</p>`;
+}
+
+function addImages(content: string): string {
+  return `${content}<img src="images/cover.jpg" alt="Cover Image" />`;
+}
+
+function addScripts(content: string): string {
+  return `${content}<script>// Script content would be filtered out</script>`;
+}
+
+function buildChapterHTML(
+  chapter: { title: string; content: string },
+  processedContent: string,
+  contentWithFormatting: boolean
+): string {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>${chapter.title}</title>
+  </head>
+  <body>
+    <h1>${chapter.title}</h1>
+    ${contentWithFormatting ? processedContent : `<p>${processedContent}</p>`}
+  </body>
+</html>`;
+}
+
+function processContentEnhancements(
+  content: string,
+  options: {
+    contentWithImages?: boolean;
+    contentWithScripts?: boolean;
+    contentWithFormatting?: boolean;
+  }
+): string {
+  let processedContent = content;
+
+  if (options.contentWithFormatting) {
+    processedContent = applyFormatting(processedContent);
+  }
+
+  if (options.contentWithImages) {
+    processedContent = addImages(processedContent);
+  }
+
+  if (options.contentWithScripts) {
+    processedContent = addScripts(processedContent);
+  }
+
+  return processedContent;
+}
+
+function determineBaseContent(
+  chapter: { title: string; content: string },
+  contentWithMultipleParagraphs: boolean
+): string {
+  return contentWithMultipleParagraphs
+    ? generateMultiParagraphContent()
+    : chapter.content;
+}
+
 export function createChapterContent(
   chapter: { title: string; content: string },
   options: {
@@ -131,37 +201,18 @@ export function createChapterContent(
   } = options;
 
   if (malformedXML) {
-    return `<invalid>This is malformed XML content</invalid>`;
+    return generateMalformedContent();
   }
 
-  let content = chapter.content;
+  const baseContent = determineBaseContent(
+    chapter,
+    contentWithMultipleParagraphs
+  );
+  const enhancedContent = processContentEnhancements(baseContent, {
+    contentWithImages,
+    contentWithScripts,
+    contentWithFormatting,
+  });
 
-  if (contentWithMultipleParagraphs) {
-    content = Array.from({ length: 3 }, () => faker.lorem.paragraph()).join(
-      '\n\n'
-    );
-  }
-
-  if (contentWithFormatting) {
-    content = `<p><strong>This is bold text</strong> and <em>this is italic text</em>.</p><p>${content}</p>`;
-  }
-
-  if (contentWithImages) {
-    content += `<img src="images/cover.jpg" alt="Cover Image" />`;
-  }
-
-  if (contentWithScripts) {
-    content += `<script>console.log('This should be filtered out');</script>`;
-  }
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <title>${chapter.title}</title>
-  </head>
-  <body>
-    <h1>${chapter.title}</h1>
-    ${contentWithFormatting ? content : `<p>${content}</p>`}
-  </body>
-</html>`;
+  return buildChapterHTML(chapter, enhancedContent, contentWithFormatting);
 }

@@ -4,11 +4,11 @@
  */
 
 import { describe, test, expect, beforeEach } from 'bun:test';
-import type { Logger } from '../../../src/interfaces/logger.js';
 import type { ConfigManager } from '../../../src/config/config-manager.js';
-import type { Result } from '../../../src/errors/result.js';
-import { BunTtsError } from '../../../src/errors/bun-tts-error.js';
 import { MarkdownParser } from '../../../src/core/document-processing/parsers/markdown-parser.js';
+import { BunTtsError } from '../../../src/errors/bun-tts-error.js';
+import type { Result } from '../../../src/errors/result.js';
+import type { Logger } from '../../../src/interfaces/logger.js';
 import {
   MockLoggerFactory,
   MockConfigManagerFactory,
@@ -18,7 +18,7 @@ import {
 } from '../../support/document-processing-factories.js';
 
 // Helper function to safely extract data from successful Result
-function getResultData<T, E extends BunTtsError>(result: Result<T, E>): T {
+function _getResultData<T, E extends BunTtsError>(result: Result<T, E>): T {
   if (result.success === false) {
     throw new Error(
       `Expected successful result but got error: ${result.error.message}`
@@ -76,18 +76,14 @@ async function validateFinalStreamStructure(stream: any): Promise<void> {
 
 describe('Streaming Integration', () => {
   let parser: MarkdownParser;
-  let mockLogger: Logger;
-  let mockConfigManager: ConfigManager;
 
   beforeEach(() => {
     const setup = createParserWithMocks();
     parser = setup.parser;
-    mockLogger = setup.mockLogger;
-    mockConfigManager = setup.mockConfigManager;
   });
 
   test(`${TestIdGenerator.generateIntegration('1.2', 4)} should stream large document correctly`, async () => {
-    const bddComment = BDDTemplateFactory.createGivenWhenThenComment(
+    BDDTemplateFactory.createGivenWhenThenComment(
       [
         'A large markdown document is available for streaming processing',
         'The document contains multiple chapters and content types',

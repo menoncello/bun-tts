@@ -1,6 +1,5 @@
 import { Buffer } from 'buffer';
 import { faker } from '@faker-js/faker';
-import { EPUBFactoryOptions } from './epub-factory-types';
 import {
   createContainerXML,
   createOPFContent,
@@ -8,6 +7,10 @@ import {
   createNAVContent,
   createChapterContent,
 } from './epub-content-creators';
+import { EPUBFactoryOptions } from './epub-factory-types.js';
+
+type EPUBVersion = '2.0' | '3.0' | '3.1' | undefined;
+type TOCType = 'ncx' | 'nav' | 'none';
 
 /**
  * Factory for creating EPUB file buffers for testing
@@ -52,14 +55,9 @@ export const createLargeEPUBBuffer = (
   options: Partial<{
     pageCount: number;
     chapterCount: number;
-    streamingRequired: boolean;
   }> = {}
 ): Buffer => {
-  const {
-    pageCount = 1000,
-    chapterCount = 50,
-    streamingRequired = false,
-  } = options;
+  const { pageCount = 1000, chapterCount = 50 } = options;
 
   const chapters = Array.from({ length: chapterCount }, (_, i) => ({
     title: `Chapter ${i + 1}`,
@@ -173,8 +171,8 @@ function buildEPUBContent(options: Required<EPUBFactoryOptions>): Buffer {
 /**
  * Build EPUB from components
  */
-function buildEPUBFromComponents(params: {
-  tocType: 'ncx' | 'nav' | 'none';
+interface EPUBComponentParams {
+  tocType: TOCType;
   chapters: Array<{ title: string; content: string }>;
   embeddedAssets: Array<{ type: string; href: string; size: number }>;
   opfParams: {
@@ -184,7 +182,7 @@ function buildEPUBFromComponents(params: {
     publisher: string;
     identifier: string;
     date: string;
-    version: '2.0' | '3.0' | '3.1' | undefined;
+    version: EPUBVersion;
     customFields: Record<string, string>;
     metadata: Record<string, any>;
   };
@@ -195,7 +193,9 @@ function buildEPUBFromComponents(params: {
     contentWithMultipleParagraphs: boolean;
     malformedXML: boolean;
   };
-}): Buffer {
+}
+
+function buildEPUBFromComponents(params: EPUBComponentParams): Buffer {
   const { tocType, chapters, embeddedAssets, opfParams, contentOptions } =
     params;
 
@@ -223,7 +223,7 @@ function buildEPUBFromComponents(params: {
  * Create table of contents content based on type
  */
 function createTOCContent(
-  tocType: 'ncx' | 'nav' | 'none',
+  tocType: TOCType,
   chapters: Array<{ title: string; content: string }>
 ): string {
   if (tocType === 'ncx') {
@@ -279,7 +279,7 @@ function buildZipStructure(params: {
   containerXML: string;
   opfContent: string;
   tocContent: string;
-  tocType: 'ncx' | 'nav' | 'none';
+  tocType: TOCType;
   chapterFiles: Array<{ path: string; content: Buffer }>;
   assetFiles: Array<{ path: string; content: Buffer }>;
 }) {
@@ -330,7 +330,7 @@ function serializeEPUB(
 /**
  * Apply partial corruption to EPUB content
  */
-function applyPartialCorruption(content: Buffer): Buffer {
+function applyPartialCorruption(_content: Buffer): Buffer {
   // This is a simple corruption simulation
   return Buffer.from('<invalid>corrupted</invalid>', 'utf8');
 }

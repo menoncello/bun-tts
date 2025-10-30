@@ -1,7 +1,7 @@
 /**
  * Display comprehensive help information for the CLI application
  *
- * @param {object} cli - CLI object containing help information
+ * @param {any} cli - CLI object containing help information
  * @param {string} cli.help - The help text to display for the CLI application
  * @returns {void} This function outputs help text to console and returns undefined
  *
@@ -11,8 +11,15 @@
  * // Outputs formatted help text with commands and examples
  * ```
  */
+import { logger } from './logger.js';
+
+/**
+ * Display help information for the CLI application
+ * @param {{help: string}} cli - CLI configuration object
+ * @param {string} cli.help - Help text to display
+ */
 export function showHelp(cli: { help: string }): void {
-  console.log(`
+  logger.info(`
 ${cli.help}
 
 Available Commands:

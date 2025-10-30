@@ -7,20 +7,38 @@ import { PARSER_CONSTANTS, REGEX_PATTERNS } from './constants.js';
 
 /**
  * Count words in text
- * @param text - The text string to count words in
- * @returns The number of words in the text
+ * @param {string} text - The text string to count words in
+ * @returns {number} The number of words in the text
  */
 export function countWords(text: string): number {
-  return text
+  if (!text || text.trim() === '') return 0;
+
+  // Enhanced word counting that handles hyphenated words, contractions, and special cases
+  const words = text
     .trim()
-    .split(REGEX_PATTERNS.WORD_SEPARATOR)
-    .filter((word) => word.length > 0).length;
+    // Replace URLs and emails with single word placeholders
+    .replace(/https?:\/\/\S+/g, 'URL')
+    // Safer email regex that avoids ReDoS vulnerabilities
+    // Prevents backtracking by using simple, non-overlapping character classes
+    // Pattern: [local-part]@[domain].[tld] where:
+    // - local-part: starts with alphanumeric, then allowed chars
+    // - domain: starts and ends with alphanumeric, dots and hyphens in middle
+    // - tld: 2-63 alphabetic characters
+    .replace(
+      /\b[\dA-Za-z][\w%+.-]*[\dA-Za-z]@[\dA-Za-z][\d.A-Za-z-]*[\dA-Za-z]\.[A-Za-z]{2,63}\b/g,
+      'EMAIL'
+    )
+    // Split by whitespace but keep hyphenated words together
+    .split(/\s+/)
+    .filter((word) => word.length > 0);
+
+  return words.length;
 }
 
 /**
  * Estimate sentence duration for TTS
- * @param text - The text to estimate duration for
- * @returns Estimated duration in seconds for text-to-speech processing
+ * @param {string} text - The text to estimate duration for
+ * @returns {number} Estimated duration in seconds for text-to-speech processing
  */
 export function estimateSentenceDuration(text: string): number {
   const wordCount = countWords(text);
@@ -29,8 +47,8 @@ export function estimateSentenceDuration(text: string): number {
 
 /**
  * Check if text has formatting
- * @param text - The text to check for formatting patterns
- * @returns True if the text contains markdown formatting, false otherwise
+ * @param {string} text - The text to check for formatting patterns
+ * @returns {boolean} True if the text contains markdown formatting, false otherwise
  */
 export function hasFormatting(text: string): boolean {
   const formattingPatterns = [
@@ -45,10 +63,10 @@ export function hasFormatting(text: string): boolean {
 
 /**
  * Extract sentences from text with optimized regex
- * @param text - The text string to extract sentences from
- * @param minSentenceLength - Minimum length a sentence must have to be included
- * @param sentenceBoundaryPatterns - Array of regex patterns to match sentence boundaries
- * @returns Array of sentences with calculated metadata
+ * @param {string} text - The text string to extract sentences from
+ * @param {number} minSentenceLength - Minimum length a sentence must have to be included
+ * @param {string[]} sentenceBoundaryPatterns - Array of regex patterns to match sentence boundaries
+ * @returns {Sentence[]} Array of sentences with calculated metadata
  */
 export function extractSentences(
   text: string,
@@ -70,9 +88,9 @@ export function extractSentences(
 
 /**
  * Find sentence boundary matches in text
- * @param text - The text to search for sentence boundaries
- * @param sentenceBoundaryPatterns - Array of regex patterns to match sentence boundaries
- * @returns Array of RegExpMatchArray containing all sentence boundary matches
+ * @param {string} text - The text to search for sentence boundaries
+ * @param {string[]} sentenceBoundaryPatterns - Array of regex patterns to match sentence boundaries
+ * @returns {RegExpMatchArray[]} Array of RegExpMatchArray containing all sentence boundary matches
  */
 function findSentenceMatches(
   text: string,
@@ -84,8 +102,8 @@ function findSentenceMatches(
 
 /**
  * Create a single sentence when no boundaries found
- * @param text - The text to create a sentence from
- * @returns A sentence object with the provided text
+ * @param {string} text - The text to create a sentence from
+ * @returns {Sentence} A sentence object with the provided text
  */
 function createSingleSentence(text: string): Sentence {
   return {
@@ -100,10 +118,10 @@ function createSingleSentence(text: string): Sentence {
 
 /**
  * Process sentence matches and create sentence objects
- * @param text - The original text to extract sentences from
- * @param matches - Array of RegExpMatchArray containing sentence boundary matches
- * @param minSentenceLength - Minimum length a sentence must have to be included
- * @param sentences - Array to populate with created sentence objects
+ * @param {string} text - The original text to extract sentences from
+ * @param {RegExpMatchArray[]} matches - Array of RegExpMatchArray containing sentence boundary matches
+ * @param {number} minSentenceLength - Minimum length a sentence must have to be included
+ * @param {Sentence[]} sentences - Array to populate with created sentence objects
  */
 function processSentenceMatches(
   text: string,
@@ -131,10 +149,10 @@ function processSentenceMatches(
 
 /**
  * Handle remaining text after last match
- * @param text - The original text to extract remaining content from
- * @param matches - Array of RegExpMatchArray containing sentence boundary matches
- * @param minSentenceLength - Minimum length remaining text must have to be included
- * @param sentences - Array to populate with created sentence objects
+ * @param {string} text - The original text to extract remaining content from
+ * @param {RegExpMatchArray[]} matches - Array of RegExpMatchArray containing sentence boundary matches
+ * @param {number} minSentenceLength - Minimum length remaining text must have to be included
+ * @param {Sentence[]} sentences - Array to populate with created sentence objects
  */
 function handleRemainingText(
   text: string,
@@ -157,9 +175,9 @@ function handleRemainingText(
 
 /**
  * Create sentence object with metadata
- * @param text - The text content for the sentence
- * @param position - The position index of the sentence
- * @returns A complete sentence object with calculated metadata
+ * @param {string} text - The text content for the sentence
+ * @param {number} position - The position index of the sentence
+ * @returns {Sentence} A complete sentence object with calculated metadata
  */
 function createSentenceObject(text: string, position: number): Sentence {
   return {
@@ -174,8 +192,8 @@ function createSentenceObject(text: string, position: number): Sentence {
 
 /**
  * Calculate paragraph confidence score
- * @param sentences - Array of sentences to calculate confidence for
- * @returns Confidence score between 0.0 and 1.0 indicating parsing quality
+ * @param {Sentence[]} sentences - Array of sentences to calculate confidence for
+ * @returns {number} Confidence score between 0.0 and 1.0 indicating parsing quality
  */
 export function calculateParagraphConfidence(sentences: Sentence[]): number {
   if (sentences.length === 0) return PARSER_CONSTANTS.BASE_CONFIDENCE;

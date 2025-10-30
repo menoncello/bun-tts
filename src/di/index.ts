@@ -88,7 +88,7 @@ export interface DocumentProcessingDependencies {
  * logger.info('Application started', { version: config.get('version') });
  * ```
  */
-export const getCommonDependencies = (): CommonDependencies => {
+export const _getCommonDependencies = (): CommonDependencies => {
   return {
     config: resolve(DEPENDENCIES.CONFIG_MANAGER),
     logger: resolve(DEPENDENCIES.LOGGER),
@@ -111,7 +111,7 @@ export const getCommonDependencies = (): CommonDependencies => {
  * logger.info('Processing document', { parser: 'markdown' });
  * ```
  */
-export const getDocumentProcessingDependencies =
+export const _getDocumentProcessingDependencies =
   (): DocumentProcessingDependencies => {
     return {
       config: resolve(DEPENDENCIES.CONFIG_MANAGER),

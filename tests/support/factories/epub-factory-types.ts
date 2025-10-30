@@ -1,5 +1,3 @@
-import { faker } from '@faker-js/faker';
-
 export interface EPUBFactoryOptions {
   title?: string;
   author?: string;

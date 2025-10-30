@@ -11,8 +11,8 @@ export class ValidationError extends BunTtsError {
   /**
    * Creates a new ValidationError instance.
    *
-   * @param message - Human-readable error message describing the validation issue
-   * @param details - Additional context information about the validation error
+   * @param {string} message - Human-readable error message describing the validation issue
+   * @param {Record<string, unknown>} details - Additional context information about the validation error
    */
   constructor(message: string, details?: Record<string, unknown>) {
     super(message, {
@@ -27,7 +27,7 @@ export class ValidationError extends BunTtsError {
   /**
    * Gets the exit code for validation errors.
    *
-   * @returns The exit code (3 for validation errors)
+   * @returns {any} The exit code (3 for validation errors)
    */
   public override getExitCode(): number {
     return VALIDATION_ERROR_EXIT_CODE;

@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect } from 'bun:test';
 import {
   ConfigurationError,
   success,
   failure,
 } from '../../src/errors/index.js';
 import {
-  recoveryManager,
+  getRecoveryManager,
   executeWithRecovery,
 } from '../../src/utils/error-recovery.js';
 import {
@@ -47,8 +47,8 @@ function registerRecoveryStrategies(
   strategy1: any,
   strategy2: any
 ): void {
-  recoveryManager().registerStrategy('ConfigurationError', strategy1);
-  recoveryManager().registerStrategy('ConfigurationError', strategy2);
+  getRecoveryManager().registerStrategy('ConfigurationError', strategy1);
+  getRecoveryManager().registerStrategy('ConfigurationError', strategy2);
 }
 
 function createFailingOperationForMultiStrategy(

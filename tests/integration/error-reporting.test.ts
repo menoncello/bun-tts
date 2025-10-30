@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect } from 'bun:test';
 import {
   ConfigurationError,
   FileNotFoundError,
 } from '../../src/errors/index.js';
 import { debugManager } from '../../src/utils/debug.js';
-import { recoveryManager } from '../../src/utils/error-recovery.js';
+import { getRecoveryManager } from '../../src/utils/error-recovery.js';
 import { errorReporter } from '../../src/utils/error-reporter.js';
 import {
   setupErrorHandlingTests,
@@ -74,7 +74,7 @@ async function performRecoveryOperation(
   error: FileNotFoundError,
   fallbackOperation: () => Promise<any>
 ): Promise<any> {
-  return recoveryManager().attemptRecovery(
+  return getRecoveryManager().attemptRecovery(
     error,
     {
       operation: 'file-processing',

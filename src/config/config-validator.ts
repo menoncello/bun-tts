@@ -38,8 +38,8 @@ export class ConfigValidator {
    * Validates that all configuration values are within acceptable ranges and
    * have valid types. Returns a Result indicating success or failure.
    *
-   * @param config - The configuration object to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
+   * @param {Partial<BunTtsConfig>} config - The configuration object to validate
+   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
    */
   validate(config: Partial<BunTtsConfig>): Result<true, ConfigurationError> {
     const loggingValidation = this.validateLoggingConfig(config.logging);
@@ -70,8 +70,8 @@ export class ConfigValidator {
   /**
    * Validate logging configuration
    *
-   * @param logging - The logging configuration to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
+   * @param {BunTtsConfig['logging']} logging - The logging configuration to validate
+   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
    */
   validateLoggingConfig(
     logging?: BunTtsConfig['logging']
@@ -85,8 +85,8 @@ export class ConfigValidator {
   /**
    * Validate TTS configuration
    *
-   * @param tts - The TTS configuration to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
+   * @param {BunTtsConfig['tts']} tts - The TTS configuration to validate
+   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
    */
   validateTtsConfig(
     tts?: BunTtsConfig['tts']
@@ -117,8 +117,8 @@ export class ConfigValidator {
   /**
    * Validate TTS engine
    *
-   * @param engine - The engine to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
+   * @param {any} engine - The engine to validate
+   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
    */
   validateTtsEngine(engine?: string): Result<true, ConfigurationError> {
     if (
@@ -133,8 +133,8 @@ export class ConfigValidator {
   /**
    * Validate TTS output format
    *
-   * @param format - The output format to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
+   * @param {any} format - The output format to validate
+   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
    */
   validateTtsOutputFormat(format?: string): Result<true, ConfigurationError> {
     if (
@@ -151,8 +151,8 @@ export class ConfigValidator {
   /**
    * Validate TTS sample rate
    *
-   * @param sampleRate - The sample rate to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
+   * @param {any} sampleRate - The sample rate to validate
+   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
    */
   validateTtsSampleRate(sampleRate?: number): Result<true, ConfigurationError> {
     if (
@@ -171,8 +171,8 @@ export class ConfigValidator {
   /**
    * Validate TTS quality
    *
-   * @param quality - The quality to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
+   * @param {any} quality - The quality to validate
+   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
    */
   validateTtsQuality(quality?: number): Result<true, ConfigurationError> {
     if (quality && (quality < MIN_QUALITY || quality > MAX_QUALITY)) {
@@ -188,8 +188,8 @@ export class ConfigValidator {
   /**
    * Validate TTS rate
    *
-   * @param rate - The rate to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
+   * @param {any} rate - The rate to validate
+   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
    */
   validateTtsRate(rate?: number): Result<true, ConfigurationError> {
     if (rate && (rate < MIN_RATE || rate > MAX_RATE)) {
@@ -205,8 +205,8 @@ export class ConfigValidator {
   /**
    * Validate TTS volume
    *
-   * @param volume - The volume to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
+   * @param {any} volume - The volume to validate
+   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
    */
   validateTtsVolume(volume?: number): Result<true, ConfigurationError> {
     if (volume && (volume < MIN_VOLUME || volume > MAX_VOLUME)) {
@@ -222,8 +222,8 @@ export class ConfigValidator {
   /**
    * Validate processing configuration
    *
-   * @param processing - The processing configuration to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
+   * @param {BunTtsConfig['processing']} processing - The processing configuration to validate
+   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
    */
   validateProcessingConfig(
     processing?: BunTtsConfig['processing']
@@ -242,8 +242,8 @@ export class ConfigValidator {
   /**
    * Validate cache configuration
    *
-   * @param cache - The cache configuration to validate
-   * @returns A Result containing true on success or a ConfigurationError on failure
+   * @param {BunTtsConfig['cache']} cache - The cache configuration to validate
+   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
    */
   validateCacheConfig(
     cache?: BunTtsConfig['cache']

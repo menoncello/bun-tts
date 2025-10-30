@@ -7,7 +7,6 @@ import {
   failure,
 } from '../../src/errors/index.js';
 import { debugManager, DebugManager } from '../../src/utils/debug.js';
-import { errorReporter } from '../../src/utils/error-reporter.js';
 
 export function setupErrorHandlingTests(): void {
   beforeEach(() => {
@@ -93,14 +92,14 @@ export function createUserContextTestErrors(): {
 }
 
 export function createRecoveryOperations(error: FileNotFoundError) {
-  let fallbackCalled = false;
+  let _fallbackCalled = false;
 
   const failingOperation = async () => {
     return failure(error);
   };
 
   const fallbackOperation = async () => {
-    fallbackCalled = true;
+    _fallbackCalled = true;
     return success('fallback-success');
   };
 

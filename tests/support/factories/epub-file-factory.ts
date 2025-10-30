@@ -1,8 +1,8 @@
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import { faker } from '@faker-js/faker';
-import { createValidEPUBBuffer } from './epub-buffer-factory';
-import { EPUBFactoryOptions } from './epub-factory-types';
+import { createValidEPUBBuffer } from './epub-buffer-factory.js';
+import { EPUBFactoryOptions } from './epub-factory-types.js';
 
 /**
  * Factory for creating actual EPUB files on disk
@@ -40,12 +40,12 @@ export const createComplexEPUBFile = async (options: {
       id: `part-${chapterIndex++}`,
     });
 
-    partChapters.forEach((chapter) => {
+    for (const chapter of partChapters) {
       chapters.push({
         ...chapter,
         id: `chapter-${chapterIndex++}`,
       });
-    });
+    }
   }
 
   return createValidEPUBFile({

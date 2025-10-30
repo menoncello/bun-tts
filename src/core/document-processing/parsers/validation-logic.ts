@@ -20,9 +20,9 @@ import {
 /**
  * Validate chapters and their contents
  *
- * @param structure - Document structure to validate
- * @param config - Parser configuration
- * @returns Validation errors and warnings
+ * @param {DocumentStructure} structure - Document structure to validate
+ * @param {MarkdownParserConfig} config - Parser configuration
+ * @returns {{errors: ValidationError[], warnings: ValidationWarning[]}} Validation errors and warnings
  */
 export function validateChapters(
   structure: DocumentStructure,
@@ -51,12 +51,12 @@ export function validateChapters(
 /**
  * Validate chapter content (paragraphs and sentences)
  *
- * @param validationContext - Context for chapter content validation
- * @param validationContext.chapter - Chapter to validate
- * @param validationContext.chapterIndex - Index of chapter
- * @param validationContext.config - Parser configuration
- * @param validationContext.errors - Array to collect validation errors
- * @param validationContext.warnings - Array to collect validation warnings
+ * @param {{chapter: Chapter, chapterIndex: number, config: MarkdownParserConfig, errors: ValidationError[], warnings: ValidationWarning[]}} validationContext - Context for chapter content validation
+ * @param {Chapter} validationContext.chapter - Chapter to validate
+ * @param {number} validationContext.chapterIndex - Index of chapter
+ * @param {MarkdownParserConfig} validationContext.config - Parser configuration
+ * @param {ValidationError[]} validationContext.errors - Array to collect validation errors
+ * @param {ValidationWarning[]} validationContext.warnings - Array to collect validation warnings
  */
 export function validateChapterContent(validationContext: {
   chapter: Chapter;
@@ -92,13 +92,13 @@ export function validateChapterContent(validationContext: {
 /**
  * Validate sentences within a paragraph
  *
- * @param validationContext - Context for sentence validation
- * @param validationContext.paragraph - Paragraph containing sentences to validate
- * @param validationContext.chapterIndex - Index of the chapter containing the paragraph
- * @param validationContext.paragraphIndex - Index of the paragraph within the chapter
- * @param validationContext.errors - Array to collect validation errors
- * @param validationContext.warnings - Array to collect validation warnings
- * @param config - Parser configuration
+ * @param {{paragraph: Paragraph, chapterIndex: number, paragraphIndex: number, errors: ValidationError[], warnings: ValidationWarning[]}} validationContext - Context for sentence validation
+ * @param {Paragraph} validationContext.paragraph - Paragraph containing sentences to validate
+ * @param {number} validationContext.chapterIndex - Index of the chapter containing the paragraph
+ * @param {number} validationContext.paragraphIndex - Index of the paragraph within the chapter
+ * @param {ValidationError[]} validationContext.errors - Array to collect validation errors
+ * @param {ValidationWarning[]} validationContext.warnings - Array to collect validation warnings
+ * @param {MarkdownParserConfig} config - Parser configuration
  */
 export function validateSentences(
   validationContext: {

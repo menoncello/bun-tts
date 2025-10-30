@@ -5,7 +5,6 @@ import {
 } from '../../src/errors/index.js';
 import {
   ErrorReporter,
-  errorReporter,
   reportError,
   reportWarning,
   reportInfo,
@@ -27,13 +26,13 @@ function createTestErrorReporter(): ErrorReporter {
   );
 }
 
-function setupTestEnvironment() {
+function setupTestEnvironment(): string | undefined {
   const originalEnv = process.env.NODE_ENV;
   process.env.NODE_ENV = 'test';
   return originalEnv;
 }
 
-function restoreTestEnvironment(originalEnv: string | undefined) {
+function restoreTestEnvironment(originalEnv: string | undefined): void {
   if (originalEnv) {
     process.env.NODE_ENV = originalEnv;
   } else {

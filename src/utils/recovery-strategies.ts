@@ -17,8 +17,8 @@ const NETWORK_RETRY_DELAY = 1000;
 export class ConfigurationRecoveryStrategy implements RecoveryStrategy {
   /**
    * Determines if this strategy can recover from the given error
-   * @param error - The error to check
-   * @returns True if the error is a recoverable configuration error
+   * @param {BunTtsError} error - The error to check
+   * @returns {boolean} True if the error is a recoverable configuration error
    */
   canRecover(error: BunTtsError): boolean {
     return error.category === 'configuration' && error.recoverable;
@@ -26,9 +26,9 @@ export class ConfigurationRecoveryStrategy implements RecoveryStrategy {
 
   /**
    * Attempts to recover from a configuration error by reloading config or using defaults
-   * @param error - The configuration error to recover from
-   * @param _context - Recovery context (not used in this strategy)
-   * @returns Result of the recovery attempt
+   * @param {BunTtsError} error - The configuration error to recover from
+   * @param {Record<string, unknown>} _context - Recovery context (not used in this strategy)
+   * @returns {Result<unknown, BunTtsError>} Result of the recovery attempt
    */
   async recover(
     error: BunTtsError,
@@ -69,8 +69,8 @@ export class ConfigurationRecoveryStrategy implements RecoveryStrategy {
 export class FileSystemRecoveryStrategy implements RecoveryStrategy {
   /**
    * Determines if this strategy can recover from the given error
-   * @param error - The error to check
-   * @returns True if the error is a recoverable file system error
+   * @param {BunTtsError} error - The error to check
+   * @returns {boolean} True if the error is a recoverable file system error
    */
   canRecover(error: BunTtsError): boolean {
     return error.category === 'file' && error.recoverable;
@@ -78,9 +78,9 @@ export class FileSystemRecoveryStrategy implements RecoveryStrategy {
 
   /**
    * Attempts to recover from a file system error by retrying file access
-   * @param error - The file system error to recover from
-   * @param _context - Recovery context (not used in this strategy)
-   * @returns Result of the recovery attempt
+   * @param {BunTtsError} error - The file system error to recover from
+   * @param {Record<string, unknown>} _context - Recovery context (not used in this strategy)
+   * @returns {Result<unknown, BunTtsError>} Result of the recovery attempt
    */
   async recover(
     error: BunTtsError,
@@ -126,8 +126,8 @@ export class FileSystemRecoveryStrategy implements RecoveryStrategy {
 export class NetworkRecoveryStrategy implements RecoveryStrategy {
   /**
    * Determines if this strategy can recover from the given error
-   * @param error - The error to check
-   * @returns True if the error is a recoverable network/TTS error
+   * @param {BunTtsError} error - The error to check
+   * @returns {boolean} True if the error is a recoverable network/TTS error
    */
   canRecover(error: BunTtsError): boolean {
     return error.category === 'tts' && error.recoverable;
@@ -135,9 +135,9 @@ export class NetworkRecoveryStrategy implements RecoveryStrategy {
 
   /**
    * Attempts to recover from a network error by implementing a retry delay
-   * @param error - The network error to recover from
-   * @param _context - Recovery context (not used in this strategy)
-   * @returns Result of the recovery attempt
+   * @param {BunTtsError} error - The network error to recover from
+   * @param {Record<string, unknown>} _context - Recovery context (not used in this strategy)
+   * @returns {Result<unknown, BunTtsError>} Result of the recovery attempt
    */
   async recover(
     error: BunTtsError,

@@ -18,7 +18,7 @@ export class Logger {
   /**
    * Creates a new Logger instance with the specified verbosity level.
    *
-   * @param verbose - Whether to enable debug level logging
+   * @param {boolean} [verbose] - Whether to enable debug level logging
    */
   constructor(verbose = false) {
     const isTestEnvironment =
@@ -31,7 +31,7 @@ export class Logger {
   /**
    * Creates a minimal logger configuration for test environments.
    *
-   * @returns A basic Pino logger instance for testing
+   * @returns {any} A basic Pino logger instance for testing
    */
   private createTestLogger(): ReturnType<typeof pino> {
     return pino({
@@ -47,8 +47,8 @@ export class Logger {
   /**
    * Creates a full-featured logger configuration for production environments.
    *
-   * @param verbose - Whether to enable debug level logging
-   * @returns A configured Pino logger instance for production
+   * @param {boolean} verbose - Whether to enable debug level logging
+   * @returns {ReturnType<typeof pino>} A configured Pino logger instance for production
    */
   private createProductionLogger(verbose: boolean): ReturnType<typeof pino> {
     const isPretty = process.stdout.isTTY && !process.env.NO_COLOR;
@@ -88,7 +88,7 @@ export class Logger {
   /**
    * Creates the pretty transport configuration for non-test environments.
    *
-   * @returns Transport configuration object for pretty printing
+   * @returns {any} Transport configuration object for pretty printing
    */
   private createPrettyTransportConfig(): Record<string, unknown> {
     return {
@@ -111,8 +111,8 @@ export class Logger {
   /**
    * Log an info message with optional context.
    *
-   * @param message - The info message to log
-   * @param context - Optional context data to include with the log entry
+   * @param {string} message - The info message to log
+   * @param {LogContext} [context] - Optional context data to include with the log entry
    */
   public info(message: string, context?: LogContext): void {
     if (context) {
@@ -125,8 +125,8 @@ export class Logger {
   /**
    * Log a debug message with optional context.
    *
-   * @param message - The debug message to log
-   * @param context - Optional context data to include with the log entry
+   * @param {string} message - The debug message to log
+   * @param {LogContext} [context] - Optional context data to include with the log entry
    */
   public debug(message: string, context?: LogContext): void {
     if (context) {
@@ -139,8 +139,8 @@ export class Logger {
   /**
    * Log a warning message with optional context.
    *
-   * @param message - The warning message to log
-   * @param context - Optional context data to include with the log entry
+   * @param {string} message - The warning message to log
+   * @param {LogContext} [context] - Optional context data to include with the log entry
    */
   public warn(message: string, context?: LogContext): void {
     if (context) {
@@ -153,8 +153,8 @@ export class Logger {
   /**
    * Log an error message with optional error or context.
    *
-   * @param message - The error message to log
-   * @param error - Optional error object or context data to include with the log entry
+   * @param {string} message - The error message to log
+   * @param {Error | LogContext} [error] - Optional error object or context data to include with the log entry
    */
   public error(message: string, error?: Error | LogContext): void {
     if (error instanceof Error) {
@@ -179,8 +179,8 @@ export class Logger {
   /**
    * Creates a child logger with additional context bindings.
    *
-   * @param context - Context data to bind to the child logger
-   * @returns A new logger instance with the bound context
+   * @param {LogContext} context - Context data to bind to the child logger
+   * @returns {Logger} A new logger instance with the bound context
    */
   public child(context: LogContext): Logger {
     const childLogger = new Logger(this.logger.level === 'debug');
@@ -192,8 +192,8 @@ export class Logger {
   /**
    * Creates a logger with additional context bindings.
    *
-   * @param context - Context data to bind to the logger
-   * @returns A new logger instance with the bound context
+   * @param {LogContext} context - Context data to bind to the logger
+   * @returns {Logger} A new logger instance with the bound context
    */
   public withContext(context: LogContext): Logger {
     return this.child(context);
@@ -203,10 +203,10 @@ export class Logger {
   /**
    * Logs an operation with timing and error handling.
    *
-   * @param operation - The name of the operation being logged
-   * @param fn - The async function to execute and log
-   * @param context - Optional additional context for the operation
-   * @returns A promise that resolves to the result of the function
+   * @param {string} operation - The name of the operation being logged
+   * @param {() => Promise<T>} fn - The async function to execute and log
+   * @param {LogContext} [context] - Optional additional context for the operation
+   * @returns {Promise<T>} A promise that resolves to the result of the function
    */
   public logOperation<T>(
     operation: string,
@@ -244,9 +244,9 @@ export class Logger {
   /**
    * Logs performance metrics for a completed operation.
    *
-   * @param operation - The name of the operation that completed
-   * @param startTime - The start timestamp of the operation
-   * @param context - Optional additional context for the performance log
+   * @param {string} operation - The name of the operation that completed
+   * @param {number} startTime - The start timestamp of the operation
+   * @param {LogContext} [context] - Optional additional context for the performance log
    */
   public logPerformance(
     operation: string,
@@ -266,7 +266,7 @@ export class Logger {
   /**
    * Gets the underlying Pino logger instance.
    *
-   * @returns The Pino logger instance used by this logger
+   * @returns {ReturnType<typeof pino>} The Pino logger instance used by this logger
    */
   public getPinoLogger(): ReturnType<typeof pino> {
     return this.logger;
@@ -277,8 +277,8 @@ export class Logger {
 /**
  * Creates a new Logger instance from CLI context.
  *
- * @param context - The CLI context containing configuration options
- * @returns A new Logger instance
+ * @param {CliContext} context - The CLI context containing configuration options
+ * @returns {Logger} A new Logger instance
  */
 export const createLogger = (context: CliContext): Logger => {
   return new Logger(context.flags.verbose);
@@ -299,9 +299,9 @@ export const getLogger = (): Logger => {
 /**
  * Creates a child logger with additional context bindings.
  *
- * @param logger - The parent Pino logger instance
- * @param context - Context data to bind to the child logger
- * @returns A child logger with the bound context
+ * @param {ReturnType<typeof pino>} logger - The parent Pino logger instance
+ * @param {LogContext} context - Context data to bind to the child logger
+ * @returns {ReturnType<typeof pino>} A child logger with the bound context
  */
 export const withContext = (
   logger: ReturnType<typeof pino>,
@@ -312,9 +312,9 @@ export const withContext = (
 /**
  * Logs an operation with timing and error handling.
  * @deprecated Use Logger.logOperation() instead
- * @param _operation - The name of the operation being logged
- * @param _fn - The async function to execute and log
- * @param _context - Optional additional context for the operation
+ * @param {string} _operation - The name of the operation being logged
+ * @param {() => Promise<T>} _fn - The async function to execute and log
+ * @param {LogContext} [_context] - Optional additional context for the operation
  * @throws Always throws an error as this function is deprecated
  */
 export const logOperation = <T>(
@@ -331,9 +331,9 @@ export const logOperation = <T>(
 /**
  * Logs performance metrics for a completed operation.
  * @deprecated Use Logger.logPerformance() instead
- * @param _operation - The name of the operation that completed
- * @param _startTime - The start timestamp of the operation
- * @param _context - Optional additional context for the performance log
+ * @param {string} _operation - The name of the operation that completed
+ * @param {number} _startTime - The start timestamp of the operation
+ * @param {LogContext} [_context] - Optional additional context for the performance log
  * @throws Always throws an error as this function is deprecated
  */
 export const logPerformance = (

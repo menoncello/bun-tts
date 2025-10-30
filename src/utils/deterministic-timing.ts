@@ -5,6 +5,8 @@
  * Replaces hard waits with immediate resolution or controlled timing mechanisms.
  */
 
+import { logger } from './logger.js';
+
 /**
  * Default batch size for processing items in batches
  */
@@ -14,7 +16,7 @@ const DEFAULT_BATCH_SIZE = 10;
  * Immediate resolution promise - replaces setTimeout(() => resolve(), 0)
  * Useful for microtask scheduling without artificial delays
  *
- * @returns A promise that resolves immediately
+ * @returns {any} A promise that resolves immediately
  */
 export const immediate = (): Promise<void> => {
   return Promise.resolve();
@@ -24,7 +26,7 @@ export const immediate = (): Promise<void> => {
  * Deterministic tick - replaces setTimeout with controlled execution
  * In tests, this can be mocked to control timing precisely
  *
- * @returns A promise that resolves on the next microtask cycle
+ * @returns {any} A promise that resolves on the next microtask cycle
  */
 export const tick = (): Promise<void> => {
   // Use setImmediate or Promise.resolve for immediate async execution
@@ -38,9 +40,9 @@ export const tick = (): Promise<void> => {
 /**
  * Conditional delay - only delays in production, immediate in tests
  *
- * @param ms - Milliseconds to delay (only in production)
- * @param isTestEnvironment - Override test environment detection (default: auto-detect)
- * @returns A promise that resolves immediately in tests or after delay in production
+ * @param {number} ms - Milliseconds to delay (only in production)
+ * @param {boolean} [isTestEnvironment] - Override test environment detection (default: auto-detect)
+ * @returns {Promise<void>} A promise that resolves immediately in tests or after delay in production
  */
 export const conditionalDelay = async (
   ms: number,
@@ -66,10 +68,10 @@ export const conditionalDelay = async (
  *
  * @template T - Type of input items
  * @template R - Type of processed results
- * @param items - Array of items to process
- * @param processor - Async function to process each item
- * @param batchSize - Number of items to process in each batch (default: 10)
- * @returns Promise resolving to array of processed results
+ * @param {T[]} items - Array of items to process
+ * @param {(item: T) => Promise<R>} processor - Async function to process each item
+ * @param {number} [batchSize] - Number of items to process in each batch (default: 10)
+ * @returns {Promise<R[]>} Promise resolving to array of processed results
  */
 export const processBatch = async <T, R>(
   items: T[],
@@ -100,7 +102,7 @@ export class AsyncSemaphore {
   /**
    * Creates a new async semaphore with the specified number of permits
    *
-   * @param permits - The maximum number of concurrent operations allowed
+   * @param {number} permits - The maximum number of concurrent operations allowed
    */
   constructor(permits: number) {
     this.permits = permits;
@@ -109,7 +111,7 @@ export class AsyncSemaphore {
   /**
    * Acquires a permit, waiting if none are currently available
    *
-   * @returns A promise that resolves when a permit is acquired
+   * @returns {Promise<void>} A promise that resolves when a permit is acquired
    */
   async acquire(): Promise<void> {
     if (this.permits > 0) {
@@ -140,8 +142,8 @@ export class AsyncSemaphore {
    * Executes a function while holding a permit, automatically releasing it
    *
    * @template T - Type of value returned by the function
-   * @param fn - Async function to execute while holding a permit
-   * @returns Promise resolving to the result of the function
+   * @param {() => Promise<T>} fn - Async function to execute while holding a permit
+   * @returns {Promise<T>} Promise resolving to the result of the function
    */
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     await this.acquire();
@@ -163,7 +165,7 @@ export class TestTimeController {
   /**
    * Gets the singleton instance of TestTimeController
    *
-   * @returns The singleton TestTimeController instance
+   * @returns {TestTimeController} The singleton TestTimeController instance
    */
   static getInstance(): TestTimeController {
     if (!TestTimeController.instance) {
@@ -175,7 +177,7 @@ export class TestTimeController {
   /**
    * Advances the simulated time by the specified amount
    *
-   * @param ms - Milliseconds to advance the time
+   * @param {number} ms - Milliseconds to advance the time
    */
   advanceTime(ms: number): void {
     this.currentTime += ms;
@@ -184,7 +186,7 @@ export class TestTimeController {
   /**
    * Gets the current simulated time
    *
-   * @returns Current time in milliseconds
+   * @returns {number} Current time in milliseconds
    */
   getCurrentTime(): number {
     return this.currentTime;
@@ -200,7 +202,7 @@ export class TestTimeController {
   /**
    * Waits for a tick using the deterministic tick function
    *
-   * @returns A promise that resolves on the next microtask cycle
+   * @returns {Promise<void>} A promise that resolves on the next microtask cycle
    */
   async waitForTick(): Promise<void> {
     await tick();
@@ -210,9 +212,9 @@ export class TestTimeController {
 /**
  * Production delay with logging - tracks delay usage for optimization
  *
- * @param ms - Milliseconds to delay
- * @param reason - Optional description of why the delay is needed
- * @returns A promise that resolves after the specified delay
+ * @param {number} ms - Milliseconds to delay
+ * @param {string} [reason] - Optional description of why the delay is needed
+ * @returns {Promise<void>} A promise that resolves after the specified delay
  */
 export const trackedDelay = async (
   ms: number,
@@ -220,20 +222,26 @@ export const trackedDelay = async (
 ): Promise<void> => {
   const startTime = Date.now();
 
-  if (reason && typeof console !== 'undefined') {
-    console.debug(`Delaying ${ms}ms for: ${reason}`);
+  if (reason) {
+    logger.debug(`Delaying ${ms}ms for: ${reason}`);
   }
 
   await new Promise((resolve) => setTimeout(resolve, ms));
 
   const actualDelay = Date.now() - startTime;
-  if (
-    reason &&
-    typeof console !== 'undefined' &&
-    actualDelay > ms + DEFAULT_BATCH_SIZE
-  ) {
-    console.warn(
+  if (reason && actualDelay > ms + DEFAULT_BATCH_SIZE) {
+    logger.warn(
       `Delay exceeded expected by ${actualDelay - ms}ms for: ${reason}`
     );
   }
 };
+
+/**
+ * Internal conditional delay function with test environment override
+ * Alias for conditionalDelay with underscore prefix for internal use
+ *
+ * @param {ms} - Milliseconds to delay (only in production)
+ * @param {isTestEnvironment} - Override test environment detection (default: auto-detect)
+ * @returns {any} A promise that resolves immediately in tests or after delay in production
+ */
+export const _conditionalDelay = conditionalDelay;

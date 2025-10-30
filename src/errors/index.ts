@@ -28,10 +28,10 @@ export class BunTtsBaseError extends Error implements BunTtsError {
   /**
    * Creates a new BunTtsBaseError instance.
    *
-   * @param message - Human-readable error message
-   * @param code - Unique error identifier for programmatic handling
-   * @param category - The category this error belongs to
-   * @param config - Configuration options for the error
+   * @param {string} message - Human-readable error message
+   * @param {string} code - Unique error identifier for programmatic handling
+   * @param {BunTtsError['category']} category - The category this error belongs to
+   * @param {BunTtsBaseErrorConfig} [config] - Configuration options for the error
    */
   constructor(
     message: string,
@@ -55,7 +55,7 @@ export class BunTtsBaseError extends Error implements BunTtsError {
   /**
    * Serializes the error to a JSON object for logging or API responses.
    *
-   * @returns A JSON representation of the error
+   * @returns {any} A JSON representation of the error
    */
   toJSON(): BunTtsError {
     return {
@@ -80,8 +80,8 @@ export class ConfigurationError extends BunTtsBaseError {
   /**
    * Creates a new ConfigurationError instance.
    *
-   * @param message - Human-readable error message describing the configuration issue
-   * @param details - Additional context information about the configuration error
+   * @param {string} message - Human-readable error message describing the configuration issue
+   * @param {Record<string, unknown>} [details] - Additional context information about the configuration error
    */
   constructor(message: string, details?: Record<string, unknown>) {
     super(message, 'CONFIG_ERROR', 'configuration', {
@@ -100,8 +100,8 @@ export class InvalidConfigError extends ConfigurationError {
   /**
    * Creates a new InvalidConfigError instance.
    *
-   * @param configPath - Path to the configuration file that contains invalid data
-   * @param reason - Specific reason why the configuration is invalid
+   * @param {string} configPath - Path to the configuration file that contains invalid data
+   * @param {string} reason - Specific reason why the configuration is invalid
    */
   constructor(configPath: string, reason: string) {
     super(`Invalid configuration at ${configPath}: ${reason}`, {
@@ -120,7 +120,7 @@ export class MissingConfigError extends ConfigurationError {
   /**
    * Creates a new MissingConfigError instance.
    *
-   * @param configPath - Path to the missing configuration file
+   * @param {string} configPath - Path to the missing configuration file
    */
   constructor(configPath: string) {
     super(`Configuration file not found: ${configPath}`, { configPath });
@@ -138,9 +138,9 @@ export class DocumentParsingError extends BunTtsBaseError {
   /**
    * Creates a new DocumentParsingError instance.
    *
-   * @param message - Human-readable error message describing the parsing issue
-   * @param filePath - Path to the file that failed to parse
-   * @param details - Additional context information about the parsing error
+   * @param {string} message - Human-readable error message describing the parsing issue
+   * @param {string} [filePath] - Path to the file that failed to parse
+   * @param {Record<string, unknown>} [details] - Additional context information about the parsing error
    */
   constructor(
     message: string,
@@ -163,8 +163,8 @@ export class UnsupportedFormatError extends DocumentParsingError {
   /**
    * Creates a new UnsupportedFormatError instance.
    *
-   * @param format - The unsupported format that was attempted
-   * @param filePath - Path to the file with the unsupported format
+   * @param {string} format - The unsupported format that was attempted
+   * @param {string} [filePath] - Path to the file with the unsupported format
    */
   constructor(format: string, filePath?: string) {
     super(`Unsupported document format: ${format}`, filePath, { format });
@@ -182,9 +182,9 @@ export class TTSError extends BunTtsBaseError {
   /**
    * Creates a new TTSError instance.
    *
-   * @param message - Human-readable error message describing the TTS issue
-   * @param engine - The TTS engine that was being used when the error occurred
-   * @param details - Additional context information about the TTS error
+   * @param {string} message - Human-readable error message describing the TTS issue
+   * @param {string} [engine] - The TTS engine that was being used when the error occurred
+   * @param {Record<string, unknown>} [details] - Additional context information about the TTS error
    */
   constructor(
     message: string,
@@ -207,8 +207,8 @@ export class VoiceNotFoundError extends TTSError {
   /**
    * Creates a new VoiceNotFoundError instance.
    *
-   * @param voice - The name of the voice that was not found
-   * @param engine - The TTS engine where the voice was searched for
+   * @param {string} voice - The name of the voice that was not found
+   * @param {string} engine - The TTS engine where the voice was searched for
    */
   constructor(voice: string, engine: string) {
     super(`Voice "${voice}" not found in ${engine} engine`, engine, { voice });
@@ -224,9 +224,9 @@ export class AudioGenerationError extends TTSError {
   /**
    * Creates a new AudioGenerationError instance.
    *
-   * @param message - Human-readable error message describing the audio generation issue
-   * @param text - The text that was being processed when the error occurred
-   * @param details - Additional context information about the audio generation error
+   * @param {string} message - Human-readable error message describing the audio generation issue
+   * @param {string} [text] - The text that was being processed when the error occurred
+   * @param {Record<string, unknown>} [details] - Additional context information about the audio generation error
    */
   constructor(
     message: string,
@@ -251,9 +251,9 @@ export class FileError extends BunTtsBaseError {
   /**
    * Creates a new FileError instance.
    *
-   * @param message - Human-readable error message describing the file issue
-   * @param filePath - Path to the file that caused the error
-   * @param operation - The file operation that was being attempted
+   * @param {string} message - Human-readable error message describing the file issue
+   * @param {string} [filePath] - Path to the file that caused the error
+   * @param {string} [operation] - The file operation that was being attempted
    */
   constructor(message: string, filePath?: string, operation?: string) {
     super(message, 'FILE_ERROR', 'file', {
@@ -272,7 +272,7 @@ export class FileNotFoundError extends FileError {
   /**
    * Creates a new FileNotFoundError instance.
    *
-   * @param filePath - Path to the file that was not found
+   * @param {string} filePath - Path to the file that was not found
    */
   constructor(filePath: string) {
     super(`File not found: ${filePath}`, filePath, 'read');
@@ -288,8 +288,8 @@ export class FilePermissionError extends FileError {
   /**
    * Creates a new FilePermissionError instance.
    *
-   * @param filePath - Path to the file with permission issues
-   * @param operation - The operation that was denied due to permissions
+   * @param {string} filePath - Path to the file with permission issues
+   * @param {string} operation - The operation that was denied due to permissions
    */
   constructor(filePath: string, operation: string) {
     super(
@@ -311,9 +311,9 @@ export class ValidationError extends BunTtsBaseError {
   /**
    * Creates a new ValidationError instance.
    *
-   * @param message - Human-readable error message describing the validation issue
-   * @param field - The name of the field that failed validation
-   * @param value - The value that failed validation
+   * @param {string} message - Human-readable error message describing the validation issue
+   * @param {string} [field] - The name of the field that failed validation
+   * @param {unknown} [value] - The value that failed validation
    */
   constructor(message: string, field?: string, value?: unknown) {
     super(message, 'VALIDATION_ERROR', 'validation', {
@@ -332,8 +332,8 @@ export class InvalidArgumentError extends ValidationError {
   /**
    * Creates a new InvalidArgumentError instance.
    *
-   * @param argument - The name of the invalid argument
-   * @param reason - The reason why the argument is invalid
+   * @param {string} argument - The name of the invalid argument
+   * @param {string} reason - The reason why the argument is invalid
    */
   constructor(argument: string, reason: string) {
     super(`Invalid argument "${argument}": ${reason}`, argument, reason);
@@ -387,8 +387,8 @@ export interface Failure<E> {
  * Creates a successful Result containing the provided data.
  *
  * @template T - The type of the data
- * @param data - The success value to wrap in a Result
- * @returns A Result representing success
+ * @param {T} data - The success value to wrap in a Result
+ * @returns {Success<T>} A Result representing success
  */
 export const success = <T>(data: T): Success<T> => ({
   success: true,
@@ -399,8 +399,8 @@ export const success = <T>(data: T): Success<T> => ({
  * Creates a failed Result containing the provided error.
  *
  * @template E - The type of the error
- * @param error - The error to wrap in a Result
- * @returns A Result representing failure
+ * @param {E} error - The error to wrap in a Result
+ * @returns {Failure<E>} A Result representing failure
  */
 export const failure = <E>(error: E): Failure<E> => ({
   success: false,
@@ -414,8 +414,8 @@ export const failure = <E>(error: E): Failure<E> => ({
  *
  * @template T - The success data type
  * @template E - The error type
- * @param result - The Result to check
- * @returns True if the Result is successful
+ * @param {Result<T, E>} result - The Result to check
+ * @returns {result is Success<T>} True if the Result is successful
  */
 export const isSuccess = <T, E>(result: Result<T, E>): result is Success<T> =>
   result.success;
@@ -425,8 +425,8 @@ export const isSuccess = <T, E>(result: Result<T, E>): result is Success<T> =>
  *
  * @template T - The success data type
  * @template E - The error type
- * @param result - The Result to check
- * @returns True if the Result is a failure
+ * @param {Result<T, E>} result - The Result to check
+ * @returns {result is Failure<E>} True if the Result is a failure
  */
 export const isFailure = <T, E>(result: Result<T, E>): result is Failure<E> =>
   !result.success;
@@ -438,9 +438,9 @@ export const isFailure = <T, E>(result: Result<T, E>): result is Failure<E> =>
  * @template T - The original data type
  * @template U - The transformed data type
  * @template E - The error type
- * @param result - The Result to map over
- * @param fn - The transformation function to apply to successful data
- * @returns A new Result with transformed data or the original error
+ * @param {Result<T, E>} result - The Result to map over
+ * @param {(data: T) => U} fn - The transformation function to apply to successful data
+ * @returns {Result<U, E>} A new Result with transformed data or the original error
  */
 export const map = <T, U, E>(
   result: Result<T, E>,
@@ -454,9 +454,9 @@ export const map = <T, U, E>(
  * @template T - The success data type
  * @template E - The original error type
  * @template F - The transformed error type
- * @param result - The Result to map over
- * @param fn - The transformation function to apply to the error
- * @returns A new Result with transformed error or the original success
+ * @param {Result<T, E>} result - The Result to map over
+ * @param {(error: E) => F} fn - The transformation function to apply to the error
+ * @returns {Result<T, F>} A new Result with transformed error or the original success
  */
 export const mapError = <T, E, F>(
   result: Result<T, E>,
@@ -471,9 +471,9 @@ export const mapError = <T, E, F>(
  * @template T - The original data type
  * @template U - The new data type
  * @template E - The error type
- * @param result - The Result to chain operations on
- * @param fn - A function that takes successful data and returns a new Result
- * @returns A new Result from the chained operation or the original error
+ * @param {Result<T, E>} result - The Result to chain operations on
+ * @param {(data: T) => Result<U, E>} fn - A function that takes successful data and returns a new Result
+ * @returns {Result<U, E>} A new Result from the chained operation or the original error
  */
 export const chain = <T, U, E>(
   result: Result<T, E>,

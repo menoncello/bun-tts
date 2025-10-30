@@ -4,15 +4,11 @@
  * Enhanced with test cleanup patterns and priority classification.
  */
 
-import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
-import type { Logger } from '../../../src/interfaces/logger.js';
-import type { ConfigManager } from '../../../src/config/config-manager.js';
-import type { Result } from '../../../src/errors/result.js';
-import { BunTtsError } from '../../../src/errors/bun-tts-error.js';
+import { expect, mock, describe, test } from 'bun:test';
 import { MarkdownParser } from '../../../src/core/document-processing/parsers/markdown-parser.js';
+import { BunTtsError } from '../../../src/errors/bun-tts-error.js';
+import type { Result } from '../../../src/errors/result.js';
 import {
-  MockLoggerFactory,
-  MockConfigManagerFactory,
   MarkdownContentFactory,
   ExpectationFactory,
   TestIdGenerator,
@@ -42,16 +38,16 @@ function getResultData<T, E extends BunTtsError>(result: Result<T, E>): T {
 // Helper function to create a parser with enhanced mocks and automatic cleanup
 function createParserWithMocks(): {
   parser: MarkdownParser;
-  mockLogger: Logger & { mock: ReturnType<typeof mock> };
-  mockConfigManager: ConfigManager & { mock: ReturnType<typeof mock> };
+  mockLogger: any & { mock: ReturnType<typeof mock> };
+  mockConfigManager: any & { mock: ReturnType<typeof mock> };
 } {
   const mockLogger = EnhancedMockFactory.createLogger();
   const mockConfigManager = EnhancedMockFactory.createConfigManager();
-  let parser = new MarkdownParser(mockLogger, mockConfigManager);
+  const parser = new MarkdownParser(mockLogger, mockConfigManager);
 
   // Register cleanup tasks
   TestCleanupManager.registerCleanup(() => {
-    parser = null as any;
+    // Parser cleanup handled by garbage collection
   });
 
   return { parser, mockLogger, mockConfigManager };
@@ -73,9 +69,9 @@ function validateBasicDocumentStructure(
     expectations.totalChaptersAtLeast
   );
   const chapterTitles = structure.chapters.map((ch: any) => ch.title);
-  expectations.chapterTitlesInclude.forEach((title: string) => {
+  for (const title of expectations.chapterTitlesInclude) {
     expect(chapterTitles).toContain(title);
-  });
+  }
 }
 
 // Helper function to validate content statistics
@@ -147,7 +143,7 @@ function createMalformedMarkdown(): string {
 This has unclosed code blocks:
 \`\`\`javascript
 function test() {
-  console.log("hello");
+  return true;
 
 ## Chapter 2
 
@@ -247,7 +243,7 @@ function createComplexDocumentationTest() {
       const setup = createParserWithMocks();
       const parser = setup.parser;
 
-      const bddComment = setupComplexDocumentationBdd();
+      setupComplexDocumentationBdd();
       await executeComplexDocumentationValidation(parser, SAMPLE_MARKDOWN);
 
       const duration = endMeasurement();
@@ -359,6 +355,35 @@ function createAllTests() {
   createShortContentTest();
   createHeadersOnlyTest();
 }
+
+// Basic test to verify the file structure and imports are working
+describe('Parsing Integration Test File Structure', () => {
+  test('should have all required helper functions available', () => {
+    // Verify that our helper functions are properly defined
+    expect(typeof createParserWithMocks).toBe('function');
+    expect(typeof validateBasicDocumentStructure).toBe('function');
+    expect(typeof validateContentStatistics).toBe('function');
+    expect(typeof validateProcessingMetrics).toBe('function');
+    expect(typeof setupComplexDocumentationBdd).toBe('function');
+    expect(typeof executeComplexDocumentationValidation).toBe('function');
+    expect(typeof createMalformedMarkdown).toBe('function');
+    expect(typeof validateMalformedDocumentParsing).toBe('function');
+    expect(typeof validateShortContentParsing).toBe('function');
+    expect(typeof createHeadersOnlyMarkdown).toBe('function');
+    expect(typeof validateHeadersOnlyParsing).toBe('function');
+    expect(typeof createComplexDocumentationTest).toBe('function');
+    expect(typeof createMalformedDocumentTest).toBe('function');
+    expect(typeof createShortContentTest).toBe('function');
+    expect(typeof createHeadersOnlyTest).toBe('function');
+    expect(typeof createAllTests).toBe('function');
+  });
+
+  test('should have valid sample markdown content', () => {
+    expect(SAMPLE_MARKDOWN).toBeDefined();
+    expect(typeof SAMPLE_MARKDOWN).toBe('string');
+    expect(SAMPLE_MARKDOWN.length).toBeGreaterThan(0);
+  });
+});
 
 // Main describe block - now much shorter and cleaner
 EnhancedTestPatterns.createDescribe(

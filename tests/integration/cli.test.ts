@@ -1,7 +1,6 @@
-import { spawn } from 'child_process';
+import { describe, it, expect } from 'bun:test';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
-import { describe, it, expect } from 'bun:test';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = join(__filename, '..');

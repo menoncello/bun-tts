@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach } from 'bun:test';
-import { success, failure } from '../../src/errors/index';
 import {
   ConfigurationError,
   FileNotFoundError,
@@ -7,12 +6,11 @@ import {
 } from '../../src/errors/index.js';
 import {
   ErrorRecoveryManager,
-  recoveryManager,
+  getRecoveryManager,
   ConfigurationRecoveryStrategy,
   FileSystemRecoveryStrategy,
   NetworkRecoveryStrategy,
-  executeWithRecovery,
-} from '../../src/utils/error-recovery';
+} from '../../src/utils/error-recovery.js';
 
 describe('Error Recovery Manager', () => {
   let manager: ErrorRecoveryManager;
@@ -127,7 +125,7 @@ describe('Default Recovery Strategies', () => {
   it('should have default strategies registered', () => {
     // Test that recovery manager has default strategies
     expect(() => {
-      recoveryManager().registerStrategy(
+      getRecoveryManager().registerStrategy(
         'TestError',
         new ConfigurationRecoveryStrategy()
       );

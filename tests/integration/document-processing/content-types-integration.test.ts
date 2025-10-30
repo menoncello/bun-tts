@@ -4,11 +4,11 @@
  */
 
 import { describe, test, expect, beforeEach } from 'bun:test';
-import type { Logger } from '../../../src/interfaces/logger.js';
 import type { ConfigManager } from '../../../src/config/config-manager.js';
-import type { Result } from '../../../src/errors/result.js';
-import { BunTtsError } from '../../../src/errors/bun-tts-error.js';
 import { MarkdownParser } from '../../../src/core/document-processing/parsers/markdown-parser.js';
+import { BunTtsError } from '../../../src/errors/bun-tts-error.js';
+import type { Result } from '../../../src/errors/result.js';
+import type { Logger } from '../../../src/interfaces/logger.js';
 import {
   MockLoggerFactory,
   MockConfigManagerFactory,
@@ -53,9 +53,9 @@ function validateMixedContentTypes(structure: any): void {
   const paragraphTypes = Array.from(
     new Set(allParagraphs.map((p: any) => p.type))
   );
-  expectations.paragraphTypesInclude.forEach((type: string) => {
+  for (const type of expectations.paragraphTypesInclude) {
     expect(paragraphTypes).toContain(type);
-  });
+  }
 }
 
 // Helper function to validate code blocks are excluded from audio
@@ -157,7 +157,7 @@ describe('Content Types Integration', () => {
   });
 
   test(`${TestIdGenerator.generateIntegration('1.2', 2)} should handle mixed content types correctly`, async () => {
-    const bddComment = setupMixedContentTypesBdd();
+    setupMixedContentTypesBdd();
     await executeMixedContentTypesValidation(parser, SAMPLE_MARKDOWN);
   });
 

@@ -3,7 +3,60 @@ import {
   DocumentStructure,
   Chapter,
   DocumentMetadata,
-} from '../../../src/core/document-processing/types';
+  Paragraph,
+  Sentence,
+} from '../../../src/core/document-processing/types.js';
+
+/**
+ * Helper function to calculate document statistics from chapters
+ */
+const calculateDocumentStatistics = (chapters: Chapter[]) => {
+  const totalParagraphs = chapters.reduce(
+    (sum, chapter) => sum + chapter.paragraphs.length,
+    0
+  );
+  const totalSentences = chapters.reduce(
+    (sum, chapter) =>
+      sum +
+      chapter.paragraphs.reduce(
+        (chapterSum, paragraph) => chapterSum + paragraph.sentences.length,
+        0
+      ),
+    0
+  );
+  const totalWordCount = chapters.reduce(
+    (sum, chapter) => sum + chapter.wordCount,
+    0
+  );
+  const estimatedTotalDuration = chapters.reduce(
+    (sum, chapter) => sum + chapter.estimatedDuration,
+    0
+  );
+
+  return {
+    totalParagraphs,
+    totalSentences,
+    totalWordCount,
+    totalChapters: chapters.length,
+    estimatedTotalDuration,
+  };
+};
+
+/**
+ * Helper function to create processing metrics
+ */
+const createProcessingMetrics = (wordCount: number) => {
+  const parseStartTime = new Date();
+  const parseEndTime = new Date(parseStartTime.getTime() + 1000); // 1 second later
+
+  return {
+    parseStartTime,
+    parseEndTime,
+    parseDurationMs: parseEndTime.getTime() - parseStartTime.getTime(),
+    sourceLength: wordCount * 6, // Average 6 characters per word
+    processingErrors: [],
+  };
+};
 
 /**
  * Factory for creating DocumentStructure objects
@@ -16,37 +69,90 @@ export const createDocumentStructure = (
       id: `chapter-${i + 1}`,
       title: `Chapter ${i + 1}`,
       startIndex: i * 100,
-      endIndex: (i + 1) * 100 - 1,
+      position: i,
     })
   );
 
-  const totalParagraphs = faker.number.int({ min: 50, max: 500 });
-  const totalSentences = faker.number.int({ min: 100, max: 1000 });
-  const totalWords = faker.number.int({ min: 500, max: 5000 });
+  const statistics = calculateDocumentStatistics(chapters);
+  const processingMetrics = createProcessingMetrics(statistics.totalWordCount);
 
   return {
-    metadata: createDocumentMetadata(),
+    metadata: createDocumentMetadata({ wordCount: statistics.totalWordCount }),
     chapters,
-    tableOfContents: chapters.map((chapter, index) => ({
-      id: chapter.id,
-      title: chapter.title,
-      href: `chapter${index + 1}.xhtml`,
-      level: 1,
-    })),
-    embeddedAssets: {
-      images: [],
-      audio: [],
-      video: [],
-      fonts: [],
-      other: [],
-    },
-    totalParagraphs,
-    totalSentences,
-    totalWords,
-    estimatedReadingTime: Math.ceil(totalWords / 200), // Assume 200 words per minute
-    version: '3.0',
-    warnings: [],
+    ...statistics,
+    confidence: faker.number.float({ min: 0.8, max: 1.0 }),
+    processingMetrics,
     ...overrides,
+  };
+};
+
+/**
+ * Helper function to create sentences from text
+ */
+const createSentences = (
+  rawText: string,
+  paragraphIndex: number,
+  currentIndexRef: { value: number }
+): Sentence[] => {
+  const sentenceTexts = rawText
+    .split(/(?<=[!.?])\s+/)
+    .filter((s) => s.trim().length > 0) || [rawText];
+
+  return sentenceTexts.map((sentenceText, sentenceIndex) => {
+    const sentenceEnd = currentIndexRef.value + sentenceText.length;
+    currentIndexRef.value = sentenceEnd + 1; // +1 for space or punctuation
+
+    return {
+      id: `sentence-${paragraphIndex}-${sentenceIndex}`,
+      text: sentenceText.trim(),
+      position: sentenceIndex,
+      wordCount: sentenceText.trim().split(/\s+/).length,
+      estimatedDuration: sentenceText.trim().split(/\s+/).length * 0.5, // 0.5 seconds per word
+      hasFormatting: false,
+    };
+  });
+};
+
+/**
+ * Helper function to create a paragraph
+ */
+const createParagraph = (
+  paragraphIndex: number,
+  currentIndexRef: { value: number }
+): Paragraph => {
+  const rawText = faker.lorem.paragraph();
+  const paragraphEnd = currentIndexRef.value + rawText.length;
+
+  const sentences = createSentences(rawText, paragraphIndex, currentIndexRef);
+  currentIndexRef.value = paragraphEnd + 2; // +2 for paragraph break
+
+  return {
+    id: `paragraph-${paragraphIndex}`,
+    type: 'text' as const,
+    sentences,
+    position: paragraphIndex,
+    wordCount: rawText.split(/\s+/).length,
+    rawText,
+    includeInAudio: true,
+    confidence: faker.number.float({ min: 0.8, max: 1.0 }),
+    text: rawText,
+  };
+};
+
+/**
+ * Helper function to create paragraphs for a chapter
+ */
+const createParagraphs = (paragraphCount: number, startIndex: number) => {
+  const currentIndexRef = { value: startIndex };
+  const paragraphs: Paragraph[] = [];
+
+  for (let i = 0; i < paragraphCount; i++) {
+    paragraphs.push(createParagraph(i, currentIndexRef));
+  }
+
+  return {
+    paragraphs,
+    endPosition: currentIndexRef.value,
   };
 };
 
@@ -55,55 +161,26 @@ export const createDocumentStructure = (
  */
 export const createChapter = (overrides: Partial<Chapter> = {}): Chapter => {
   const paragraphCount = faker.number.int({ min: 5, max: 20 });
-  const startIndex = faker.number.int({ min: 0, max: 1000 });
+  const startPosition = faker.number.int({ min: 0, max: 1000 });
+  const startIndex = startPosition;
 
-  let currentIndex = startIndex;
-  const paragraphs = Array.from({ length: paragraphCount }, () => {
-    const text = faker.lorem.paragraph();
-    const paragraphStart = currentIndex;
-    const paragraphEnd = currentIndex + text.length;
-
-    const sentences = Array.from(
-      { length: faker.number.int({ min: 2, max: 8 }) },
-      () => {
-        const sentenceText = faker.lorem.sentence();
-        const sentenceStart = currentIndex;
-        const sentenceEnd = currentIndex + sentenceText.length;
-        currentIndex = sentenceEnd + 1; // +1 for space or punctuation
-
-        return {
-          text: sentenceText,
-          startIndex: sentenceStart,
-          endIndex: sentenceEnd,
-          confidence: faker.number.float({ min: 0.8, max: 1.0 }),
-        };
-      }
-    );
-
-    currentIndex = paragraphEnd + 2; // +2 for paragraph break
-
-    return {
-      text,
-      startIndex: paragraphStart,
-      endIndex: paragraphEnd,
-      sentences,
-    };
-  });
-
-  const endIndex = currentIndex;
-  const totalWords = paragraphs.reduce(
-    (sum, p) => sum + p.text.split(' ').length,
-    0
+  const { paragraphs, endPosition } = createParagraphs(
+    paragraphCount,
+    startIndex
   );
+  const totalWords = paragraphs.reduce((sum, p) => sum + p.wordCount, 0);
 
   return {
     id: faker.string.uuid(),
     title: faker.lorem.sentence(),
+    level: 1,
     paragraphs,
+    position: 0,
+    startPosition,
+    endPosition,
     startIndex,
-    endIndex,
     wordCount: totalWords,
-    estimatedReadingTime: Math.ceil(totalWords / 200), // Assume 200 words per minute
+    estimatedDuration: totalWords * 0.5, // 0.5 seconds per word
     ...overrides,
   };
 };
@@ -119,5 +196,10 @@ export const createDocumentMetadata = (
   language: 'en',
   publisher: faker.company.name(),
   identifier: faker.string.uuid(),
+  wordCount: faker.number.int({ min: 1000, max: 10000 }),
+  customMetadata: {
+    description: faker.lorem.sentence(),
+    tags: [faker.lorem.word(), faker.lorem.word()],
+  },
   ...overrides,
 });

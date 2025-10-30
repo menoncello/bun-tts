@@ -29,8 +29,8 @@ class DebugManager {
 
   /**
    * Creates a new DebugManager instance.
-   * @param options - Configuration options for debugging behavior
-   * @param logger - Optional custom logger implementation
+   * @param {DebugOptions} options - Configuration options for debugging behavior
+   * @param {Logger} [logger] - Optional custom logger implementation
    */
   private constructor(options: DebugOptions = {}, logger?: Logger) {
     this.options = {
@@ -51,9 +51,9 @@ class DebugManager {
 
   /**
    * Gets the singleton DebugManager instance.
-   * @param options - Configuration options for debugging behavior
-   * @param logger - Optional custom logger implementation
-   * @returns The singleton DebugManager instance
+   * @param {DebugOptions} [options] - Configuration options for debugging behavior
+   * @param {Logger} [logger] - Optional custom logger implementation
+   * @returns {DebugManager} The singleton DebugManager instance
    */
   public static getInstance(
     options?: DebugOptions,
@@ -69,9 +69,9 @@ class DebugManager {
   /**
    * Creates a new DebugManager instance for testing purposes.
    * This method bypasses the singleton pattern to allow isolated testing.
-   * @param options - Configuration options for debugging behavior
-   * @param logger - Optional custom logger implementation
-   * @returns A new DebugManager instance
+   * @param {DebugOptions} [options] - Configuration options for debugging behavior
+   * @param {Logger} [logger] - Optional custom logger implementation
+   * @returns {DebugManager} A new DebugManager instance
    */
   public static createInstance(
     options?: DebugOptions,
@@ -91,8 +91,8 @@ class DebugManager {
   // Performance tracking
   /**
    * Starts a performance timer for measuring execution time.
-   * @param name - Unique identifier for the timer
-   * @param metadata - Optional additional data to associate with the timer
+   * @param {string} name - Unique identifier for the timer
+   * @param {Record<string, unknown>} [metadata] - Optional additional data to associate with the timer
    */
   public startTimer(name: string, metadata?: Record<string, unknown>): void {
     if (!this.options.enablePerformanceTracking) return;
@@ -108,9 +108,9 @@ class DebugManager {
 
   /**
    * Ends a performance timer and records the duration.
-   * @param name - The unique identifier of the timer to end
-   * @param metadata - Optional additional data to associate with the timer result
-   * @returns The duration in milliseconds, or 0 if timer wasn't found
+   * @param {string} name - The unique identifier of the timer to end
+   * @param {Record<string, unknown>} [metadata] - Optional additional data to associate with the timer result
+   * @returns {number} The duration in milliseconds, or 0 if timer wasn't found
    */
   public endTimer(name: string, metadata?: Record<string, unknown>): number {
     if (!this.options.enablePerformanceTracking) return 0;
@@ -145,8 +145,8 @@ class DebugManager {
 
   /**
    * Retrieves performance metrics for a specific timer or all timers.
-   * @param name - Optional specific timer name to retrieve metrics for
-   * @returns Array of performance metrics
+   * @param {string} [name] - Optional specific timer name to retrieve metrics for
+   * @returns {PerformanceMetric[]} Array of performance metrics
    */
   public getPerformanceMetrics(name?: string): PerformanceMetric[] {
     if (name) {
@@ -157,7 +157,7 @@ class DebugManager {
 
   /**
    * Clears performance metrics for a specific timer or all timers.
-   * @param name - Optional specific timer name to clear metrics for
+   * @param {string} [name] - Optional specific timer name to clear metrics for
    */
   public clearPerformanceMetrics(name?: string): void {
     if (name) {
@@ -170,8 +170,8 @@ class DebugManager {
   // Memory tracking
   /**
    * Takes a snapshot of current memory usage for monitoring.
-   * @param label - Optional label to identify this memory snapshot
-   * @returns Memory snapshot data
+   * @param {string} [label] - Optional label to identify this memory snapshot
+   * @returns {MemorySnapshot} Memory snapshot data
    */
   public takeMemorySnapshot(label?: string): MemorySnapshot {
     const memUsage = process.memoryUsage();
@@ -198,7 +198,7 @@ class DebugManager {
 
   /**
    * Retrieves all stored memory snapshots.
-   * @returns Array of memory snapshot data
+   * @returns {MemorySnapshot[]} Array of memory snapshot data
    */
   public getMemorySnapshots(): MemorySnapshot[] {
     return [...this.memorySnapshots];
@@ -213,7 +213,7 @@ class DebugManager {
 
   /**
    * Gets the logger instance used by this DebugManager.
-   * @returns The logger instance
+   * @returns {Logger} The logger instance
    */
   public getLogger(): Logger {
     return this.logger;
@@ -222,8 +222,8 @@ class DebugManager {
   // Logging methods
   /**
    * Logs a debug message.
-   * @param message - The debug message to log
-   * @param metadata - Optional additional data to include with the log
+   * @param {string} message - The debug message to log
+   * @param {Record<string, unknown>} [metadata] - Optional additional data to include with the log
    */
   public debug(message: string, metadata?: Record<string, unknown>): void {
     this.addLog('debug', message, metadata);
@@ -232,8 +232,8 @@ class DebugManager {
 
   /**
    * Logs an info message.
-   * @param message - The info message to log
-   * @param metadata - Optional additional data to include with the log
+   * @param {string} message - The info message to log
+   * @param {Record<string, unknown>} [metadata] - Optional additional data to include with the log
    */
   public info(message: string, metadata?: Record<string, unknown>): void {
     this.addLog('info', message, metadata);
@@ -242,8 +242,8 @@ class DebugManager {
 
   /**
    * Logs a warning message.
-   * @param message - The warning message to log
-   * @param metadata - Optional additional data to include with the log
+   * @param {string} message - The warning message to log
+   * @param {Record<string, unknown>} [metadata] - Optional additional data to include with the log
    */
   public warn(message: string, metadata?: Record<string, unknown>): void {
     this.addLog('warn', message, metadata);
@@ -252,8 +252,8 @@ class DebugManager {
 
   /**
    * Logs an error with proper error reporting.
-   * @param error - The error to log and report
-   * @param metadata - Optional additional data to include with the error log
+   * @param {BunTtsError | Error | unknown} error - The error to log and report
+   * @param {Record<string, unknown>} [metadata] - Optional additional data to include with the error log
    */
   public error(
     error: BunTtsError | Error | unknown,
@@ -269,8 +269,8 @@ class DebugManager {
   /**
    * Logs a trace message with stack trace information.
    * Only logs if trace logging is enabled in options.
-   * @param message - The trace message to log
-   * @param metadata - Optional additional data to include with the log
+   * @param {string} message - The trace message to log
+   * @param {Record<string, unknown>} [metadata] - Optional additional data to include with the log
    */
   public trace(message: string, metadata?: Record<string, unknown>): void {
     if (!this.options.enableTrace) return;
@@ -283,9 +283,9 @@ class DebugManager {
   // Log management
   /**
    * Retrieves debug logs with optional filtering.
-   * @param level - Optional log level to filter by
-   * @param limit - Optional limit on number of logs to return (from most recent)
-   * @returns Array of debug logs
+   * @param {string} [level] - Optional log level to filter by
+   * @param {number} [limit] - Optional limit on number of logs to return (from most recent)
+   * @returns {DebugLog[]} Array of debug logs
    */
   public getLogs(level?: string, limit?: number): DebugLog[] {
     let logs = [...this.debugLogs];
@@ -311,10 +311,10 @@ class DebugManager {
   // Utility methods
   /**
    * Measures the execution time of an async function.
-   * @param name - Unique identifier for the measurement
-   * @param fn - The async function to measure
-   * @param metadata - Optional additional data to associate with the measurement
-   * @returns The result of the function execution
+   * @param {string} name - Unique identifier for the measurement
+   * @param {() => Promise<T>} fn - The async function to measure
+   * @param {Record<string, unknown>} [metadata] - Optional additional data to associate with the measurement
+   * @returns {Promise<T>} The result of the function execution
    */
   public async measureAsync<T>(
     name: string,
@@ -340,10 +340,10 @@ class DebugManager {
 
   /**
    * Measures the execution time of a synchronous function.
-   * @param name - Unique identifier for the measurement
-   * @param fn - The synchronous function to measure
-   * @param metadata - Optional additional data to associate with the measurement
-   * @returns The result of the function execution
+   * @param {string} name - Unique identifier for the measurement
+   * @param {() => T} fn - The synchronous function to measure
+   * @param {Record<string, unknown>} [metadata] - Optional additional data to associate with the measurement
+   * @returns {T} The result of the function execution
    */
   public measureSync<T>(
     name: string,
@@ -369,7 +369,7 @@ class DebugManager {
 
   /**
    * Generates a comprehensive debug report containing all collected data.
-   * @returns Object containing summary, performance metrics, memory snapshots, and logs
+   * @returns {{summary: Record<string, unknown>, performance: Record<string, PerformanceMetric[]>, memory: MemorySnapshot[], logs: DebugLog[]}} Object containing summary, performance metrics, memory snapshots, and logs
    */
   public generateReport(): {
     summary: Record<string, unknown>;
@@ -401,8 +401,8 @@ class DebugManager {
 
   /**
    * Adds a performance metric to the storage with size management.
-   * @param name - The name of the metric category
-   * @param metric - The performance metric to store
+   * @param {string} name - The name of the metric category
+   * @param {PerformanceMetric} metric - The performance metric to store
    */
   private addPerformanceMetric(name: string, metric: PerformanceMetric): void {
     if (!this.performanceMetrics.has(name)) {
@@ -422,9 +422,9 @@ class DebugManager {
 
   /**
    * Adds a log entry to the debug logs with size management.
-   * @param level - The log level (debug, info, warn, error, trace)
-   * @param message - The log message
-   * @param metadata - Optional additional data to include with the log
+   * @param {string} level - The log level (debug, info, warn, error, trace)
+   * @param {string} message - The log message
+   * @param {Record<string, unknown>} [metadata] - Optional additional data to include with the log
    */
   private addLog(
     level: string,

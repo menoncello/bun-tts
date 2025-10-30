@@ -11,8 +11,8 @@ export class ConfigurationError extends BunTtsError {
   /**
    * Creates a new ConfigurationError instance.
    *
-   * @param message - Human-readable error message describing the configuration issue
-   * @param details - Additional context information about the configuration error
+   * @param {string} message - Human-readable error message describing the configuration issue
+   * @param {Record<string, unknown>} details - Additional context information about the configuration error
    */
   constructor(message: string, details?: Record<string, unknown>) {
     super(message, {
@@ -27,7 +27,7 @@ export class ConfigurationError extends BunTtsError {
   /**
    * Gets the exit code for configuration errors.
    *
-   * @returns The exit code (2 for configuration errors)
+   * @returns {any} The exit code (2 for configuration errors)
    */
   public override getExitCode(): number {
     return CONFIG_ERROR_EXIT_CODE;

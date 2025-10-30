@@ -1,22 +1,42 @@
 import { describe, it, expect, beforeEach } from 'bun:test';
 import { ConfigCommand } from '../../../src/cli/commands/config-command.js';
 import { ConfigManager } from '../../../src/config/index.js';
-import { success } from '../../../src/errors';
+import { success } from '../../../src/errors/index.js';
 import {
   createMockLogger,
   createMockConfigManager,
+  createMockOutputWriter,
   createTestCliContext,
 } from '../di/test-utils';
 
+// Shared test utilities
+function setupCommand() {
+  const mockLogger = createMockLogger() as any;
+  const mockConfigManager =
+    createMockConfigManager() as unknown as ConfigManager;
+  const mockOutputWriter = createMockOutputWriter() as any;
+  const configCommand = new ConfigCommand(
+    mockLogger,
+    mockConfigManager,
+    mockOutputWriter
+  );
+  return { mockLogger, mockConfigManager, configCommand };
+}
+
+function clearMocks(mockLogger: any, mockConfigManager: any) {
+  mockConfigManager.loadConfig.mockClear();
+  mockConfigManager.createSampleConfig.mockClear();
+  mockLogger.info.mockClear();
+  mockLogger.error.mockClear();
+}
+
 describe('ConfigCommand Setup', () => {
-  it('should receive both logger and configManager via DI', () => {
-    const mockLogger = createMockLogger() as any;
-    const mockConfigManager =
-      createMockConfigManager() as unknown as ConfigManager;
-    const configCommand = new ConfigCommand(mockLogger, mockConfigManager);
+  it('should receive logger, configManager, and outputWriter via DI', () => {
+    const { mockLogger, mockConfigManager, configCommand } = setupCommand();
 
     expect((configCommand as any).logger).toBe(mockLogger);
     expect((configCommand as any).configManager).toBe(mockConfigManager);
+    expect((configCommand as any).outputWriter).toBeDefined();
   });
 });
 
@@ -25,20 +45,14 @@ describe('Config Show Action - Success', () => {
   let mockConfigManager: any;
   let configCommand: ConfigCommand;
 
-  function setupCommand() {
-    mockLogger = createMockLogger() as any;
-    mockConfigManager = createMockConfigManager() as unknown as ConfigManager;
-    configCommand = new ConfigCommand(mockLogger, mockConfigManager);
-  }
+  beforeEach(() => {
+    const setup = setupCommand();
+    mockLogger = setup.mockLogger;
+    mockConfigManager = setup.mockConfigManager;
+    configCommand = setup.configCommand;
+  });
 
-  function clearMocks() {
-    mockConfigManager.loadConfig.mockClear();
-    mockLogger.info.mockClear();
-    mockLogger.error.mockClear();
-  }
-
-  beforeEach(() => setupCommand());
-  beforeEach(() => clearMocks());
+  beforeEach(() => clearMocks(mockLogger, mockConfigManager));
 
   it('should display current configuration when config loads successfully', async () => {
     const mockConfig = {
@@ -65,20 +79,14 @@ describe('Config Show Action - Error', () => {
   let mockConfigManager: any;
   let configCommand: ConfigCommand;
 
-  function setupCommand() {
-    mockLogger = createMockLogger() as any;
-    mockConfigManager = createMockConfigManager() as unknown as ConfigManager;
-    configCommand = new ConfigCommand(mockLogger, mockConfigManager);
-  }
+  beforeEach(() => {
+    const setup = setupCommand();
+    mockLogger = setup.mockLogger;
+    mockConfigManager = setup.mockConfigManager;
+    configCommand = setup.configCommand;
+  });
 
-  function clearMocks() {
-    mockConfigManager.loadConfig.mockClear();
-    mockLogger.info.mockClear();
-    mockLogger.error.mockClear();
-  }
-
-  beforeEach(() => setupCommand());
-  beforeEach(() => clearMocks());
+  beforeEach(() => clearMocks(mockLogger, mockConfigManager));
 
   it('should log error when config loading fails', async () => {
     const mockError = new Error('Config file not found');
@@ -107,19 +115,14 @@ describe('Config Sample Action', () => {
   let mockConfigManager: any;
   let configCommand: ConfigCommand;
 
-  function setupCommand() {
-    mockLogger = createMockLogger() as any;
-    mockConfigManager = createMockConfigManager() as unknown as ConfigManager;
-    configCommand = new ConfigCommand(mockLogger, mockConfigManager);
-  }
+  beforeEach(() => {
+    const setup = setupCommand();
+    mockLogger = setup.mockLogger;
+    mockConfigManager = setup.mockConfigManager;
+    configCommand = setup.configCommand;
+  });
 
-  function clearMocks() {
-    mockConfigManager.createSampleConfig.mockClear();
-    mockLogger.info.mockClear();
-  }
-
-  beforeEach(() => setupCommand());
-  beforeEach(() => clearMocks());
+  beforeEach(() => clearMocks(mockLogger, mockConfigManager));
 
   it('should display sample configuration', async () => {
     const sampleConfig = '# Sample Configuration Content';
@@ -141,19 +144,14 @@ describe('Config Validate Action', () => {
   let mockConfigManager: any;
   let configCommand: ConfigCommand;
 
-  function setupCommand() {
-    mockLogger = createMockLogger() as any;
-    mockConfigManager = createMockConfigManager() as unknown as ConfigManager;
-    configCommand = new ConfigCommand(mockLogger, mockConfigManager);
-  }
+  beforeEach(() => {
+    const setup = setupCommand();
+    mockLogger = setup.mockLogger;
+    mockConfigManager = setup.mockConfigManager;
+    configCommand = setup.configCommand;
+  });
 
-  function clearMocks() {
-    mockConfigManager.loadConfig.mockClear();
-    mockLogger.info.mockClear();
-  }
-
-  beforeEach(() => setupCommand());
-  beforeEach(() => clearMocks());
+  beforeEach(() => clearMocks(mockLogger, mockConfigManager));
 
   describe('With Config Path', () => {
     it('should validate configuration successfully', async () => {
@@ -188,16 +186,15 @@ describe('ConfigCommand Integration', () => {
   let configCommand: ConfigCommand;
 
   beforeEach(() => {
-    mockLogger = createMockLogger();
-    mockConfigManager = createMockConfigManager() as unknown as ConfigManager;
-    configCommand = new ConfigCommand(mockLogger, mockConfigManager);
+    const setup = setupCommand();
+    mockLogger = setup.mockLogger;
+    mockConfigManager = setup.mockConfigManager;
+    configCommand = setup.configCommand;
   });
 
-  it('should use injected dependencies in all operations', async () => {
-    mockConfigManager.loadConfig.mockClear();
-    mockConfigManager.createSampleConfig.mockClear();
-    mockLogger.info.mockClear();
+  beforeEach(() => clearMocks(mockLogger, mockConfigManager));
 
+  it('should use injected dependencies in all operations', async () => {
     mockConfigManager.loadConfig.mockResolvedValue = Promise.resolve(
       success({})
     );
@@ -219,14 +216,15 @@ describe('ConfigCommand Error Handling', () => {
   let configCommand: ConfigCommand;
 
   beforeEach(() => {
-    mockLogger = createMockLogger();
-    mockConfigManager = createMockConfigManager() as unknown as ConfigManager;
-    configCommand = new ConfigCommand(mockLogger, mockConfigManager);
+    const setup = setupCommand();
+    mockLogger = setup.mockLogger;
+    mockConfigManager = setup.mockConfigManager;
+    configCommand = setup.configCommand;
   });
 
-  it('should handle unknown actions gracefully', async () => {
-    mockLogger.error.mockClear();
+  beforeEach(() => clearMocks(mockLogger, mockConfigManager));
 
+  it('should handle unknown actions gracefully', async () => {
     const context = createTestCliContext({ args: ['unknown'] });
     await configCommand.execute(context);
 

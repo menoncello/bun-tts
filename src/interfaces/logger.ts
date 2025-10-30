@@ -5,49 +5,49 @@
 export interface Logger {
   /**
    * Log a debug message with optional metadata.
-   * @param message - The debug message to log
-   * @param metadata - Optional key-value pairs to include with the log entry
+   * @param {string} message - The debug message to log
+   * @param {Record<string, unknown>} metadata - Optional key-value pairs to include with the log entry
    */
   debug: (message: string, metadata?: Record<string, unknown>) => void;
 
   /**
    * Log an info message with optional metadata.
-   * @param message - The info message to log
-   * @param metadata - Optional key-value pairs to include with the log entry
+   * @param {string} message - The info message to log
+   * @param {Record<string, unknown>} metadata - Optional key-value pairs to include with the log entry
    */
   info: (message: string, metadata?: Record<string, unknown>) => void;
 
   /**
    * Log a warning message with optional metadata.
-   * @param message - The warning message to log
-   * @param metadata - Optional key-value pairs to include with the log entry
+   * @param {string} message - The warning message to log
+   * @param {Record<string, unknown>} metadata - Optional key-value pairs to include with the log entry
    */
   warn: (message: string, metadata?: Record<string, unknown>) => void;
 
   /**
    * Log an error message with optional metadata.
-   * @param message - The error message to log
-   * @param metadata - Optional key-value pairs to include with the log entry
+   * @param {string} message - The error message to log
+   * @param {Record<string, unknown>} metadata - Optional key-value pairs to include with the log entry
    */
   error: (message: string, metadata?: Record<string, unknown>) => void;
 
   /**
    * Log a fatal error message with optional metadata.
-   * @param message - The fatal error message to log
-   * @param metadata - Optional key-value pairs to include with the log entry
+   * @param {string} message - The fatal error message to log
+   * @param {Record<string, unknown>} metadata - Optional key-value pairs to include with the log entry
    */
   fatal: (message: string, metadata?: Record<string, unknown>) => void;
 
   /**
    * Create a child logger with additional context bindings.
-   * @param bindings - Key-value pairs to bind to the child logger context
-   * @returns A new logger instance with the bound context
+   * @param {Record<string, unknown>} bindings - Key-value pairs to bind to the child logger context
+   * @returns {Logger} A new logger instance with the bound context
    */
   child: (bindings: Record<string, unknown>) => Logger;
 
   /**
    * Write a chunk of data (for stream compatibility).
-   * @param chunk - The data chunk to write
+   * @param {unknown} chunk - The data chunk to write
    */
   write?: (chunk: unknown) => void;
 
@@ -73,8 +73,8 @@ export class MockLogger implements Logger {
 
   /**
    * Log a debug message with optional metadata.
-   * @param message - The debug message to log
-   * @param metadata - Optional key-value pairs to include with the log entry
+   * @param {string} message - The debug message to log
+   * @param {Record<string, unknown>} metadata - Optional key-value pairs to include with the log entry
    */
   debug(message: string, metadata?: Record<string, unknown>): void {
     this.logs.push({ level: 'debug', message, metadata });
@@ -82,8 +82,8 @@ export class MockLogger implements Logger {
 
   /**
    * Log an info message with optional metadata.
-   * @param message - The info message to log
-   * @param metadata - Optional key-value pairs to include with the log entry
+   * @param {string} message - The info message to log
+   * @param {Record<string, unknown>} metadata - Optional key-value pairs to include with the log entry
    */
   info(message: string, metadata?: Record<string, unknown>): void {
     this.logs.push({ level: 'info', message, metadata });
@@ -91,8 +91,8 @@ export class MockLogger implements Logger {
 
   /**
    * Log a warning message with optional metadata.
-   * @param message - The warning message to log
-   * @param metadata - Optional key-value pairs to include with the log entry
+   * @param {string} message - The warning message to log
+   * @param {Record<string, unknown>} metadata - Optional key-value pairs to include with the log entry
    */
   warn(message: string, metadata?: Record<string, unknown>): void {
     this.logs.push({ level: 'warn', message, metadata });
@@ -100,8 +100,8 @@ export class MockLogger implements Logger {
 
   /**
    * Log an error message with optional metadata.
-   * @param message - The error message to log
-   * @param metadata - Optional key-value pairs to include with the log entry
+   * @param {string} message - The error message to log
+   * @param {Record<string, unknown>} metadata - Optional key-value pairs to include with the log entry
    */
   error(message: string, metadata?: Record<string, unknown>): void {
     this.logs.push({ level: 'error', message, metadata });
@@ -109,8 +109,8 @@ export class MockLogger implements Logger {
 
   /**
    * Log a fatal error message with optional metadata.
-   * @param message - The fatal error message to log
-   * @param metadata - Optional key-value pairs to include with the log entry
+   * @param {string} message - The fatal error message to log
+   * @param {Record<string, unknown>} metadata - Optional key-value pairs to include with the log entry
    */
   fatal(message: string, metadata?: Record<string, unknown>): void {
     this.logs.push({ level: 'fatal', message, metadata });
@@ -119,8 +119,8 @@ export class MockLogger implements Logger {
   /**
    * Create a child logger with additional context bindings.
    * In the mock implementation, returns the same instance.
-   * @param _bindings - Key-value pairs to bind to the child logger context (ignored in mock)
-   * @returns The same logger instance
+   * @param {Record<string, unknown>} _bindings - Key-value pairs to bind to the child logger context (ignored in mock)
+   * @returns {Logger} The same logger instance
    */
   child(_bindings: Record<string, unknown>): Logger {
     return this;
@@ -128,7 +128,7 @@ export class MockLogger implements Logger {
 
   /**
    * Get all logged entries.
-   * @returns A copy of all log entries stored in this mock logger
+   * @returns {any} A copy of all log entries stored in this mock logger
    */
   getLogs(): Array<{
     level: string;
@@ -153,7 +153,7 @@ export class MockLogger implements Logger {
   /**
    * Write a chunk of data (for stream compatibility).
    * Silently ignored in the mock implementation.
-   * @param _chunk - The data chunk to write (ignored in mock)
+   * @param {unknown} _chunk - The data chunk to write (ignored in mock)
    */
   write(_chunk: unknown): void {
     // Silently ignore writes in mock
@@ -173,7 +173,7 @@ export class LoggerFactory {
   /**
    * Get the singleton logger instance.
    * Creates a new production logger if one doesn't exist.
-   * @returns The logger instance
+   * @returns {any} The logger instance
    */
   static getInstance(): Logger {
     if (!LoggerFactory.instance) {
@@ -185,7 +185,7 @@ export class LoggerFactory {
 
   /**
    * Set a custom logger instance (useful for testing).
-   * @param logger - The logger instance to set
+   * @param {Logger} logger - The logger instance to set
    */
   static setInstance(logger: Logger): void {
     LoggerFactory.instance = logger;
@@ -203,7 +203,7 @@ export class LoggerFactory {
    * Create a production logger instance.
    * This will be implemented in logger.ts with the real Pino logger.
    * For now, returns a basic implementation that will be replaced.
-   * @returns A basic logger implementation
+   * @returns {any} A basic logger implementation
    */
   private static createProductionLogger(): Logger {
     // This will be implemented in logger.ts with the real Pino logger

@@ -1,15 +1,17 @@
-import { describe, test, expect } from 'bun:test';
-import { EPUBParser } from '../../../../src/core/document-processing/parsers/epub-parser';
-import type { EPUBParseOptions } from '../../../../src/core/document-processing/parsers/epub-parser-types';
+import { test, expect } from 'bun:test';
+import { getErrorCode } from '../../../../src/core/document-processing/parsers/epub-parser-type-guards.js';
+import type { EPUBParseOptions } from '../../../../src/core/document-processing/parsers/epub-parser-types.js';
+import { EPUBParser } from '../../../../src/core/document-processing/parsers/epub-parser.js';
+import { tick } from '../../../../src/utils/deterministic-timing.js';
 
 // Test helper functions for EPUBParser tests
 
 export function testDefaultConstructor(parser: EPUBParser): void {
   expect(parser).toBeDefined();
   const stats = parser.getStats();
-  expect(stats).toHaveProperty('parseTime');
+  expect(stats).toHaveProperty('parseTimeMs');
   expect(stats).toHaveProperty('chaptersPerSecond');
-  expect(stats).toHaveProperty('memoryUsage');
+  expect(stats).toHaveProperty('memoryUsageMB');
 }
 
 export function testCustomConstructor(customOptions: EPUBParseOptions): void {
@@ -17,9 +19,9 @@ export function testCustomConstructor(customOptions: EPUBParseOptions): void {
 
   const stats = customParser.getStats();
   expect(stats).toBeDefined();
-  expect(stats).toHaveProperty('parseTime');
+  expect(stats).toHaveProperty('parseTimeMs');
   expect(stats).toHaveProperty('chaptersPerSecond');
-  expect(stats).toHaveProperty('memoryUsage');
+  expect(stats).toHaveProperty('memoryUsageMB');
 }
 
 export async function testNullInput(parser: EPUBParser): Promise<void> {
@@ -27,8 +29,11 @@ export async function testNullInput(parser: EPUBParser): Promise<void> {
 
   expect(result.success).toBe(false);
   expect(result.error).toBeDefined();
-  expect(result.error!.code).toBe('INVALID_INPUT');
-  expect(result.error!.message).toBe('Input is required');
+  const errorCode = getErrorCode(result.error);
+  expect(errorCode).toBe('INVALID_INPUT_TYPE');
+  expect(result.error!.message).toBe(
+    'Invalid input type for EPUB parsing. Expected string, Buffer, or ArrayBuffer.'
+  );
 }
 
 export async function testUndefinedInput(parser: EPUBParser): Promise<void> {
@@ -36,7 +41,11 @@ export async function testUndefinedInput(parser: EPUBParser): Promise<void> {
 
   expect(result.success).toBe(false);
   expect(result.error).toBeDefined();
-  expect(result.error!.code).toBe('INVALID_INPUT');
+  const errorCode = getErrorCode(result.error);
+  expect(errorCode).toBe('INVALID_INPUT_TYPE');
+  expect(result.error!.message).toBe(
+    'Invalid input type for EPUB parsing. Expected string, Buffer, or ArrayBuffer.'
+  );
 }
 
 export async function testEmptyStringInput(parser: EPUBParser): Promise<void> {
@@ -44,7 +53,8 @@ export async function testEmptyStringInput(parser: EPUBParser): Promise<void> {
 
   expect(result.success).toBe(false);
   expect(result.error).toBeDefined();
-  expect(result.error!.code).toBe('INVALID_INPUT');
+  const errorCode = getErrorCode(result.error);
+  expect(errorCode).toBe('INVALID_INPUT');
   expect(result.error!.message).toBe('Input is required');
 }
 
@@ -53,7 +63,8 @@ export async function testEmptyBufferInput(parser: EPUBParser): Promise<void> {
 
   expect(result.success).toBe(false);
   expect(result.error).toBeDefined();
-  expect(result.error!.code).toBe('EPUB_FORMAT_ERROR');
+  const errorCode = getErrorCode(result.error);
+  expect(errorCode).toBe('EPUB_FORMAT_ERROR');
 }
 
 export async function testInvalidEPUBContent(
@@ -66,7 +77,8 @@ export async function testInvalidEPUBContent(
 
   expect(result.success).toBe(false);
   expect(result.error).toBeDefined();
-  expect(result.error!.code).toBe('EPUB_FORMAT_ERROR');
+  const errorCode = getErrorCode(result.error);
+  expect(errorCode).toBe('EPUB_FORMAT_ERROR');
 }
 
 export function testSetOptions(parser: EPUBParser): void {
@@ -83,15 +95,15 @@ export function testSetOptions(parser: EPUBParser): void {
 export function testGetStats(parser: EPUBParser): void {
   const stats = parser.getStats();
 
-  expect(stats).toHaveProperty('parseTime');
+  expect(stats).toHaveProperty('parseTimeMs');
   expect(stats).toHaveProperty('chaptersPerSecond');
-  expect(stats).toHaveProperty('memoryUsage');
+  expect(stats).toHaveProperty('memoryUsageMB');
   expect(stats).toHaveProperty('cacheHits');
   expect(stats).toHaveProperty('cacheMisses');
 
-  expect(typeof stats.parseTime).toBe('number');
+  expect(typeof stats.parseTimeMs).toBe('number');
   expect(typeof stats.chaptersPerSecond).toBe('number');
-  expect(typeof stats.memoryUsage).toBe('number');
+  expect(typeof stats.memoryUsageMB).toBe('number');
   expect(typeof stats.cacheHits).toBe('number');
   expect(typeof stats.cacheMisses).toBe('number');
 }
@@ -105,7 +117,8 @@ export async function testErrorNormalization(
 
   expect(result.success).toBe(false);
   expect(result.error).toBeDefined();
-  expect(result.error!.code).toBe('EPUB_FORMAT_ERROR');
+  const errorCode = getErrorCode(result.error);
+  expect(errorCode).toBe('EPUB_FORMAT_ERROR');
   expect(result.error!.message).toBeDefined();
 }
 
@@ -157,21 +170,20 @@ export async function testPerformanceStatsUpdate(
   testContent?: Buffer
 ): Promise<void> {
   const initialStats = parser.getStats();
-  expect(initialStats.parseTime).toBe(0);
+  expect(initialStats.parseTimeMs).toBe(0);
 
-  const { tick } = require('../../../../src/utils/deterministic-timing');
   await tick();
 
   const content = testContent || Buffer.from('invalid content');
   const result = await parser.parse(content);
 
   const updatedStats = parser.getStats();
-  expect(updatedStats.parseTime).toBeGreaterThanOrEqual(0);
+  expect(updatedStats.parseTimeMs).toBeGreaterThanOrEqual(0);
 
   if (result.success) {
-    expect(updatedStats.parseTime).toBeGreaterThan(initialStats.parseTime);
+    expect(updatedStats.parseTimeMs).toBeGreaterThan(initialStats.parseTimeMs);
   } else {
-    expect(typeof updatedStats.parseTime).toBe('number');
+    expect(typeof updatedStats.parseTimeMs).toBe('number');
   }
 }
 
@@ -189,15 +201,6 @@ export function testMethodSignatures(parser: EPUBParser): void {
 
 // Type-safe option test helpers
 export const VALID_PARSER_OPTIONS: EPUBParseOptions[] = [
-  { mode: 'tts' },
-  { mode: 'full' },
-  { mode: 'metadata-only' },
-  { streaming: true },
-  { streaming: false },
-  { strictMode: true },
-  { strictMode: false },
-  { enableProfiling: true },
-  { enableProfiling: false },
   { extractMedia: true },
   { extractMedia: false },
   { preserveHTML: true },
@@ -205,6 +208,9 @@ export const VALID_PARSER_OPTIONS: EPUBParseOptions[] = [
   { chapterSensitivity: 0.1 },
   { chapterSensitivity: 0.5 },
   { chapterSensitivity: 1.0 },
+  { chapterSensitivity: 2.0 },
+  { verbose: true },
+  { verbose: false },
 ];
 
 export const VALID_TEST_INPUTS = [

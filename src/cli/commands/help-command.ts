@@ -18,11 +18,11 @@ export interface OutputWriter {
  */
 export class ConsoleOutputWriter implements OutputWriter {
   /**
-   * Writes content to console.log.
-   * @param content - The content to write to console
+   * Writes content to standard output.
+   * @param {string} content - The content to write to output
    */
   public write(content: string): void {
-    console.log(content);
+    process.stdout.write(`${content}\n`);
   }
 }
 
@@ -38,8 +38,8 @@ export class HelpCommand {
   /**
    * Creates a new HelpCommand instance.
    *
-   * @param logger - Logger instance for structured logging
-   * @param outputWriter - Output writer for displaying help content (defaults to ConsoleOutputWriter)
+   * @param {Logger} logger - Logger instance for structured logging
+   * @param {any} outputWriter - Output writer for displaying help content (defaults to ConsoleOutputWriter)
    * @throws {Error} When logger is not provided
    */
   constructor(
@@ -61,8 +61,8 @@ export class HelpCommand {
    * verbose flag in the context. Uses dependency injection for output to
    * improve testability and maintainability.
    *
-   * @param context - The CLI context containing flags and configuration
-   * @returns Promise that resolves when help display is complete
+   * @param {any} context - The CLI context containing flags and configuration
+   * @returns {Promise<void>} Promise that resolves when help display is complete
    */
   public async execute(context: CliContext): Promise<void> {
     const helpText = this.generateHelpText();
@@ -81,7 +81,7 @@ export class HelpCommand {
   /**
    * Generates the main help text content.
    *
-   * @returns Formatted help text string
+   * @returns {string} Formatted help text string
    */
   private generateHelpText(): string {
     return `
@@ -113,7 +113,7 @@ Examples:
   /**
    * Generates verbose debugging information.
    *
-   * @returns Formatted verbose information string
+   * @returns {string} Formatted verbose information string
    */
   private generateVerboseInfo(): string {
     return `

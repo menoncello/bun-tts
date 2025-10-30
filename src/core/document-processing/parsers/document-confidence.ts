@@ -42,8 +42,8 @@ export const CONTENT_STRUCTURE_WORD_THRESHOLD = 1;
 
 /**
  * Calculate structure confidence based on chapter count
- * @param chapterCount - Number of chapters in the document
- * @returns Structure confidence bonus
+ * @param {number} chapterCount - Number of chapters in the document
+ * @returns {number} number Structure confidence bonus
  */
 export const calculateStructureConfidence = (chapterCount: number): number => {
   if (chapterCount >= EXCELLENT_STRUCTURE_CHAPTER_THRESHOLD) {
@@ -58,10 +58,10 @@ export const calculateStructureConfidence = (chapterCount: number): number => {
 
 /**
  * Calculate content distribution confidence based on paragraphs and sentences
- * @param totalParagraphs - Total number of paragraphs
- * @param totalSentences - Total number of sentences
- * @param chapterCount - Number of chapters
- * @returns Content distribution confidence bonus
+ * @param {number} totalParagraphs - Total number of paragraphs
+ * @param {number} totalSentences - Total number of sentences
+ * @param {number} chapterCount - Number of chapters
+ * @returns {number} number Content distribution confidence bonus
  */
 export const calculateContentDistributionConfidence = (
   totalParagraphs: number,
@@ -101,8 +101,8 @@ export const calculateContentDistributionConfidence = (
 
 /**
  * Calculate content size confidence based on word count
- * @param wordCount - Total word count
- * @returns Content size confidence bonus
+ * @param {number} wordCount - Total word count
+ * @returns {number} number Content size confidence bonus
  */
 export const calculateContentSizeConfidence = (wordCount: number): number => {
   if (wordCount > COMPREHENSIVE_CONTENT_THRESHOLD) {
@@ -117,8 +117,8 @@ export const calculateContentSizeConfidence = (wordCount: number): number => {
 
 /**
  * Check for single character content
- * @param wordCount - Total word count
- * @returns Confidence score or null if not applicable
+ * @param {number} wordCount - Total word count
+ * @returns {number | null} Confidence score or null if not applicable
  */
 const checkSingleCharacterContent = (wordCount: number): number | null => {
   if (wordCount === 1) {
@@ -129,11 +129,11 @@ const checkSingleCharacterContent = (wordCount: number): number | null => {
 
 /**
  * Check for extremely minimal content scenarios
- * @param wordCount - Total word count
- * @param chapterCount - Number of chapters
- * @param totalParagraphs - Total number of paragraphs
- * @param confidence - Current confidence score
- * @returns Confidence score or null if not applicable
+ * @param {number} wordCount - Total word count
+ * @param {number} chapterCount - Number of chapters
+ * @param {number} totalParagraphs - Total number of paragraphs
+ * @param {number} confidence - Current confidence score
+ * @returns {number | null} Confidence score or null if not applicable
  */
 const checkExtremelyMinimalContent = (
   wordCount: number,
@@ -158,10 +158,10 @@ const checkExtremelyMinimalContent = (
 
 /**
  * Check for content with no clear structure
- * @param chapterCount - Number of chapters
- * @param totalParagraphs - Total number of paragraphs
- * @param confidence - Current confidence score
- * @returns Confidence score or null if not applicable
+ * @param {number} chapterCount - Number of chapters
+ * @param {number} totalParagraphs - Total number of paragraphs
+ * @param {number} confidence - Current confidence score
+ * @returns {number} number Confidence score or null if not applicable
  */
 const checkNoClearStructure = (
   chapterCount: number,
@@ -176,11 +176,11 @@ const checkNoClearStructure = (
 
 /**
  * Check for minimal structure and content
- * @param chapterCount - Number of chapters
- * @param totalParagraphs - Total number of paragraphs
- * @param wordCount - Total word count
- * @param confidence - Current confidence score
- * @returns Confidence score or null if not applicable
+ * @param {number} chapterCount - Number of chapters
+ * @param {number} totalParagraphs - Total number of paragraphs
+ * @param {number} wordCount - Total word count
+ * @param {number} confidence - Current confidence score
+ * @returns {number} number Confidence score or null if not applicable
  */
 const checkMinimalStructure = (
   chapterCount: number,
@@ -200,10 +200,10 @@ const checkMinimalStructure = (
 
 /**
  * Check for content with good structure
- * @param wordCount - Total word count
- * @param chapterCount - Number of chapters
- * @param confidence - Current confidence score
- * @returns Confidence score or null if not applicable
+ * @param {number} wordCount - Total word count
+ * @param {number} chapterCount - Number of chapters
+ * @param {number} confidence - Current confidence score
+ * @returns {number} number Confidence score or null if not applicable
  */
 const checkGoodStructure = (
   wordCount: number,
@@ -226,9 +226,9 @@ const checkGoodStructure = (
 
 /**
  * Check for reasonable content amount
- * @param wordCount - Total word count
- * @param confidence - Current confidence score
- * @returns Confidence score or null if not applicable
+ * @param {number} wordCount - Total word count
+ * @param {number} confidence - Current confidence score
+ * @returns {number} number Confidence score or null if not applicable
  */
 const checkReasonableContent = (
   wordCount: number,
@@ -242,11 +242,11 @@ const checkReasonableContent = (
 
 /**
  * Check structure-related scenarios
- * @param chapterCount - Number of chapters
- * @param totalParagraphs - Total number of paragraphs
- * @param wordCount - Total word count
- * @param confidence - Current confidence score
- * @returns Confidence score or null if not applicable
+ * @param {number} chapterCount - Number of chapters
+ * @param {number} totalParagraphs - Total number of paragraphs
+ * @param {number} wordCount - Total word count
+ * @param {number} confidence - Current confidence score
+ * @returns {number} number Confidence score or null if not applicable
  */
 const checkStructureScenarios = (
   chapterCount: number,
@@ -280,10 +280,10 @@ const checkStructureScenarios = (
 
 /**
  * Check content quality scenarios
- * @param wordCount - Total word count
- * @param chapterCount - Number of chapters
- * @param confidence - Current confidence score
- * @returns Confidence score or null if not applicable
+ * @param {number} wordCount - Total word count
+ * @param {number} chapterCount - Number of chapters
+ * @param {number} confidence - Current confidence score
+ * @returns {number} number Confidence score or null if not applicable
  */
 const checkContentQualityScenarios = (
   wordCount: number,
@@ -311,11 +311,11 @@ const checkContentQualityScenarios = (
 
 /**
  * Check content structure scenarios
- * @param wordCount - Total word count
- * @param chapterCount - Number of chapters
- * @param totalParagraphs - Total number of paragraphs
- * @param confidence - Current confidence score
- * @returns Confidence score or null if not applicable
+ * @param {number} wordCount - Total word count
+ * @param {number} chapterCount - Number of chapters
+ * @param {number} totalParagraphs - Total number of paragraphs
+ * @param {number} confidence - Current confidence score
+ * @returns {number} number Confidence score or null if not applicable
  */
 const checkContentStructureScenarios = (
   wordCount: number,
@@ -349,11 +349,11 @@ const checkContentStructureScenarios = (
 
 /**
  * Adjust confidence based on edge cases and minimal content scenarios
- * @param confidence - Current confidence score
- * @param wordCount - Total word count
- * @param chapterCount - Number of chapters
- * @param totalParagraphs - Total number of paragraphs
- * @returns Adjusted confidence score
+ * @param {number} confidence - Current confidence score
+ * @param {number} wordCount - Total word count
+ * @param {number} chapterCount - Number of chapters
+ * @param {number} totalParagraphs - Total number of paragraphs
+ * @returns {number} number Adjusted confidence score
  */
 export const adjustConfidenceForEdgeCases = (
   confidence: number,
@@ -395,11 +395,11 @@ export const adjustConfidenceForEdgeCases = (
 
 /**
  * Calculate document confidence based on structure quality
- * @param chapters - Array of chapters to analyze
- * @param totalParagraphs - Total number of paragraphs
- * @param totalSentences - Total number of sentences
- * @param wordCount - Total word count
- * @returns Confidence score between 0 and 1
+ * @param {Chapter[]} chapters - Array of chapters to analyze
+ * @param {number} totalParagraphs - Total number of paragraphs
+ * @param {number} totalSentences - Total number of sentences
+ * @param {number} wordCount - Total word count
+ * @returns {number} number Confidence score between 0 and 1
  */
 export const calculateDocumentConfidence = (
   chapters: Chapter[],
