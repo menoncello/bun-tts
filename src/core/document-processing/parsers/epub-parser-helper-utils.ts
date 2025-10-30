@@ -8,24 +8,24 @@ import type {
   TableOfContentsItem,
   Chapter,
   EmbeddedAssets,
-} from '../types';
+} from '../types.js';
 import {
   applyCompatibilityFixes,
   applyCompatibilityFixesToTOC,
   type CompatibilityConfig,
-} from './epub-parser-compatibility';
-import { updatePerformanceStats } from './epub-parser-statistics';
-import type { DocumentStatistics } from './epub-parser-types';
+} from './epub-parser-compatibility.js';
+import { updatePerformanceStats } from './epub-parser-statistics.js';
+import type { DocumentStatistics } from './epub-parser-types.js';
 import {
   EPUB_LIBRARY_VERSION,
   EPUB_LIBRARY_FEATURES,
-} from './epub-parser-utils';
+} from './epub-parser-utils.js';
 
 /**
  * Creates compatibility configuration from parsing options
- * @param options - Parsing options containing strict mode setting
- * @param options.strictMode - Whether to enable strict parsing mode
- * @returns CompatibilityConfig for EPUB version handling
+ * @param {{strictMode?: boolean}} options - Parsing options containing strict mode setting
+ * @param {boolean} options.strictMode - Whether to enable strict parsing mode
+ * @returns {CompatibilityConfig} CompatibilityConfig for EPUB version handling
  */
 export function createCompatibilityConfig(options: {
   strictMode?: boolean;
@@ -39,11 +39,11 @@ export function createCompatibilityConfig(options: {
 
 /**
  * Applies compatibility fixes to metadata and table of contents
- * @param metadata - Original document metadata
- * @param tableOfContents - Original table of contents
- * @param compatibilityAnalysis - Analysis of EPUB version compatibility issues
- * @param compatibilityConfig - Configuration for compatibility handling
- * @returns Fixed metadata and table of contents
+ * @param {any} metadata - Original document metadata
+ * @param {any} tableOfContents - Original table of contents
+ * @param {any} compatibilityAnalysis - Analysis of EPUB version compatibility issues
+ * @param {any} compatibilityConfig - Configuration for compatibility handling
+ * @returns {unknown} unknown Fixed metadata and table of contents
  */
 export function applyFixesToMetadataAndTOC(
   metadata: DocumentMetadata,
@@ -69,15 +69,15 @@ export function applyFixesToMetadataAndTOC(
 
 /**
  * Merges document and content information into complete parse result
- * @param documentInfo - Document metadata, TOC, and assets
- * @param documentInfo.metadata - Document metadata information
- * @param documentInfo.tableOfContents - Table of contents structure
- * @param documentInfo.embeddedAssets - Embedded media and assets
- * @param contentInfo - Chapters, stats, and document structure
- * @param contentInfo.chapters - Array of document chapters
- * @param contentInfo.stats - Document statistics
- * @param contentInfo.documentStructure - Complete document structure
- * @returns Merged result object with all components
+ * @param {{metadata: DocumentMetadata, tableOfContents: TableOfContentsItem[], embeddedAssets: EmbeddedAssets}} documentInfo - Document metadata, TOC, and assets
+ * @param {DocumentMetadata} documentInfo.metadata - Document metadata information
+ * @param {TableOfContentsItem[]} documentInfo.tableOfContents - Table of contents structure
+ * @param {EmbeddedAssets} documentInfo.embeddedAssets - Embedded media and assets
+ * @param {{chapters: Chapter[], stats: DocumentStatistics, documentStructure: DocumentStructure}} contentInfo - Chapters, stats, and document structure
+ * @param {Chapter[]} contentInfo.chapters - Array of document chapters
+ * @param {DocumentStatistics} contentInfo.stats - Document statistics
+ * @param {DocumentStructure} contentInfo.documentStructure - Complete document structure
+ * @returns {{metadata: DocumentMetadata, tableOfContents: TableOfContentsItem[], chapters: Chapter[], embeddedAssets: EmbeddedAssets, stats: DocumentStatistics, documentStructure: DocumentStructure}} Merged result object with all components
  */
 export function createParseResult(
   documentInfo: {
@@ -106,7 +106,7 @@ export function createParseResult(
 
 /**
  * Creates library information object for document structure
- * @returns Library information with version and features
+ * @returns {unknown} unknown Library information with version and features
  */
 export function createLibraryInfo(): {
   name: string;
@@ -122,10 +122,10 @@ export function createLibraryInfo(): {
 
 /**
  * Updates performance statistics and returns updated stats
- * @param startTime - Start time for parsing
- * @param chapterCount - Number of chapters processed
- * @param performanceStats - Current performance statistics
- * @returns Updated performance statistics
+ * @param {Date} startTime - Start time for parsing
+ * @param {number} chapterCount - Number of chapters processed
+ * @param {any} performanceStats - Current performance statistics
+ * @returns {unknown} unknown Updated performance statistics
  */
 export function createUpdatedPerformanceStats(
   startTime: number,
@@ -137,11 +137,11 @@ export function createUpdatedPerformanceStats(
 
 /**
  * Creates base document structure with core content
- * @param metadata - Document metadata
- * @param chapters - Array of document chapters
- * @param tableOfContents - Table of contents structure
- * @param embeddedAssets - Embedded media and assets
- * @returns Base structure object
+ * @param {any} metadata - Document metadata
+ * @param {Chapter[]} chapters - Array of document chapters
+ * @param {any} tableOfContents - Table of contents structure
+ * @param {any} embeddedAssets - Embedded media and assets
+ * @returns {object} object Base structure object
  */
 export function createBaseStructure(
   metadata: import('../types').DocumentMetadata,
@@ -164,8 +164,8 @@ export function createBaseStructure(
 
 /**
  * Creates statistics structure for document
- * @param stats - Document statistics
- * @returns Statistics structure object
+ * @param {any} stats - Document statistics
+ * @returns {object} object Statistics structure object
  */
 export function createStatsStructure(
   stats: import('./epub-parser-types').DocumentStatistics
@@ -185,9 +185,9 @@ export function createStatsStructure(
 
 /**
  * Creates metadata structure for document
- * @param metadata - Document metadata
- * @param options - Parsing configuration options
- * @returns Metadata structure object
+ * @param {any} metadata - Document metadata
+ * @param {any} options - Parsing configuration options
+ * @returns {object} object Metadata structure object
  */
 export function createMetaStructure(
   metadata: import('../types').DocumentMetadata,
@@ -205,4 +205,4 @@ export function createMetaStructure(
 }
 
 // Re-export CompatibilityConfig for use in other modules
-export type { CompatibilityConfig } from './epub-parser-compatibility';
+export type { CompatibilityConfig } from './epub-parser-compatibility.js';

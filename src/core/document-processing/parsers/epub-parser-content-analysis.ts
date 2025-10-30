@@ -3,9 +3,9 @@
  */
 
 import type { Epub } from '@smoores/epub';
-import { logger } from '../../../utils/logger';
-import { EPUBVersion } from './epub-parser-compatibility';
-import { CONTENT_ANALYSIS_SAMPLE_SIZE } from './epub-parser-constants';
+import { logger } from '../../../utils/logger.js';
+import { EPUBVersion } from './epub-parser-compatibility.js';
+import { CONTENT_ANALYSIS_SAMPLE_SIZE } from './epub-parser-constants.js';
 
 /**
  * Spine item interface for type safety
@@ -18,10 +18,10 @@ export interface SpineItem {
 
 /**
  * Analyze content compatibility issues
- * @param epub - EPUB instance
- * @param detectedVersion - Detected EPUB version
- * @param warnings - Array to add warnings to
- * @param requiredFallbacks - Array to add required fallbacks to
+ * @param {any} epub - EPUB instance
+ * @param {any} detectedVersion - Detected EPUB version
+ * @param {string[]} warnings - Array to add warnings to
+ * @param {string[]} requiredFallbacks - Array to add required fallbacks to
  */
 export async function analyzeContentCompatibility(
   epub: Epub,
@@ -53,8 +53,8 @@ export async function analyzeContentCompatibility(
 
 /**
  * Get spine items safely with error handling
- * @param epub - EPUB instance
- * @returns Array of spine items
+ * @param {any} epub - EPUB instance
+ * @returns {Promise<SpineItem[]>} Array of spine items
  */
 async function getSpineItemsSafe(epub: Epub): Promise<SpineItem[]> {
   try {
@@ -81,8 +81,8 @@ interface AnalysisContext {
 
 /**
  * Analyze a single content item for compatibility issues
- * @param context - Analysis context containing all necessary parameters
- * @param spineItem - Spine item to analyze
+ * @param {any} context - Analysis context containing all necessary parameters
+ * @param {any} spineItem - Spine item to analyze
  */
 async function analyzeSingleItem(
   context: AnalysisContext,
@@ -102,9 +102,9 @@ async function analyzeSingleItem(
 
 /**
  * Read content safely with error handling
- * @param epub - EPUB instance
- * @param itemId - Item ID to read
- * @returns Content string or null
+ * @param {any} epub - EPUB instance
+ * @param {any} itemId - Item ID to read
+ * @returns {Promise<string | null>} Content string or null
  */
 async function readContentSafe(
   epub: Epub,
@@ -119,9 +119,9 @@ async function readContentSafe(
 
 /**
  * Analyze EPUB 2.0 content for compatibility issues
- * @param content - Content to analyze
- * @param warnings - Array to add warnings to
- * @param requiredFallbacks - Array to add required fallbacks to
+ * @param {string} content - Content to analyze
+ * @param {string[]} warnings - Array to add warnings to
+ * @param {string[]} requiredFallbacks - Array to add required fallbacks to
  */
 function analyzeEPUB2Content(
   content: string,
@@ -134,9 +134,9 @@ function analyzeEPUB2Content(
 
 /**
  * Check for media content that's incompatible with EPUB 2.0
- * @param content - Content to check
- * @param warnings - Array to add warnings to
- * @param requiredFallbacks - Array to add required fallbacks to
+ * @param {string} content - Content to check
+ * @param {string[]} warnings - Array to add warnings to
+ * @param {string[]} requiredFallbacks - Array to add required fallbacks to
  */
 function checkForMediaContent(
   content: string,
@@ -151,9 +151,9 @@ function checkForMediaContent(
 
 /**
  * Check for script content that's incompatible with EPUB 2.0
- * @param content - Content to check
- * @param warnings - Array to add warnings to
- * @param requiredFallbacks - Array to add required fallbacks to
+ * @param {string} content - Content to check
+ * @param {string[]} warnings - Array to add warnings to
+ * @param {string[]} requiredFallbacks - Array to add required fallbacks to
  */
 function checkForScriptContent(
   content: string,

@@ -8,15 +8,15 @@ import {
   type CompatibilityConfig,
   EPUBVersion,
   type EPUBFeatureSupport,
-} from '../../../../src/core/document-processing/parsers/epub-parser-compatibility';
+} from '../../../../src/core/document-processing/parsers/epub-parser-compatibility.js';
+import type {
+  DocumentMetadata,
+  TableOfContentsItem,
+} from '../../../../src/core/document-processing/types.js';
 import {
   setupEPUBParserFixture,
   cleanupEPUBParserFixture,
 } from '../../../support/fixtures/epub-parser.fixture';
-import type {
-  DocumentMetadata,
-  TableOfContentsItem,
-} from '../../../../src/core/document-processing/types';
 
 // Helper functions for test setup
 const createCompatibilityConfig = (
@@ -70,11 +70,28 @@ const createTestMetadata = (): DocumentMetadata => ({
   publisher: 'Test Publisher',
   identifier: 'test-identifier',
   version: 'unknown',
+  wordCount: 1000,
+  customMetadata: {
+    description: 'Test book description',
+    genre: 'test',
+  },
 });
 
 const createTestTOC = (): TableOfContentsItem[] => [
-  { id: 'chapter1', title: 'Chapter 1', href: 'chapter1', level: 1 },
-  { id: 'chapter2', title: 'Chapter 2', href: 'chapter2', level: 2 },
+  {
+    id: 'chapter1',
+    title: 'Chapter 1',
+    href: 'chapter1',
+    level: 1,
+    children: [],
+  },
+  {
+    id: 'chapter2',
+    title: 'Chapter 2',
+    href: 'chapter2',
+    level: 2,
+    children: [],
+  },
 ];
 
 describe('EPUB Parser Compatibility Layer - Version Detection', () => {
@@ -158,8 +175,6 @@ describe('EPUB Parser Compatibility Layer - Feature Support Analysis', () => {
   describe('Feature Support Analysis', () => {
     test('AC5-TC05: should provide correct feature support for EPUB 2.0', () => {
       // GIVEN: EPUB 2.0 version
-      const version = EPUBVersion.EPUB_2_0;
-
       // WHEN: Analyzing feature support expectations
       const expectedSupport = createEpub20FeatureSupport();
 
@@ -172,8 +187,6 @@ describe('EPUB Parser Compatibility Layer - Feature Support Analysis', () => {
 
     test('AC5-TC06: should provide correct feature support for EPUB 3.0+', () => {
       // GIVEN: EPUB 3.0 version
-      const version = EPUBVersion.EPUB_3_0;
-
       // WHEN: Analyzing feature support expectations
       const expectedSupport = createEpub30FeatureSupport();
 
@@ -235,15 +248,6 @@ describe('EPUB Parser Compatibility Layer - Compatibility Analysis', () => {
     });
   });
 });
-
-// Test helper functions for compatibility fixes
-function setupCompatibilityFixesFixture() {
-  return setupEPUBParserFixture();
-}
-
-async function cleanupCompatibilityFixesFixture(fixture: any) {
-  await cleanupEPUBParserFixture(fixture);
-}
 
 function createCompatibilityFixtures() {
   const metadata = createTestMetadata();

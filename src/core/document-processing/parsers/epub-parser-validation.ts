@@ -7,25 +7,25 @@
  */
 
 import { Epub } from '@smoores/epub';
-import type { EpubMetadata } from './epub-parser-types';
+import type { EpubMetadata } from './epub-parser-types.js';
 import {
   createInitialValidationResult,
   updateValidationMetadata,
   handleValidationError,
   determineValidity,
-  validateEPUBStructure as validateEPUBStructureLegacy,
   validateEPUBMetadata as validateEPUBMetadataLegacy,
   validateEPUBSpine as validateEPUBSpineLegacy,
   validateEPUBManifest as validateEPUBManifestLegacy,
-} from './epub-parser-validation-basic';
-import { validateStandardStructure } from './epub-parser-validation-standard';
-import { validateStrictStructure } from './epub-parser-validation-strict';
+} from './epub-parser-validation-basic.js';
+import { validateStandardStructure } from './epub-parser-validation-standard.js';
+import { validateStrictStructure } from './epub-parser-validation-strict.js';
 import {
   ValidationLevel,
   type ValidationConfig,
   type ValidationResult,
   type StandardStructureParams,
-} from './epub-parser-validation-types';
+  type EpubLike,
+} from './epub-parser-validation-types.js';
 
 // Re-export types for backward compatibility
 export type {
@@ -33,11 +33,19 @@ export type {
   ValidationConfig,
   ValidationResult,
   StandardStructureParams,
-} from './epub-parser-validation-types';
+} from './epub-parser-validation-types.js';
+
+// Re-export utility functions for tests and other modules
+export {
+  handleValidationError,
+  determineValidity,
+  createInitialValidationResult,
+  updateValidationMetadata,
+} from './epub-parser-validation-basic.js';
 
 /**
  * Run validation based on specified level
- * @param params - Validation parameters including epub, metadata, and configuration
+ * @param {any} params - Validation parameters including epub, metadata, and configuration
  */
 async function runValidationByLevel(
   params: StandardStructureParams
@@ -47,7 +55,15 @@ async function runValidationByLevel(
       const { validateBasicStructure } = await import(
         './epub-parser-validation-basic'
       );
-      await validateBasicStructure(params);
+      const basicResult = await validateBasicStructure(params.epub);
+      // Merge the basic validation result into the shared result
+      params.result.errors.push(...basicResult.errors);
+      params.result.warnings.push(...basicResult.warnings);
+      params.result.metadata = {
+        ...params.result.metadata,
+        ...basicResult.metadata,
+      };
+      params.result.isValid = basicResult.isValid;
       break;
     case ValidationLevel.STANDARD:
       await validateStandardStructure(params);
@@ -60,12 +76,12 @@ async function runValidationByLevel(
 
 /**
  * Enhanced EPUB validation with configurable validation levels
- * @param epub - EPUB instance to validate
- * @param config - Validation configuration options
- * @returns Detailed validation result
+ * @param {Epub | EpubLike} epub - EPUB instance to validate
+ * @param {object} config - Validation configuration options
+ * @returns {ValidationResult} Detailed validation result
  */
 export async function validateEPUBStructureAdvanced(
-  epub: Epub,
+  epub: Epub | EpubLike,
   config: ValidationConfig = { level: ValidationLevel.STANDARD }
 ): Promise<ValidationResult> {
   const result = createInitialValidationResult();
@@ -102,45 +118,116 @@ export async function validateEPUBStructureAdvanced(
 }
 
 /**
- * Validate EPUB structure by checking required components (legacy function)
- * @param epub - EPUB instance to validate
- * @throws EPUBStructureError if structure is invalid
- * @returns Promise that resolves when validation is complete
+ * Validate EPUB structure by checking required components (enhanced version)
+ * @param {Epub | EpubLike} epub - EPUB instance to validate
+ * @param {object} config - Validation configuration options (optional)
+ * @returns {ValidationResult} Promise that resolves when validation is complete
  */
-export async function validateEPUBStructure(epub: Epub): Promise<void> {
-  return validateEPUBStructureLegacy(epub);
+export async function validateEPUBStructure(
+  epub: Epub | EpubLike,
+  config: ValidationConfig = { level: ValidationLevel.STANDARD }
+): Promise<ValidationResult> {
+  return validateEPUBStructureAdvanced(epub, config);
 }
 
 /**
- * Validate EPUB metadata (legacy function)
- * @param metadata - EPUB metadata to validate
+ * Validate EPUB metadata (enhanced version)
+ * @param {any} metadata - EPUB metadata to validate
+ * @param {object} config - Validation configuration options (optional)
+ * @returns {ValidationResult} Enhanced validation result with detailed error reporting
+ */
+export async function validateEPUBMetadata(
+  metadata: EpubMetadata,
+  config: ValidationConfig = { level: ValidationLevel.STANDARD }
+): Promise<ValidationResult> {
+  // Create a minimal epub-like object for metadata validation
+  const epubForMetadata: EpubLike = {
+    getMetadata: async () => metadata,
+    getSpineItems: async () => [],
+    getManifest: async () => ({}),
+  };
+
+  return validateEPUBStructureAdvanced(epubForMetadata, config);
+}
+
+/**
+ * Validate EPUB spine (enhanced version)
+ * @param {any} spineItems - EPUB spine items to validate
+ * @param {object} config - Validation configuration options (optional)
+ * @returns {ValidationResult} Enhanced validation result with detailed error reporting
+ */
+export async function validateEPUBSpine(
+  spineItems: Array<{ id: string; href: string; mediaType?: string }>,
+  config: ValidationConfig = { level: ValidationLevel.STANDARD }
+): Promise<ValidationResult> {
+  // Create a minimal epub-like object for spine validation
+  const epubForSpine: EpubLike = {
+    getMetadata: async () => ({}) as EpubMetadata,
+    getSpineItems: async () => spineItems,
+    getManifest: async () => ({}),
+  };
+
+  return validateEPUBStructureAdvanced(epubForSpine, config);
+}
+
+/**
+ * Validate EPUB manifest (enhanced version)
+ * @param {any} manifest - EPUB manifest to validate
+ * @param {object} config - Validation configuration options (optional)
+ * @returns {ValidationResult} Enhanced validation result with detailed error reporting
+ */
+export async function validateEPUBManifest(
+  manifest: Record<string, { href: string; mediaType?: string }>,
+  config: ValidationConfig = { level: ValidationLevel.STANDARD }
+): Promise<ValidationResult> {
+  // Create a minimal epub-like object for manifest validation
+  const epubForManifest: EpubLike = {
+    getMetadata: async () => ({}) as EpubMetadata,
+    getSpineItems: async () => [],
+    getManifest: async () => manifest,
+  };
+
+  return validateEPUBStructureAdvanced(epubForManifest, config);
+}
+
+/**
+ * Legacy validation functions for backward compatibility
+ * These maintain the original synchronous API while delegating to basic validation
+ */
+
+/**
+ * Validate EPUB metadata (legacy function - synchronous)
+ * @param {any} metadata - EPUB metadata to validate
  * @throws EPUBStructureError if metadata is invalid
- * @returns void when validation is complete
+ * @returns {void} void void when validation is complete
  */
-export function validateEPUBMetadata(metadata: EpubMetadata): void {
-  return validateEPUBMetadataLegacy(metadata);
+export function validateEPUBMetadataLegacySync(metadata: EpubMetadata): void {
+  // For legacy compatibility, perform basic synchronous validation
+  validateEPUBMetadataLegacy(metadata);
 }
 
 /**
- * Validate EPUB spine (legacy function)
- * @param spineItems - EPUB spine items to validate
+ * Validate EPUB spine (legacy function - synchronous)
+ * @param {any} spineItems - EPUB spine items to validate
  * @throws EPUBStructureError if spine is invalid
- * @returns void when validation is complete
+ * @returns {void} void void when validation is complete
  */
-export function validateEPUBSpine(
+export function validateEPUBSpineLegacySync(
   spineItems: Array<{ id: string; href: string; mediaType?: string }>
 ): void {
-  return validateEPUBSpineLegacy(spineItems);
+  // For legacy compatibility, perform basic synchronous validation
+  validateEPUBSpineLegacy(spineItems);
 }
 
 /**
- * Validate EPUB manifest (legacy function)
- * @param manifest - EPUB manifest to validate
+ * Validate EPUB manifest (legacy function - synchronous)
+ * @param {any} manifest - EPUB manifest to validate
  * @throws EPUBStructureError if manifest is invalid
- * @returns void when validation is complete
+ * @returns {void} void void when validation is complete
  */
-export function validateEPUBManifest(
+export function validateEPUBManifestLegacySync(
   manifest: Record<string, { href: string; mediaType?: string }>
 ): void {
-  return validateEPUBManifestLegacy(manifest);
+  // For legacy compatibility, perform basic synchronous validation
+  validateEPUBManifestLegacy(manifest);
 }

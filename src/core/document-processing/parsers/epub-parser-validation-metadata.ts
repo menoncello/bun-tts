@@ -1,17 +1,17 @@
 /** EPUB Parser Metadata Validation - Metadata-specific validation logic */
 
-import type { EpubMetadata } from './epub-parser-types';
+import type { EpubMetadata } from './epub-parser-types.js';
 import {
   MIN_LANGUAGE_LENGTH,
   MAX_LANGUAGE_LENGTH,
   MAX_AUTHOR_NAME_LENGTH,
   type ValidationResult,
-} from './epub-parser-validation-types';
+} from './epub-parser-validation-types.js';
 
 /**
  * Validate language metadata
- * @param metadata - EPUB metadata array
- * @param result - Validation result
+ * @param {any} metadata - EPUB metadata array
+ * @param {any} result - Validation result
  */
 function validateLanguageMetadata(
   metadata: EpubMetadata,
@@ -27,45 +27,55 @@ function validateLanguageMetadata(
   }
 
   result.metadata.language = languageEntry.value;
-  validateLanguageLength(languageEntry.value, result);
-  validateLanguageFormat(languageEntry.value, result);
+
+  // Check length first, if invalid don't check format to avoid duplicate errors
+  const lengthValid = validateLanguageLength(languageEntry.value, result);
+  if (lengthValid) {
+    validateLanguageFormat(languageEntry.value, result);
+  }
 }
 
 /**
  * Add missing language warning
- * @param result - Validation result
+ * @param {any} result - Validation result
  */
 function addMissingLanguageWarning(result: ValidationResult): void {
   result.warnings.push({
     code: 'MISSING_LANGUAGE',
-    message: 'Language metadata not found',
+    message: 'language metadata not found',
     suggestion: 'Add dc:language element to OPF file',
   });
 }
 
 /**
  * Validate language length
- * @param language - Language code
- * @param result - Validation result
+ * @param {any} language - Language code
+ * @param {any} result - Validation result
+ * @returns {boolean} boolean True if length is valid
  */
 function validateLanguageLength(
   language: string,
   result: ValidationResult
-): void {
-  if (language.length < MIN_LANGUAGE_LENGTH || language.length > MAX_LANGUAGE_LENGTH) {
+): boolean {
+  if (
+    language.length < MIN_LANGUAGE_LENGTH ||
+    language.length > MAX_LANGUAGE_LENGTH
+  ) {
     result.errors.push({
       code: 'INVALID_LANGUAGE_LENGTH',
-      message: `Language code length ${language.length} is invalid (must be ${MIN_LANGUAGE_LENGTH}-${MAX_LANGUAGE_LENGTH})`,
-      severity: 'warning',
+      message: `Invalid language code length: ${language.length} (must be ${MIN_LANGUAGE_LENGTH}-${MAX_LANGUAGE_LENGTH})`,
+      severity: 'error',
       fix: `Use standard language code (e.g., 'en', 'pt-BR')`,
     });
+    return false;
   }
+  return true;
 }
 
 /**
  * Validate language format
- * @param language - Language code
- * @param result - Validation result
+ * @param {any} language - Language code
+ * @param {any} result - Validation result
  */
 function validateLanguageFormat(
   language: string,
@@ -75,8 +85,8 @@ function validateLanguageFormat(
   if (!languagePattern.test(language)) {
     result.errors.push({
       code: 'INVALID_LANGUAGE_FORMAT',
-      message: `Language code format '${language}' is invalid`,
-      severity: 'warning',
+      message: `Invalid language code format: ${language}`,
+      severity: 'error',
       fix: `Use standard language code format (e.g., 'en', 'pt-BR')`,
     });
   }
@@ -84,8 +94,8 @@ function validateLanguageFormat(
 
 /**
  * Validate author metadata
- * @param metadata - EPUB metadata array
- * @param result - Validation result
+ * @param {any} metadata - EPUB metadata array
+ * @param {any} result - Validation result
  */
 function validateAuthorMetadata(
   metadata: EpubMetadata,
@@ -118,8 +128,8 @@ function validateAuthorMetadata(
 
 /**
  * Validate date metadata
- * @param metadata - EPUB metadata array
- * @param result - Validation result
+ * @param {any} metadata - EPUB metadata array
+ * @param {any} result - Validation result
  */
 function validateDateMetadata(
   metadata: EpubMetadata,
@@ -152,8 +162,8 @@ function validateDateMetadata(
 
 /**
  * Check if date string is valid
- * @param dateString - Date string to validate
- * @returns True if date is valid
+ * @param {any} dateString - Date string to validate
+ * @returns {unknown} unknown True if date is valid
  */
 function isValidDate(dateString: string): boolean {
   // Check for basic ISO 8601 format
@@ -168,8 +178,8 @@ function isValidDate(dateString: string): boolean {
 
 /**
  * Standard metadata validation with comprehensive checks
- * @param metadata - EPUB metadata array
- * @param result - Validation result
+ * @param {any} metadata - EPUB metadata array
+ * @param {any} result - Validation result
  */
 export function validateStandardMetadata(
   metadata: EpubMetadata,

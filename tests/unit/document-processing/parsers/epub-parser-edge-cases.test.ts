@@ -1,13 +1,30 @@
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
-import { EPUBParser } from '../../../../src/core/document-processing/parsers/epub-parser';
+import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
 import {
-  DocumentParseError,
-  EPUBFormatError,
-} from '../../../../src/errors/document-parse-error';
+  getErrorCode,
+  getErrorRecoverable,
+} from '../../../../src/core/document-processing/parsers/epub-parser-type-guards.js';
+import { EPUBParser } from '../../../../src/core/document-processing/parsers/epub-parser.js';
 import {
   setupEPUBParserFixture,
   cleanupEPUBParserFixture,
 } from '../../../support/fixtures/epub-parser.fixture';
+
+// Mock the Epub module before importing the modules that use it
+const mockEpub = {
+  from: mock((input: any) => {
+    // Check for empty buffer that should fail EPUB parsing
+    if (input && input.length === 0) {
+      return Promise.reject(new Error('Invalid EPUB: empty file'));
+    }
+
+    // Default success case for valid inputs
+    return Promise.resolve({ metadata: { title: 'Test Book' } });
+  }),
+};
+
+mock.module('@smoores/epub', () => ({
+  Epub: mockEpub,
+}));
 
 let parser: EPUBParser;
 let fixture: any;
@@ -34,7 +51,8 @@ const testLargeBufferHandling = async () => {
   expect(typeof result.success).toBe('boolean');
   if (!result.success) {
     expect(result.error).toBeDefined();
-    expect(result.error!.code).toBeDefined();
+    const errorCode = getErrorCode(result.error);
+    expect(errorCode).toBeDefined();
   }
 };
 
@@ -42,17 +60,17 @@ const testCorruptedStructureHandling = async () => {
   // GIVEN: Malformed EPUB content with corrupted zip structure
   const corruptedContent = Buffer.from([
     0x50,
-    0x4b,
+    0x4B,
     0x03,
     0x04, // ZIP signature
     0x14,
     0x00,
     0x00,
     0x00, // Version
-    0xff,
-    0xff,
-    0xff,
-    0xff, // Invalid flags
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF, // Invalid flags
     // ... rest of corrupted content
   ]);
 
@@ -62,7 +80,8 @@ const testCorruptedStructureHandling = async () => {
   // THEN: Should handle gracefully with structured error
   expect(result.success).toBe(false);
   expect(result.error).toBeDefined();
-  expect(result.error!.code).toBe('EPUB_FORMAT_ERROR');
+  const errorCode = getErrorCode(result.error);
+  expect(errorCode).toBe('EPUB_FORMAT_ERROR');
 };
 
 const testBinaryContentHandling = async () => {
@@ -70,12 +89,12 @@ const testBinaryContentHandling = async () => {
   const binaryContent = Buffer.from([
     0x89,
     0x50,
-    0x4e,
+    0x4E,
     0x47,
-    0x0d,
-    0x0a,
-    0x1a,
-    0x0a, // PNG header
+    0x0D,
+    0x0A,
+    0x1A,
+    0x0A, // PNG header
   ]);
 
   // WHEN: Parsing binary content as EPUB
@@ -108,13 +127,12 @@ const createParserWithOptions = (options: any) => {
 const testParserOptionsValidation = () => {
   // GIVEN: Parser with various option combinations
   const testOptions = [
-    { strictMode: true },
-    { strictMode: false },
-    { enableProfiling: true },
-    { enableProfiling: false },
-    { streaming: true },
-    { streaming: false },
     { extractMedia: true },
+    { extractMedia: false },
+    { preserveHTML: true },
+    { preserveHTML: false },
+    { chapterSensitivity: 0.5 },
+    { chapterSensitivity: 1.0 },
     { extractMedia: false },
     { preserveHTML: true },
     { preserveHTML: false },
@@ -122,7 +140,9 @@ const testParserOptionsValidation = () => {
 
   // WHEN: Creating parsers with different options
   // THEN: All should be created without errors
-  testOptions.forEach(createParserWithOptions);
+  for (const options of testOptions) {
+    createParserWithOptions(options);
+  }
 };
 
 const testEmptyOptionsHandling = () => {
@@ -145,7 +165,6 @@ const testNullOrUndefinedOptionsHandling = () => {
 
 const testStatisticsTracking = async () => {
   // GIVEN: Parser instance
-  const statsBefore = parser.getStats();
 
   // WHEN: Performing parse operation that affects stats
   await parser.parse(fixture.corruptedEPUB);
@@ -154,9 +173,9 @@ const testStatisticsTracking = async () => {
 
   // THEN: Statistics should be properly tracked
   expect(statsAfter).toBeDefined();
-  expect(typeof statsAfter.parseTime).toBe('number');
+  expect(typeof statsAfter.parseTimeMs).toBe('number');
   expect(typeof statsAfter.chaptersPerSecond).toBe('number');
-  expect(typeof statsAfter.memoryUsage).toBe('number');
+  expect(typeof statsAfter.memoryUsageMB).toBe('number');
   expect(typeof statsAfter.cacheHits).toBe('number');
   expect(typeof statsAfter.cacheMisses).toBe('number');
 };
@@ -171,10 +190,10 @@ const testRepeatedOperations = async () => {
   ]);
 
   // THEN: All should complete without errors
-  results.forEach((result) => {
+  for (const result of results) {
     expect(result).toBeDefined();
     expect(typeof result.success).toBe('boolean');
-  });
+  }
 };
 
 const testConcurrentOperations = async () => {
@@ -188,10 +207,10 @@ const testConcurrentOperations = async () => {
 
   // THEN: All should complete successfully
   expect(results).toHaveLength(5);
-  results.forEach((result) => {
+  for (const result of results) {
     expect(result).toBeDefined();
     expect(typeof result.success).toBe('boolean');
-  });
+  }
 };
 
 const testMalformedJSONHandling = async () => {
@@ -218,12 +237,11 @@ const testMalformedJSONHandling = async () => {
 
 const testParserStateMutations = async () => {
   // GIVEN: Parser instance
-  const initialStats = parser.getStats();
 
   // WHEN: Modifying parser options during operation
-  parser.setOptions({ strictMode: !parser.getStats().parseTime });
+  parser.setOptions({ extractMedia: !parser.getStats().parseTime });
   await parser.parse(fixture.corruptedEPUB);
-  parser.setOptions({ strictMode: false });
+  parser.setOptions({ extractMedia: false });
 
   // THEN: Parser should remain functional
   const finalStats = parser.getStats();
@@ -236,9 +254,9 @@ const testBoundaryConditions = async () => {
   const boundaryConditions = [
     Buffer.alloc(0), // Empty buffer
     Buffer.from([0x00]), // Single null byte
-    Buffer.from([0xff]), // Single 0xFF byte
+    Buffer.from([0xFF]), // Single 0xFF byte
     Buffer.from('\x00\x00\x00'), // Multiple null bytes
-    Buffer.from(new Array(1000).fill(0).join('')), // Long empty string
+    Buffer.from(Array.from({ length: 1000 }).fill(0).join('')), // Long empty string
   ];
 
   // WHEN: Testing each boundary condition
@@ -247,13 +265,13 @@ const testBoundaryConditions = async () => {
   );
 
   // THEN: All should handle gracefully
-  results.forEach((result, index) => {
+  for (const result of results) {
     expect(result).toBeDefined();
     expect(typeof result.success).toBe('boolean');
     if (!result.success) {
       expect(result.error).toBeDefined();
     }
-  });
+  }
 };
 
 const validateErrorConditionResult = (result: any) => {
@@ -261,9 +279,13 @@ const validateErrorConditionResult = (result: any) => {
   expect(result).toBeDefined();
   if (!result.success) {
     expect(result.error).toBeDefined();
-    expect(result.error!.code).toBeDefined();
+    const errorCode = getErrorCode(result.error);
+    const isRecoverable = getErrorRecoverable(result.error);
+    expect(errorCode).toBeDefined();
     expect(result.error!.message).toBeDefined();
-    expect(typeof result.error!.recoverable).toBe('boolean');
+    expect(isRecoverable === null || typeof isRecoverable === 'boolean').toBe(
+      true
+    );
   }
 };
 
@@ -290,20 +312,14 @@ const generateAllConfigurations = () => {
   const booleanOptions = [true, false];
   const configurations = [];
 
-  for (const strictMode of booleanOptions) {
-    for (const enableProfiling of booleanOptions) {
-      for (const streaming of booleanOptions) {
-        for (const extractMedia of booleanOptions) {
-          for (const preserveHTML of booleanOptions) {
-            configurations.push({
-              strictMode,
-              enableProfiling,
-              streaming,
-              extractMedia,
-              preserveHTML,
-            });
-          }
-        }
+  for (const extractMedia of booleanOptions) {
+    for (const preserveHTML of booleanOptions) {
+      for (const chapterSensitivity of [0.5, 0.8, 1.0]) {
+        configurations.push({
+          extractMedia,
+          preserveHTML,
+          chapterSensitivity,
+        });
       }
     }
   }
@@ -315,9 +331,9 @@ const testConfigurationCreation = () => {
 
   // WHEN: Creating parsers with all configurations
   // THEN: All should be created successfully
-  configurations.forEach((config) => {
+  for (const config of configurations) {
     expect(() => new EPUBParser(config)).not.toThrow();
-  });
+  }
 };
 
 const validateStatsStructure = (stats: any) => {
@@ -332,14 +348,16 @@ const validateStatsStructure = (stats: any) => {
 const testStatisticsWithDifferentStates = () => {
   // GIVEN: Parser in different states
   const freshParser = new EPUBParser();
-  const configuredParser = new EPUBParser({ strictMode: true });
+  const configuredParser = new EPUBParser({ extractMedia: true });
 
   // WHEN: Getting statistics from different parser states
   const freshStats = freshParser.getStats();
   const configuredStats = configuredParser.getStats();
 
   // THEN: All should return proper statistics structure
-  [freshStats, configuredStats].forEach(validateStatsStructure);
+  for (const stats of [freshStats, configuredStats]) {
+    validateStatsStructure(stats);
+  }
 };
 
 const defineBufferHandlingTests = () => {

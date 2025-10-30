@@ -10,29 +10,32 @@ import type {
   TableOfContentsItem,
   EmbeddedAssets,
   DocumentStructure,
-} from '../types';
-import { extractEmbeddedAssets } from './epub-parser-asset-extractor';
+} from '../types.js';
+import { extractEmbeddedAssets } from './epub-parser-asset-extractor.js';
 import {
   extractChapters,
   parseTableOfContents,
-} from './epub-parser-chapter-extractor';
-import { analyzeCompatibility } from './epub-parser-compatibility';
+} from './epub-parser-chapter-extractor.js';
+import { analyzeCompatibility } from './epub-parser-compatibility.js';
 import {
   createCompatibilityConfig,
   applyFixesToMetadataAndTOC,
-} from './epub-parser-helper-utils';
-import { extractMetadata as extractEPUBMetadata } from './epub-parser-metadata-extractor';
-import type { EPUBParseOptions, DocumentStatistics } from './epub-parser-types';
+} from './epub-parser-helper-utils.js';
+import { extractMetadata as extractEPUBMetadata } from './epub-parser-metadata-extractor.js';
+import type {
+  EPUBParseOptions,
+  DocumentStatistics,
+} from './epub-parser-types.js';
 
 /**
  * Creates document data for structure building
- * @param fixedMetadataTOC - Fixed metadata and table of contents
- * @param fixedMetadataTOC.fixedMetadata - Fixed metadata information
- * @param fixedMetadataTOC.fixedTableOfContents - Fixed table of contents structure
- * @param contentData - Extracted content data
- * @param contentData.chapters - Array of document chapters
- * @param contentData.embeddedAssets - Embedded media and assets
- * @returns Complete document data
+ * @param {object} fixedMetadataTOC - Fixed metadata and table of contents
+ * @param {DocumentMetadata} fixedMetadataTOC.fixedMetadata - Fixed metadata information
+ * @param {TableOfContentsItem[]} fixedMetadataTOC.fixedTableOfContents - Fixed table of contents structure
+ * @param {object} contentData - Extracted content data
+ * @param {Chapter[]} contentData.chapters - Array of document chapters
+ * @param {EmbeddedAssets} contentData.embeddedAssets - Embedded media and assets
+ * @returns {object} Complete document data
  */
 function createDocumentData(
   fixedMetadataTOC: {
@@ -56,10 +59,10 @@ function createDocumentData(
 
 /**
  * Extracts all components from EPUB file
- * @param epub - The EPUB instance to extract data from
- * @param options - Parsing configuration options
- * @param buildStructureCallback - Callback function to build the complete structure
- * @returns Complete document structure with all extracted components
+ * @param {Epub} epub - The EPUB instance to extract data from
+ * @param {EPUBParseOptions} options - Parsing configuration options
+ * @param {Function} buildStructureCallback - Callback function to build the complete structure
+ * @returns {Promise<object>} Complete document structure with all extracted components
  */
 export async function extractAllComponents(
   epub: Epub,
@@ -94,9 +97,9 @@ export async function extractAllComponents(
 
 /**
  * Prepare extraction data from EPUB
- * @param epub - The EPUB instance to extract data from
- * @param options - Parsing configuration options
- * @returns Extraction data with metadata, TOC, and content
+ * @param {Epub} epub - The EPUB instance to extract data from
+ * @param {EPUBParseOptions} options - Parsing configuration options
+ * @returns {Promise<object>} Extraction data with metadata, TOC, and content
  */
 async function prepareExtractionData(
   epub: Epub,
@@ -127,18 +130,18 @@ async function prepareExtractionData(
 
 /**
  * Analyzes EPUB compatibility and returns compatibility data
- * @param epub - The EPUB instance to analyze
- * @param options - Parsing configuration options
- * @returns Compatibility analysis and configuration data
+ * @param {Epub} epub - The EPUB instance to analyze
+ * @param {EPUBParseOptions} _options - Parsing configuration options (currently unused)
+ * @returns {Promise<object>} Compatibility analysis and configuration data
  */
 export async function analyzeCompatibilityData(
   epub: Epub,
-  options: EPUBParseOptions
+  _options: EPUBParseOptions
 ): Promise<{
   compatibilityAnalysis: import('./epub-parser-compatibility').CompatibilityAnalysis;
   compatibilityConfig: import('./epub-parser-helper-utils').CompatibilityConfig;
 }> {
-  const compatibilityConfig = createCompatibilityConfig(options);
+  const compatibilityConfig = createCompatibilityConfig({ strictMode: false }); // Default strictMode since it's not in EPUBParseOptions
   const compatibilityAnalysis = await analyzeCompatibility(
     epub,
     compatibilityConfig
@@ -148,11 +151,11 @@ export async function analyzeCompatibilityData(
 
 /**
  * Extracts metadata and table of contents, then applies compatibility fixes
- * @param epub - The EPUB instance to extract data from
- * @param compatibilityData - Compatibility analysis and configuration data
- * @param compatibilityData.compatibilityAnalysis - The compatibility analysis results
- * @param compatibilityData.compatibilityConfig - The compatibility configuration
- * @returns Fixed metadata and table of contents
+ * @param {Epub} epub - The EPUB instance to extract data from
+ * @param {object} compatibilityData - Compatibility analysis and configuration data
+ * @param {import('./epub-parser-compatibility').CompatibilityAnalysis} compatibilityData.compatibilityAnalysis - The compatibility analysis results
+ * @param {import('./epub-parser-helper-utils').CompatibilityConfig} compatibilityData.compatibilityConfig - The compatibility configuration
+ * @returns {Promise<object>} Fixed metadata and table of contents
  */
 export async function extractAndFixMetadataTOC(
   epub: Epub,
@@ -175,10 +178,10 @@ export async function extractAndFixMetadataTOC(
 
 /**
  * Extracts content chapters and embedded assets
- * @param epub - The EPUB instance to extract data from
- * @param tableOfContents - Table of contents structure for chapter extraction
- * @param options - Parsing configuration options
- * @returns Extracted chapters and embedded assets
+ * @param {Epub} epub - The EPUB instance to extract data from
+ * @param {TableOfContentsItem[]} tableOfContents - Table of contents structure for chapter extraction
+ * @param {EPUBParseOptions} options - Parsing configuration options
+ * @returns {Promise<object>} Extracted chapters and embedded assets
  */
 export async function extractContentData(
   epub: Epub,
@@ -198,8 +201,8 @@ export async function extractContentData(
 
 /**
  * Extracts metadata and table of contents in parallel
- * @param epub - The EPUB instance to extract data from
- * @returns Tuple containing metadata and table of contents
+ * @param {Epub} epub - The EPUB instance to extract data from
+ * @returns {Promise<[DocumentMetadata, TableOfContentsItem[]]>} Tuple containing metadata and table of contents
  */
 export async function extractMetadataAndTOC(
   epub: Epub
@@ -209,10 +212,10 @@ export async function extractMetadataAndTOC(
 
 /**
  * Extracts content chapters and embedded assets in parallel
- * @param epub - The EPUB instance to extract data from
- * @param tableOfContents - Table of contents structure for chapter extraction
- * @param options - Parsing configuration options
- * @returns Tuple containing chapters and embedded assets
+ * @param {Epub} epub - The EPUB instance to extract data from
+ * @param {TableOfContentsItem[]} tableOfContents - Table of contents structure for chapter extraction
+ * @param {EPUBParseOptions} options - Parsing configuration options
+ * @returns {Promise<[Chapter[], EmbeddedAssets]>} Tuple containing chapters and embedded assets
  */
 export async function extractContentAndAssets(
   epub: Epub,

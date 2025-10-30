@@ -9,7 +9,7 @@ import type {
   EpubMetadata as LibraryEpubMetadata,
   ManifestItem as LibraryManifestItem,
 } from '@smoores/epub';
-import type { ParseOptions } from '../types';
+import type { ParseOptions } from '../types.js';
 
 export interface EPUBParseOptions extends ParseOptions {
   /** Extract images and media content */
@@ -18,6 +18,8 @@ export interface EPUBParseOptions extends ParseOptions {
   preserveHTML?: boolean;
   /** Chapter detection sensitivity */
   chapterSensitivity?: number;
+  /** Enable strict mode validation */
+  strictMode?: boolean;
 }
 
 // Type interfaces for better readability
@@ -39,6 +41,9 @@ export interface DocumentStatistics {
   totalSentences: number;
   totalWords: number;
   estimatedReadingTime: number;
+  chapterCount: number;
+  imageCount: number;
+  tableCount: number;
 }
 
 export type ManifestItem = LibraryManifestItem;

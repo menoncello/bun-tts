@@ -6,19 +6,19 @@
  */
 
 import type { Epub } from '@smoores/epub';
-import { logger } from '../../../utils/logger';
+import { logger } from '../../../utils/logger.js';
 import {
   extractVersionFromMetadata,
   detectVersionFromStructure,
   type RawEpubMetadata,
-} from './epub-parser-compatibility-utils';
-import { analyzeContentCompatibility } from './epub-parser-content-analysis';
+} from './epub-parser-compatibility-utils.js';
+import { analyzeContentCompatibility } from './epub-parser-content-analysis.js';
 
 // Re-export compatibility fix functions
 export {
   applyCompatibilityFixes,
   applyCompatibilityFixesToTOC,
-} from './epub-parser-compatibility-fixes';
+} from './epub-parser-compatibility-fixes.js';
 
 /**
  * EPUB version enumeration
@@ -133,8 +133,8 @@ const VERSION_FEATURE_SUPPORT: Record<EPUBVersion, EPUBFeatureSupport> = {
 
 /**
  * Detect EPUB version from metadata
- * @param epub - EPUB instance to analyze
- * @returns Detected EPUB version
+ * @param {any} epub - EPUB instance to analyze
+ * @returns {Promise<EPUBVersion>} Detected EPUB version
  */
 async function detectVersionFromMetadata(epub: Epub): Promise<EPUBVersion> {
   try {
@@ -151,9 +151,9 @@ async function detectVersionFromMetadata(epub: Epub): Promise<EPUBVersion> {
 
 /**
  * Log version detection result
- * @param version - Detected version
- * @param source - Detection source
- * @param config - Compatibility configuration
+ * @param {any} version - Detected version
+ * @param {any} source - Detection source
+ * @param {object} config - Compatibility configuration
  */
 function logVersionDetection(
   version: EPUBVersion,
@@ -170,9 +170,9 @@ function logVersionDetection(
 
 /**
  * Detect EPUB version from metadata and structure
- * @param epub - EPUB instance to analyze
- * @param config - Compatibility configuration
- * @returns Detected EPUB version
+ * @param {any} epub - EPUB instance to analyze
+ * @param {object} config - Compatibility configuration
+ * @returns {Promise<EPUBVersion>} Detected EPUB version
  */
 export async function detectEPUBVersion(
   epub: Epub,
@@ -193,9 +193,9 @@ export async function detectEPUBVersion(
 
 /**
  * Create basic compatibility analysis
- * @param detectedVersion - Detected EPUB version
- * @param config - Compatibility configuration
- * @returns Basic compatibility analysis
+ * @param {any} detectedVersion - Detected EPUB version
+ * @param {object} config - Compatibility configuration
+ * @returns {{warnings: string[], requiredFallbacks: string[], isCompatible: boolean}} Basic compatibility analysis
  */
 function createBasicAnalysis(
   detectedVersion: EPUBVersion,
@@ -225,9 +225,9 @@ function createBasicAnalysis(
 
 /**
  * Analyze EPUB compatibility
- * @param epub - EPUB instance to analyze
- * @param config - Compatibility configuration
- * @returns Compatibility analysis result
+ * @param {any} epub - EPUB instance to analyze
+ * @param {object} config - Compatibility configuration
+ * @returns {Promise<CompatibilityAnalysis>} Compatibility analysis result
  */
 export async function analyzeCompatibility(
   epub: Epub,

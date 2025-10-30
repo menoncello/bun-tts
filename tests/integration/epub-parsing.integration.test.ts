@@ -1,11 +1,11 @@
-import { unlinkSync, existsSync, mkdirSync } from 'fs';
 import { describe, test, expect, afterEach, beforeAll } from 'bun:test';
-import { EPUBParser } from '../../src/core/document-processing/parsers/epub-parser';
+import { unlinkSync, existsSync, mkdirSync } from 'fs';
 import {
-  createValidEPUBFile,
-  createComplexEPUBFile,
-} from '../support/factories/epub-factory';
-import { DocumentParseError } from '../../src/errors/document-parse-error';
+  getErrorCode,
+  getErrorRecoverable,
+} from '../../src/core/document-processing/parsers/epub-parser-type-guards.js';
+import { EPUBParser } from '../../src/core/document-processing/parsers/epub-parser.js';
+import { createValidEPUBFile } from '../support/factories/epub-factory';
 
 describe('EPUB Parsing Integration Tests', () => {
   const testFiles: string[] = [];
@@ -81,11 +81,11 @@ function setupTestEnvironment(): void {
 
 function cleanupTestFiles(testFiles: string[]): void {
   // Clean up test files
-  testFiles.forEach((file) => {
+  for (const file of testFiles) {
     if (existsSync(file)) {
       unlinkSync(file);
     }
-  });
+  }
   testFiles.length = 0; // Clear the array without reassigning
 }
 
@@ -110,9 +110,12 @@ async function testInvalidEPUBHandling(testFiles: string[]): Promise<void> {
 
   // Should have proper error structure
   if (parseResult.error) {
-    expect(parseResult.error).toHaveProperty('code');
+    const errorCode = getErrorCode(parseResult.error);
+    const isRecoverable = getErrorRecoverable(parseResult.error);
+
+    expect(errorCode).toBeDefined();
     expect(parseResult.error).toHaveProperty('message');
-    expect(parseResult.error).toHaveProperty('recoverable');
+    expect(isRecoverable).toBeDefined();
   }
 }
 
@@ -128,18 +131,18 @@ async function testParserInterface(): Promise<void> {
   // THEN: Should have correct interface
   const stats = parser.getStats();
   expect(stats).toBeDefined();
-  expect(typeof stats.parseTime).toBe('number');
+  expect(typeof stats.parseTimeMs).toBe('number');
 }
 
 async function testParserOptions(): Promise<void> {
   // GIVEN: EPUB parser with different options
-  const strictParser = new EPUBParser({ strictMode: true });
-  const lenientParser = new EPUBParser({ strictMode: false });
-  const streamingParser = new EPUBParser({ streaming: true });
+  const strictParser = new EPUBParser({ extractMedia: true });
+  const lenientParser = new EPUBParser({ extractMedia: false });
+  const streamingParser = new EPUBParser({ preserveHTML: true });
 
   // WHEN: Setting options dynamically
-  strictParser.setOptions({ strictMode: false });
-  lenientParser.setOptions({ streaming: true });
+  strictParser.setOptions({ extractMedia: false });
+  lenientParser.setOptions({ preserveHTML: true });
 
   // THEN: Should accept options without errors
   expect(strictParser.getStats()).toBeDefined();
@@ -158,9 +161,13 @@ async function testParsingErrorStructure(): Promise<void> {
   // THEN: Should return structured error response
   expect(result.success).toBe(false);
   expect(result.error).toBeDefined();
-  expect(result.error!.code).toBeDefined();
+
+  const errorCode = getErrorCode(result.error);
+  const isRecoverable = getErrorRecoverable(result.error);
+
+  expect(errorCode).toBeDefined();
   expect(result.error!.message).toBeDefined();
-  expect(typeof result.error!.recoverable).toBe('boolean');
+  expect(typeof isRecoverable).toBe('boolean');
 }
 
 async function testInvalidInputHandling(): Promise<void> {
@@ -175,17 +182,17 @@ async function testInvalidInputHandling(): Promise<void> {
   ]);
 
   // THEN: Should handle all gracefully
-  results.forEach((result) => {
+  for (const result of results) {
     expect(result.success).toBe(false);
     expect(result.error).toBeDefined();
-  });
+  }
 }
 
 async function testStreamingConfiguration(): Promise<void> {
-  // GIVEN: Parser with streaming enabled
+  // GIVEN: Parser with media extraction enabled
   const streamingParser = new EPUBParser({
-    streaming: true,
-    enableProfiling: true,
+    extractMedia: true,
+    preserveHTML: true,
   });
 
   // WHEN: Getting parser stats
@@ -193,18 +200,18 @@ async function testStreamingConfiguration(): Promise<void> {
 
   // THEN: Should have proper structure
   expect(stats).toBeDefined();
-  expect(typeof stats.parseTime).toBe('number');
-  expect(typeof stats.memoryUsage).toBe('number');
+  expect(typeof stats.parseTimeMs).toBe('number');
+  expect(typeof stats.memoryUsageMB).toBe('number');
 }
 
 async function testDynamicConfiguration(): Promise<void> {
   // GIVEN: Parser instance
-  const parser = new EPUBParser({ strictMode: true });
+  const parser = new EPUBParser({ extractMedia: true });
 
   // WHEN: Changing configuration
   parser.setOptions({
-    strictMode: false,
-    streaming: true,
+    extractMedia: false,
+    preserveHTML: true,
   });
 
   // THEN: Should accept changes without error

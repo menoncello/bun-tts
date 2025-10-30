@@ -5,12 +5,13 @@ import {
   MAX_CHAPTER_COUNT,
   MSG_UNKNOWN_ERROR,
   type ValidationResult,
-} from './epub-parser-validation-types';
+  type EpubLike,
+} from './epub-parser-validation-types.js';
 
 /**
  * Validate chapter count
- * @param chapterCount - Number of chapters
- * @param result - Validation result
+ * @param {number} chapterCount - Number of chapters
+ * @param {any} result - Validation result
  */
 function validateChapterCount(
   chapterCount: number,
@@ -28,10 +29,12 @@ function validateChapterCount(
 
 /**
  * Check if manifest contains navigation files (NCX or NAV)
- * @param manifest - EPUB manifest record
- * @returns True if navigation files are found
+ * @param {any} manifest - EPUB manifest record
+ * @returns {unknown} unknown True if navigation files are found
  */
-function checkManifestHasNavigation(manifest: Record<string, unknown>): boolean {
+function checkManifestHasNavigation(
+  manifest: Record<string, unknown>
+): boolean {
   if (!manifest) {
     return false;
   }
@@ -52,11 +55,11 @@ function checkManifestHasNavigation(manifest: Record<string, unknown>): boolean 
 
 /**
  * Validate content structure
- * @param epub - EPUB instance
- * @param result - Validation result
+ * @param {any} epub - EPUB instance
+ * @param {any} result - Validation result
  */
 export async function validateContentStructure(
-  epub: Epub,
+  epub: Epub | EpubLike,
   result: ValidationResult
 ): Promise<void> {
   try {
@@ -76,11 +79,11 @@ export async function validateContentStructure(
 
 /**
  * Validate navigation structure
- * @param epub - EPUB instance
- * @param result - Validation result
+ * @param {any} epub - EPUB instance
+ * @param {any} result - Validation result
  */
 export async function validateNavigation(
-  epub: Epub,
+  epub: Epub | EpubLike,
   result: ValidationResult
 ): Promise<void> {
   try {

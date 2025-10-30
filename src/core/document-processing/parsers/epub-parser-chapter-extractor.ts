@@ -5,24 +5,28 @@
  */
 
 import { Epub } from '@smoores/epub';
-import { logger } from '../../../utils/logger';
-import type { Chapter, TableOfContentsItem } from '../types';
+import { logger } from '../../../utils/logger.js';
+import type { Chapter, TableOfContentsItem } from '../types.js';
+import {
+  POSITION_DIVISOR,
+  SECONDS_PER_MINUTE,
+} from './chapter-extraction-constants.js';
 import {
   processChapterContent,
   splitIntoParagraphs,
   calculateReadingTime,
-} from './epub-parser-content-processor';
-import type { EPUBParseOptions } from './epub-parser-types';
-import { ERROR_MESSAGE_NO_CONTENT, countWords } from './epub-parser-utils';
+} from './epub-parser-content-processor.js';
+import type { EPUBParseOptions } from './epub-parser-types.js';
+import { ERROR_MESSAGE_NO_CONTENT, countWords } from './epub-parser-utils.js';
 
 const UNKNOWN_ERROR = 'Unknown error';
 
 /**
  * Extract chapters with content
- * @param epub - EPUB instance
- * @param tableOfContents - Array of TOC items
- * @param options - Parse options
- * @returns Array of extracted chapters
+ * @param {any} epub - EPUB instance
+ * @param {any} tableOfContents - Array of TOC items
+ * @param {any} options - Parse options
+ * @returns {unknown} unknown Array of extracted chapters
  */
 export async function extractChapters(
   epub: Epub,
@@ -58,11 +62,11 @@ export async function extractChapters(
 
 /**
  * Extract individual chapter content
- * @param epub - EPUB instance
- * @param tocItem - Table of contents item
- * @param startIndex - Starting character index
- * @param options - Parse options
- * @returns Extracted chapter with content
+ * @param {any} epub - EPUB instance
+ * @param {any} tocItem - Table of contents item
+ * @param {any} startIndex - Starting character index
+ * @param {any} options - Parse options
+ * @returns {unknown} unknown Extracted chapter with content
  */
 export async function extractChapter(
   epub: Epub,
@@ -91,11 +95,11 @@ export async function extractChapter(
 
 /**
  * Build chapter object from content and options
- * @param tocItem - Table of contents item
- * @param content - Raw content
- * @param startIndex - Global starting index
- * @param options - Parse options
- * @returns Built chapter object
+ * @param {any} tocItem - Table of contents item
+ * @param {string} content - Raw content
+ * @param {any} startIndex - Global starting index
+ * @param {any} options - Parse options
+ * @returns {object} object Built chapter object
  */
 async function buildChapterFromContent(
   tocItem: TableOfContentsItem,
@@ -111,19 +115,22 @@ async function buildChapterFromContent(
   return {
     id: tocItem.id,
     title: tocItem.title,
+    level: tocItem.level || 1,
     paragraphs,
-    startIndex,
-    endIndex: startIndex + processedContent.length,
+    position: Math.floor(startIndex / POSITION_DIVISOR), // Rough position estimate
     wordCount,
-    estimatedReadingTime,
+    estimatedDuration: estimatedReadingTime * SECONDS_PER_MINUTE, // Convert minutes to seconds
+    startPosition: startIndex,
+    endPosition: startIndex + processedContent.length,
+    startIndex,
   };
 }
 
 /**
  * Create empty chapter placeholder for failed extraction
- * @param tocItem - Table of contents item
- * @param globalIndex - Global character index
- * @returns Empty chapter object
+ * @param {any} tocItem - Table of contents item
+ * @param {any} globalIndex - Global character index
+ * @returns {object} object Empty chapter object
  */
 export function createEmptyChapter(
   tocItem: TableOfContentsItem,
@@ -132,18 +139,21 @@ export function createEmptyChapter(
   return {
     id: tocItem.id,
     title: tocItem.title,
+    level: tocItem.level || 1,
     paragraphs: [],
-    startIndex: globalIndex,
-    endIndex: globalIndex,
+    position: Math.floor(globalIndex / POSITION_DIVISOR), // Rough position estimate
     wordCount: 0,
-    estimatedReadingTime: 0,
+    estimatedDuration: 0,
+    startPosition: globalIndex,
+    endPosition: globalIndex,
+    startIndex: globalIndex,
   };
 }
 
 /**
  * Parse table of contents from NCX or NAV file
- * @param epub - EPUB instance to parse TOC from
- * @returns Array of table of contents items
+ * @param {any} epub - EPUB instance to parse TOC from
+ * @returns {unknown} unknown Array of table of contents items
  */
 export async function parseTableOfContents(
   epub: Epub
@@ -163,8 +173,8 @@ export async function parseTableOfContents(
 
 /**
  * Create table of contents from spine items
- * @param spineItems - Array of manifest spine items
- * @returns Table of contents items
+ * @param {any} spineItems - Array of manifest spine items
+ * @returns {unknown} unknown Table of contents items
  */
 function createTOCFromSpineItems(
   spineItems: Array<{ id: string; href: string; mediaType?: string }>
@@ -174,12 +184,13 @@ function createTOCFromSpineItems(
     title: extractChapterTitleFromManifest(spineItem, index),
     href: spineItem.id,
     level: 0,
+    children: [],
   }));
 }
 
 /**
  * Create minimal fallback table of contents
- * @returns Minimal table of contents with default item
+ * @returns {unknown} unknown Minimal table of contents with default item
  */
 function createFallbackTOC(): TableOfContentsItem[] {
   return [
@@ -188,17 +199,18 @@ function createFallbackTOC(): TableOfContentsItem[] {
       title: 'Content',
       href: 'content',
       level: 0,
+      children: [],
     },
   ];
 }
 
 /**
  * Extract chapter title from manifest spine item
- * @param spineItem - Manifest spine item to extract title from
- * @param spineItem.id - The ID of the spine item
- * @param spineItem.href - The href of the spine item
- * @param index - Item index for fallback title generation
- * @returns Chapter title string
+ * @param {{ id: string; href: string }} spineItem - Manifest spine item to extract title from
+ * @param {string} spineItem.id - The ID of the spine item
+ * @param {string} spineItem.href - The href of the spine item
+ * @param {any} index - Item index for fallback title generation
+ * @returns {string} Chapter title string
  */
 function extractChapterTitleFromManifest(
   spineItem: { id: string; href: string },

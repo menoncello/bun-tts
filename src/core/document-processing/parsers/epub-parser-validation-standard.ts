@@ -1,8 +1,11 @@
 /** EPUB Parser Standard Validation - Standard validation logic for EPUB structure and content */
 
-import { validateBasicStructure } from './epub-parser-validation-basic';
-import { validateContentStructure, validateNavigation } from './epub-parser-validation-content';
-import { validateStandardMetadata } from './epub-parser-validation-metadata';
+import { validateBasicStructure } from './epub-parser-validation-basic.js';
+import {
+  validateContentStructure,
+  validateNavigation,
+} from './epub-parser-validation-content.js';
+import { validateStandardMetadata } from './epub-parser-validation-metadata.js';
 import {
   MAX_SPINE_ITEMS,
   MAX_MANIFEST_ITEMS,
@@ -13,17 +16,17 @@ import {
   type SpineItem,
   type ManifestRecord,
   type StandardStructureParams,
-} from './epub-parser-validation-types';
+} from './epub-parser-validation-types.js';
 
 /**
  * Standard validation with content and structure checks
- * @param params - Validation parameters
- * @param params.epub - EPUB instance
- * @param params.metadata - EPUB metadata
- * @param params.spineItems - Spine items array
- * @param params.manifest - Manifest record
- * @param params.result - Validation result
- * @param params.config - Validation configuration
+ * @param {any} params - Validation parameters
+ * @param {any} params.epub - EPUB instance
+ * @param {any} params.metadata - EPUB metadata
+ * @param {any} params.spineItems - Spine items array
+ * @param {any} params.manifest - Manifest record
+ * @param {any} params.result - Validation result
+ * @param {any} params.config - Validation configuration
  */
 export async function validateStandardStructure(
   params: StandardStructureParams
@@ -31,7 +34,7 @@ export async function validateStandardStructure(
   const { epub, metadata, spineItems, manifest, result, config } = params;
 
   // Run basic validation first
-  await validateBasicStructure(params);
+  await validateBasicStructure(epub);
 
   // Enhanced metadata validation
   validateStandardMetadata(metadata, result);
@@ -51,9 +54,9 @@ export async function validateStandardStructure(
 
 /**
  * Validate standard spine with comprehensive checks
- * @param spineItems - Array of EPUB spine items to validate for reading order
- * @param result - Validation result object to update with validation findings
- * @param config - Validation configuration options
+ * @param {any} spineItems - Array of EPUB spine items to validate for reading order
+ * @param {any} result - Validation result object to update with validation findings
+ * @param {object} config - Validation configuration options
  */
 export function validateStandardSpine(
   spineItems: SpineItem[],
@@ -66,9 +69,9 @@ export function validateStandardSpine(
 
 /**
  * Validate spine item count
- * @param spineItems - Array of spine items
- * @param result - Validation result
- * @param config - Validation configuration
+ * @param {any} spineItems - Array of spine items
+ * @param {any} result - Validation result
+ * @param {object} config - Validation configuration
  */
 function validateSpineItemCount(
   spineItems: SpineItem[],
@@ -88,8 +91,8 @@ function validateSpineItemCount(
 
 /**
  * Validate spine items
- * @param spineItems - Array of spine items
- * @param result - Validation result
+ * @param {any} spineItems - Array of spine items
+ * @param {any} result - Validation result
  */
 function validateSpineItems(
   spineItems: SpineItem[],
@@ -104,9 +107,9 @@ function validateSpineItems(
 
 /**
  * Validate spine item structure
- * @param index - Item index
- * @param item - Spine item to validate
- * @param result - Validation result
+ * @param {any} index - Item index
+ * @param {any} item - Spine item to validate
+ * @param {any} result - Validation result
  */
 function validateSpineItemStructure(
   index: number,
@@ -134,9 +137,9 @@ function validateSpineItemStructure(
 
 /**
  * Validate spine item ID
- * @param index - Item index
- * @param item - Spine item to validate
- * @param result - Validation result
+ * @param {any} index - Item index
+ * @param {any} item - Spine item to validate
+ * @param {any} result - Validation result
  */
 function validateSpineItemId(
   index: number,
@@ -154,16 +157,20 @@ function validateSpineItemId(
 
 /**
  * Validate spine item href
- * @param index - Item index
- * @param item - Spine item to validate
- * @param result - Validation result
+ * @param {any} index - Item index
+ * @param {any} item - Spine item to validate
+ * @param {any} result - Validation result
  */
 function validateSpineItemHref(
   index: number,
   item: SpineItem,
   result: ValidationResult
 ): void {
-  if (item.href && !item.href.endsWith('.xhtml') && !item.href.endsWith('.html')) {
+  if (
+    item.href &&
+    !item.href.endsWith('.xhtml') &&
+    !item.href.endsWith('.html')
+  ) {
     result.warnings.push({
       code: 'UNEXPECTED_SPINE_ITEM_TYPE',
       message: `Spine item ${index} href "${item.href}" may not be XHTML`,
@@ -174,9 +181,9 @@ function validateSpineItemHref(
 
 /**
  * Validate standard manifest with comprehensive checks
- * @param manifest - Manifest record to validate for resource references
- * @param result - Validation result object to update with validation findings
- * @param config - Validation configuration options
+ * @param {any} manifest - Manifest record to validate for resource references
+ * @param {any} result - Validation result object to update with validation findings
+ * @param {object} config - Validation configuration options
  */
 export function validateStandardManifest(
   manifest: ManifestRecord,
@@ -189,9 +196,9 @@ export function validateStandardManifest(
 
 /**
  * Validate manifest item count
- * @param manifest - Manifest record
- * @param result - Validation result
- * @param config - Validation configuration
+ * @param {any} manifest - Manifest record
+ * @param {any} result - Validation result
+ * @param {object} config - Validation configuration
  */
 function validateManifestItemCount(
   manifest: ManifestRecord,
@@ -211,8 +218,8 @@ function validateManifestItemCount(
 
 /**
  * Validate manifest items
- * @param manifest - Manifest record
- * @param result - Validation result
+ * @param {any} manifest - Manifest record
+ * @param {any} result - Validation result
  */
 function validateManifestItems(
   manifest: ManifestRecord,
@@ -226,9 +233,9 @@ function validateManifestItems(
 
 /**
  * Validate manifest item href
- * @param id - Item ID
- * @param item - Manifest item
- * @param result - Validation result
+ * @param {any} id - Item ID
+ * @param {any} item - Manifest item
+ * @param {any} result - Validation result
  */
 function validateManifestItemHref(
   id: string,
@@ -255,9 +262,9 @@ function validateManifestItemHref(
 
 /**
  * Validate manifest item media type
- * @param id - Item ID
- * @param item - Manifest item
- * @param result - Validation result
+ * @param {any} id - Item ID
+ * @param {any} item - Manifest item
+ * @param {any} result - Validation result
  */
 function validateManifestItemMediaType(
   id: string,

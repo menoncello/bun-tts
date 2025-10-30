@@ -4,7 +4,22 @@
  */
 
 import { Epub } from '@smoores/epub';
-import type { EpubMetadata } from './epub-parser-types';
+import type { EpubMetadata } from './epub-parser-types.js';
+
+// Re-export EpubMetadata for convenience
+export type { EpubMetadata };
+
+// Minimal EPUB interface for validation mock objects
+export interface EpubLike {
+  getMetadata: () => Promise<EpubMetadata>;
+  getSpineItems: () => Promise<
+    Array<{ id: string; href: string; mediaType?: string }>
+  >;
+  getManifest: () => Promise<
+    Record<string, { href: string; mediaType?: string }>
+  >;
+  readXhtmlItemContents?: (id: string, format?: string) => Promise<string>;
+}
 
 // Constants for validation
 export const MAX_SPINE_ITEMS = 10000;
@@ -22,6 +37,15 @@ export const LARGE_CONTENT_THRESHOLD = MEGABYTE * MEGABYTE; // 1MB
 export const MAX_TOTAL_ITEMS = 50000;
 export const MIN_EPUB_VERSION = 2.0;
 export const MAX_AUTHOR_NAME_LENGTH = 255;
+
+// File size multiplier constants
+export const MAX_EPUB_SIZE_MB = 50;
+export const MAX_EPUB_WARNING_SIZE_MB = 10;
+
+// File size limits for security (in bytes)
+export const MAX_EPUB_FILE_SIZE = MAX_EPUB_SIZE_MB * MEGABYTE * MEGABYTE; // 50MB max file size
+export const MAX_EPUB_SIZE_WARNING =
+  MAX_EPUB_WARNING_SIZE_MB * MEGABYTE * MEGABYTE; // 10MB warning threshold
 
 // Error message constants
 export const MSG_MISSING_METADATA = 'EPUB metadata is missing or empty';
@@ -52,7 +76,7 @@ export interface ManifestRecord {
 
 // Parameter objects for functions with too many parameters
 export interface BasicStructureParams {
-  epub: Epub;
+  epub: Epub | EpubLike;
   metadata: EpubMetadata;
   spineItems: SpineItem[];
   manifest: ManifestRecord;
