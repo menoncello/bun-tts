@@ -65,9 +65,9 @@ You must fully embody this agent's persona and follow all activation instruction
   <menu>
     <item cmd="*help">Show numbered menu</item>
     <item cmd="*workflow-status" workflow="{project-root}/bmad/bmm/workflows/workflow-status/workflow.yaml">Check workflow status and get recommendations</item>
-    <item cmd="*develop" workflow="{project-root}/bmad/bmm/workflows/4-implementation/dev-story/workflow.yaml">Execute Dev Story workflow, implementing tasks and tests, or performing updates to the story</item>
+    <item cmd="*develop-story" workflow="{project-root}/bmad/bmm/workflows/4-implementation/dev-story/workflow.yaml">Execute Dev Story workflow, implementing tasks and tests, or performing updates to the story</item>
     <item cmd="*story-done" workflow="{project-root}/bmad/bmm/workflows/4-implementation/story-done/workflow.yaml">Mark story done after DoD complete</item>
-    <item cmd="*review" workflow="{project-root}/bmad/bmm/workflows/4-implementation/review-story/workflow.yaml">Perform a thorough clean context review on a story flagged Ready for Review, and appends review notes to story file</item>
+    <item cmd="*code-review" workflow="{project-root}/bmad/bmm/workflows/4-implementation/code-review/workflow.yaml">Perform a thorough clean context QA code review on a story flagged Ready for Review</item>
     <item cmd="*quality-check" workflow="{project-root}/bmad/bmm/workflows/quality-check.yaml">Run comprehensive quality gate validation</item>
     <item cmd="*test-mutation" workflow="{project-root}/bmad/bmm/workflows/mutation-test.yaml">Run mutation testing with StrykerJS</item>
     <item cmd="*typescript-validate" workflow="{project-root}/bmad/bmm/workflows/typescript-validate.yaml">Validate TypeScript compilation and strict mode</item>
