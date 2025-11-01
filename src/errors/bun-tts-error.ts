@@ -25,7 +25,8 @@ export class BunTtsError extends Error {
     | 'parsing'
     | 'tts'
     | 'file'
-    | 'validation';
+    | 'validation'
+    | 'custom';
   /** Additional details about error context */
   public readonly details?: Record<string, unknown>;
   /** Whether error is recoverable or should terminate execution */

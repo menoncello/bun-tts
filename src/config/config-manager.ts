@@ -41,31 +41,80 @@ export class ConfigManager {
     configPath?: string
   ): Promise<Result<BunTtsConfig, ConfigurationError>> {
     try {
-      const explorer = cosmiconfig(this.moduleName);
-
-      const result: CosmiconfigResult = await (configPath
-        ? explorer.load(configPath)
-        : explorer.search());
-
-      if (result) {
-        this.configPath = result.filepath;
-        this.config = await this.mergeWithDefaults(result.config);
-      } else {
-        // Use default config if no configuration file found
-        this.config = await this.getDefaultConfig();
-        this.configPath = undefined;
-      }
-
-      return Ok(this.config);
+      const result = await this.loadConfigurationFile(configPath);
+      return this.handleLoadSuccess(result);
     } catch (error) {
-      const wrappedError = new ConfigurationError(
-        `Failed to load configuration: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-        { configPath, error }
-      );
-      return Err(wrappedError);
+      return this.handleLoadError(error, configPath);
     }
+  }
+
+  /**
+   * Load configuration file using cosmiconfig
+   *
+   * @param {string} [configPath] - Optional path to a specific configuration file to load
+   * @returns {Promise<CosmiconfigResult>} Promise resolving to cosmiconfig result
+   */
+  private async loadConfigurationFile(
+    configPath?: string
+  ): Promise<CosmiconfigResult> {
+    const explorer = cosmiconfig(this.moduleName);
+    return configPath ? explorer.load(configPath) : explorer.search();
+  }
+
+  /**
+   * Handle successful configuration loading
+   *
+   * @param {CosmiconfigResult} result - The cosmiconfig result
+   * @returns {Result<BunTtsConfig, ConfigurationError>} Success result with configuration
+   */
+  private async handleLoadSuccess(
+    result: CosmiconfigResult
+  ): Promise<Result<BunTtsConfig, ConfigurationError>> {
+    if (result) {
+      this.configPath = result.filepath;
+      this.config = await this.mergeWithDefaults(result.config);
+    } else {
+      this.config = await this.getDefaultConfig();
+      this.configPath = undefined;
+    }
+    return Ok(this.config);
+  }
+
+  /**
+   * Handle configuration loading errors
+   *
+   * @param {unknown} error - The error that occurred
+   * @param {string} [configPath] - Optional config path for error context
+   * @returns {Result<BunTtsConfig, ConfigurationError>} Error result
+   */
+  private async handleLoadError(
+    error: unknown,
+    configPath?: string
+  ): Promise<Result<BunTtsConfig, ConfigurationError>> {
+    // Handle ENOENT (file not found) by returning default config for graceful behavior
+    if (this.isFileNotFoundError(error)) {
+      this.config = await this.getDefaultConfig();
+      this.configPath = undefined;
+      return Ok(this.config);
+    }
+
+    const wrappedError = new ConfigurationError(
+      `Failed to load configuration: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+      { configPath, error }
+    );
+    return Err(wrappedError);
+  }
+
+  /**
+   * Check if error is a file not found error
+   *
+   * @param {unknown} error - The error to check
+   * @returns {boolean} True if error is ENOENT
+   */
+  private isFileNotFoundError(error: unknown): boolean {
+    return error instanceof Error && 'code' in error && error.code === 'ENOENT';
   }
 
   /**
@@ -269,6 +318,12 @@ export class ConfigManager {
       }
 
       const fs = await import('fs/promises');
+      const path = await import('path');
+
+      // Ensure directory exists
+      const dir = path.dirname(filePath);
+      await fs.mkdir(dir, { recursive: true });
+
       await fs.writeFile(
         filePath,
         JSON.stringify(config, null, JSON_INDENTATION)

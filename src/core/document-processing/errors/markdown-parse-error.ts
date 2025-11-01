@@ -80,6 +80,12 @@ export class MarkdownParseError extends BunTtsError {
   /** Confidence score that this is actually an error (0-1) */
   public readonly confidence: number;
 
+  /** Timestamp when the error occurred */
+  public readonly timestamp: Date;
+
+  /** Original error that caused this failure */
+  public override readonly cause?: unknown;
+
   /**
    * Create a new MarkdownParseError
    *
@@ -102,7 +108,11 @@ export class MarkdownParseError extends BunTtsError {
       code: MARKDOWN_PARSE_ERROR_CODES[code],
       category: 'parsing',
       recoverable: false,
-      details: cause ? { cause: cause.message } : undefined,
+      details: cause
+        ? {
+            cause: cause instanceof Error ? cause.message : String(cause),
+          }
+        : undefined,
     });
 
     this.name = 'MarkdownParseError';
@@ -110,11 +120,8 @@ export class MarkdownParseError extends BunTtsError {
     this.code = code;
     this.location = location;
     this.confidence = Math.max(0, Math.min(1, confidence));
-
-    // Store cause manually for access
-    if (cause) {
-      (this as { cause?: Error }).cause = cause;
-    }
+    this.timestamp = new Date();
+    this.cause = cause;
 
     // Maintain proper stack trace for where our error was thrown
     if (Error.captureStackTrace) {
@@ -246,14 +253,14 @@ export class MarkdownParseError extends BunTtsError {
    * Create error for encoding issues
    *
    * @param {string} message - Description of encoding issue
-   * @param {Error} cause - Original encoding error
+   * @param {unknown} cause - Original encoding error
    * @returns {MarkdownParseError} A new MarkdownParseError instance
    */
-  static encodingError(message: string, cause?: Error): MarkdownParseError {
+  static encodingError(message: string, cause?: unknown): MarkdownParseError {
     return new MarkdownParseError(
       'ENCODING_ERROR',
       `Encoding error: ${message}`,
-      { cause }
+      { cause: cause instanceof Error ? cause : undefined }
     );
   }
 
@@ -261,12 +268,12 @@ export class MarkdownParseError extends BunTtsError {
    * Create error for memory allocation failure
    *
    * @param {string} message - Description of memory issue
-   * @param {Error} cause - Original memory error
+   * @param {unknown} cause - Original memory error
    * @returns {MarkdownParseError} A new MarkdownParseError instance
    */
-  static memoryError(message: string, cause?: Error): MarkdownParseError {
+  static memoryError(message: string, cause?: unknown): MarkdownParseError {
     return new MarkdownParseError('MEMORY_ERROR', `Memory error: ${message}`, {
-      cause,
+      cause: cause instanceof Error ? cause : undefined,
     });
   }
 
@@ -274,12 +281,12 @@ export class MarkdownParseError extends BunTtsError {
    * Create generic parse failure error
    *
    * @param {string} message - Description of failure
-   * @param {Error} cause - Original error
+   * @param {unknown} cause - Original error
    * @returns {MarkdownParseError} A new MarkdownParseError instance
    */
-  static parseFailed(message: string, cause?: Error): MarkdownParseError {
+  static parseFailed(message: string, cause?: unknown): MarkdownParseError {
     return new MarkdownParseError('PARSE_FAILED', `Parse failed: ${message}`, {
-      cause,
+      cause: cause instanceof Error ? cause : undefined,
     });
   }
 

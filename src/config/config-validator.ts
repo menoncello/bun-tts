@@ -15,15 +15,17 @@ export const VALID_LOG_LEVELS = [
 ] as const;
 
 export const VALID_TTS_ENGINES = ['kokoro', 'chatterbox'] as const;
-export const VALID_OUTPUT_FORMATS = ['mp3', 'wav', 'ogg'] as const;
+export const VALID_OUTPUT_FORMATS = ['mp3', 'wav', 'm4a'] as const;
 export const MIN_SAMPLE_RATE = 8000;
 export const MAX_SAMPLE_RATE = 48000;
-export const MIN_QUALITY = 0;
+export const MIN_QUALITY = Number.EPSILON;
 export const MAX_QUALITY = 1;
 export const MIN_RATE = 0.1;
 export const MAX_RATE = 3.0;
 export const MIN_VOLUME = 0;
 export const MAX_VOLUME = 2.0;
+export const MIN_WORKERS = 1;
+export const MAX_WORKERS = 32;
 
 /**
  * Configuration validator for bun-tts
@@ -42,28 +44,49 @@ export class ConfigValidator {
    * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
    */
   validate(config: Partial<BunTtsConfig>): Result<true, ConfigurationError> {
-    const loggingValidation = this.validateLoggingConfig(config.logging);
-    if (!loggingValidation.success) {
-      return loggingValidation;
+    // Handle undefined config - treat as empty config
+    if (!config) {
+      return Ok(true);
     }
 
-    const ttsValidation = this.validateTtsConfig(config.tts);
-    if (!ttsValidation.success) {
-      return ttsValidation;
-    }
+    return this.validateAllConfigSections(config);
+  }
 
-    const processingValidation = this.validateProcessingConfig(
-      config.processing
-    );
-    if (!processingValidation.success) {
-      return processingValidation;
-    }
+  /**
+   * Validate all configuration sections
+   *
+   * @param {Partial<BunTtsConfig>} config - The configuration object to validate
+   * @returns {Result<true, ConfigurationError>} Validation result
+   */
+  private validateAllConfigSections(
+    config: Partial<BunTtsConfig>
+  ): Result<true, ConfigurationError> {
+    const validators = [
+      () => this.validateLoggingConfig(config.logging),
+      () => this.validateTtsConfig(config.tts),
+      () => this.validateProcessingConfig(config.processing),
+      () => this.validateCacheConfig(config.cache),
+      () => this.validateCliConfig(config.cli),
+    ];
 
-    const cacheValidation = this.validateCacheConfig(config.cache);
-    if (!cacheValidation.success) {
-      return cacheValidation;
-    }
+    return this.executeValidators(validators);
+  }
 
+  /**
+   * Execute a list of validator functions
+   *
+   * @param {(() => Result<true, ConfigurationError>)[]} validators - Array of validator functions
+   * @returns {Result<true, ConfigurationError>} First failure or success
+   */
+  private executeValidators(
+    validators: Array<() => Result<true, ConfigurationError>>
+  ): Result<true, ConfigurationError> {
+    for (const validator of validators) {
+      const result = validator();
+      if (!result.success) {
+        return result;
+      }
+    }
     return Ok(true);
   }
 
@@ -121,6 +144,12 @@ export class ConfigValidator {
    * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
    */
   validateTtsEngine(engine?: string): Result<true, ConfigurationError> {
+    if (engine && typeof engine !== 'string') {
+      return Err(
+        new ConfigurationError('Invalid TTS engine: must be a string')
+      );
+    }
+
     if (
       engine &&
       !VALID_TTS_ENGINES.includes(engine as (typeof VALID_TTS_ENGINES)[number])
@@ -137,6 +166,12 @@ export class ConfigValidator {
    * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
    */
   validateTtsOutputFormat(format?: string): Result<true, ConfigurationError> {
+    if (format && typeof format !== 'string') {
+      return Err(
+        new ConfigurationError('Invalid output format: must be a string')
+      );
+    }
+
     if (
       format &&
       !VALID_OUTPUT_FORMATS.includes(
@@ -156,8 +191,10 @@ export class ConfigValidator {
    */
   validateTtsSampleRate(sampleRate?: number): Result<true, ConfigurationError> {
     if (
-      sampleRate &&
-      (sampleRate < MIN_SAMPLE_RATE || sampleRate > MAX_SAMPLE_RATE)
+      sampleRate !== undefined &&
+      (sampleRate <= 0 ||
+        sampleRate < MIN_SAMPLE_RATE ||
+        sampleRate > MAX_SAMPLE_RATE)
     ) {
       return Err(
         new ConfigurationError(
@@ -175,7 +212,10 @@ export class ConfigValidator {
    * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
    */
   validateTtsQuality(quality?: number): Result<true, ConfigurationError> {
-    if (quality && (quality < MIN_QUALITY || quality > MAX_QUALITY)) {
+    if (
+      quality !== undefined &&
+      (quality < MIN_QUALITY || quality > MAX_QUALITY)
+    ) {
       return Err(
         new ConfigurationError(
           `Quality must be between ${MIN_QUALITY} and ${MAX_QUALITY}`
@@ -192,7 +232,10 @@ export class ConfigValidator {
    * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
    */
   validateTtsRate(rate?: number): Result<true, ConfigurationError> {
-    if (rate && (rate < MIN_RATE || rate > MAX_RATE)) {
+    if (
+      rate !== undefined &&
+      (rate <= 0 || rate < MIN_RATE || rate > MAX_RATE)
+    ) {
       return Err(
         new ConfigurationError(
           `Rate must be between ${MIN_RATE} and ${MAX_RATE}`
@@ -228,12 +271,20 @@ export class ConfigValidator {
   validateProcessingConfig(
     processing?: BunTtsConfig['processing']
   ): Result<true, ConfigurationError> {
-    if (processing?.maxFileSize && processing.maxFileSize <= 0) {
+    if (processing?.maxFileSize !== undefined && processing.maxFileSize <= 0) {
       return Err(new ConfigurationError(`Max file size must be positive`));
     }
 
-    if (processing?.maxWorkers && processing.maxWorkers <= 0) {
-      return Err(new ConfigurationError(`Max workers must be positive`));
+    if (
+      processing?.maxWorkers !== undefined &&
+      (processing.maxWorkers < MIN_WORKERS ||
+        processing.maxWorkers > MAX_WORKERS)
+    ) {
+      return Err(
+        new ConfigurationError(
+          `Max workers must be between ${MIN_WORKERS} and ${MAX_WORKERS}`
+        )
+      );
     }
 
     return Ok(true);
@@ -248,12 +299,45 @@ export class ConfigValidator {
   validateCacheConfig(
     cache?: BunTtsConfig['cache']
   ): Result<true, ConfigurationError> {
-    if (cache?.maxSize && cache.maxSize <= 0) {
+    if (cache?.maxSize !== undefined && cache.maxSize <= 0) {
       return Err(new ConfigurationError(`Cache max size must be positive`));
     }
 
-    if (cache?.ttl && cache.ttl <= 0) {
+    if (cache?.ttl !== undefined && cache.ttl <= 0) {
       return Err(new ConfigurationError(`Cache TTL must be positive`));
+    }
+
+    return Ok(true);
+  }
+
+  /**
+   * Validate CLI configuration
+   *
+   * @param {BunTtsConfig['cli']} cli - The CLI configuration to validate
+   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
+   */
+  validateCliConfig(
+    cli?: BunTtsConfig['cli']
+  ): Result<true, ConfigurationError> {
+    if (
+      cli?.showProgress !== undefined &&
+      typeof cli.showProgress !== 'boolean'
+    ) {
+      return Err(
+        new ConfigurationError(`Invalid show progress value: must be boolean`)
+      );
+    }
+
+    if (cli?.colors !== undefined && typeof cli.colors !== 'boolean') {
+      return Err(
+        new ConfigurationError(`Invalid colors value: must be boolean`)
+      );
+    }
+
+    if (cli?.debug !== undefined && typeof cli.debug !== 'boolean') {
+      return Err(
+        new ConfigurationError(`Invalid debug value: must be boolean`)
+      );
     }
 
     return Ok(true);

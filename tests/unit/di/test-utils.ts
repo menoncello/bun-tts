@@ -197,18 +197,96 @@ export const createMockOutputWriter = () => {
 
 /**
  * Mock ConfigManager for testing
+ * Uses the actual ConfigManager class but with mocked methods to avoid file system operations
  */
 export const createMockConfigManager = () => {
-  return {
-    loadConfig: createMockMethod(
-      Promise.resolve({ success: true, data: { sample: 'config' } })
-    ),
-    getConfig: createMockMethod({ sample: 'config' }),
-    reloadConfig: createMockMethod(
-      Promise.resolve({ success: true, data: { sample: 'config' } })
-    ),
-    createSampleConfig: createMockMethod('# Sample Config'),
+  const defaultConfig = {
+    ttsEngine: 'kokoro',
+    voiceSettings: {
+      speed: 1.0,
+      pitch: 1.0,
+      volume: 1.0,
+      emotion: {
+        enabled: false,
+        engine: 'ai',
+        intensity: 0.5,
+      },
+    },
+    outputFormat: 'mp3',
+    sampleRate: 22050,
+    channels: 1,
+    bitrate: 128,
   };
+
+  // Create a mock that extends the ConfigManager class functionality
+  return {
+    // Use the actual class methods but override to avoid file system access
+    loadConfig: createMockMethod(
+      Promise.resolve({
+        success: true,
+        data: defaultConfig,
+      })
+    ),
+    getConfig: createMockMethod(defaultConfig),
+    reloadConfig: createMockMethod(
+      Promise.resolve({
+        success: true,
+        data: defaultConfig,
+      })
+    ),
+    createSampleConfig: createMockMethod(`# bun-tts Configuration File
+# This file controls the default behavior of the bun-tts CLI tool
+
+# TTS engine to use for audio generation
+# Options: kokoro, chatterbox
+ttsEngine: "kokoro"
+
+# Voice settings for audio generation
+voiceSettings:
+  # Speech speed (0 to 3, where 1.0 is normal speed)
+  speed: 1.0
+
+  # Pitch adjustment (0 to 2, where 1.0 is normal pitch)
+  pitch: 1.0
+
+  # Volume level (0 to 2, where 1.0 is normal volume)
+  volume: 1.0
+
+  # Emotion settings (optional)
+  emotion:
+    # Enable emotion processing
+    enabled: false
+
+    # Emotion detection engine
+    # Options: ai, rule-based
+    engine: "ai"
+
+    # Intensity of emotion expression (0 to 1)
+    intensity: 0.5
+
+# Audio output format
+# Options: mp3, wav, m4a
+outputFormat: "mp3"
+
+# Audio sample rate in Hz
+sampleRate: 22050
+
+# Audio channels
+# Options: 1 (mono), 2 (stereo)
+channels: 1
+
+# Audio bitrate in kbps (for compressed formats)
+bitrate: 128`),
+
+    // Additional methods that might be expected by tests
+    get: createMockMethod(null),
+    set: createMockMethod(null),
+    has: createMockMethod(false),
+    clear: createMockMethod(null),
+    save: createMockMethod(Promise.resolve({ success: true, data: undefined })),
+
+    // Cast to ConfigManager type to satisfy TypeScript
+  } as unknown as ConfigManager;
 };
 
 /**

@@ -1,4 +1,4 @@
-import { failure, type Result } from '../errors/index.js';
+import { failure, BunTtsBaseError, type Result } from '../errors/index.js';
 import type { BunTtsError } from '../types/index.js';
 import { debugManager } from './debug.js';
 import type { RecoveryStrategy, RecoveryContext } from './error-recovery.js';
@@ -142,18 +142,20 @@ export const normalizeError = (error: unknown): BunTtsError => {
  * @returns {BunTtsError} A normalized BunTtsError
  */
 export const normalizeStandardError = (error: Error): BunTtsError => {
-  return {
-    name: error.name,
-    message: error.message,
-    code: 'UNKNOWN_ERROR',
-    category: 'validation',
-    details: {
-      originalError: error.constructor.name,
-      stack: error.stack,
-    },
-    recoverable: true,
-    stack: error.stack,
-  };
+  const baseError = new BunTtsBaseError(
+    error.message,
+    'UNKNOWN_ERROR',
+    'validation',
+    {
+      recoverable: true,
+      details: {
+        originalError: error.constructor.name,
+        stack: error.stack,
+      },
+    }
+  );
+  baseError.name = error.name;
+  return baseError;
 };
 
 /**
@@ -163,18 +165,20 @@ export const normalizeStandardError = (error: Error): BunTtsError => {
  */
 export const normalizeUnknownError = (error: unknown): BunTtsError => {
   const errorMessage = String(error);
-  return {
-    name: 'UnknownError',
-    message: errorMessage,
-    code: 'UNKNOWN_ERROR',
-    category: 'validation' as const,
-    details: {
-      type: typeof error,
-      value: error,
-    },
-    recoverable: true,
-    stack: new Error(errorMessage).stack,
-  };
+  const baseError = new BunTtsBaseError(
+    errorMessage,
+    'UNKNOWN_ERROR',
+    'validation',
+    {
+      recoverable: true,
+      details: {
+        type: typeof error,
+        value: error,
+      },
+    }
+  );
+  baseError.name = 'UnknownError';
+  return baseError;
 };
 
 /**
@@ -204,7 +208,14 @@ export const getStrategiesForError = (
   error: BunTtsError,
   strategies: Map<string, RecoveryStrategy[]>
 ): RecoveryStrategy[] => {
-  return strategies.get(error.name) || strategies.get(error.category) || [];
+  // Check by error code first (most specific)
+  const strategiesByCode = strategies.get(error.code);
+  // Then by error name (class name)
+  const strategiesByName = strategies.get(error.name);
+  // Finally by error category (most general)
+  const strategiesByCategory = strategies.get(error.category);
+
+  return strategiesByCode || strategiesByName || strategiesByCategory || [];
 };
 
 /**

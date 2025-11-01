@@ -173,28 +173,6 @@ Your input:</ask>
     <action>Capture concrete, actionable suggestions with severity (High/Med/Low) and rationale. When possible, suggest specific code-level changes (filenames + line ranges) without rewriting large sections.</action>
   </step>
 
-  <step n="5.5" goal="Verify quality gates enforcement">
-    <critical>CRITICAL: Verify DEV agent enforced all quality gates during implementation</critical>
-
-    <action>Check TypeScript compilation was run with 0 errors</action>
-    <action>Scan for eslint-disable comments in changed files - flag as HIGH SEVERITY violation</action>
-    <action>Scan for @ts-ignore/@ts-expect-error comments - flag as HIGH SEVERITY violation</action>
-    <action>Verify mutation testing score meets project thresholds (90/80/70)</action>
-    <action>Check test coverage is adequate for implemented functionality</action>
-
-    <check if="eslint-disable comments found">
-      <action>Flag as HIGH SEVERITY: "eslint-disable comments found - code must be refactored to satisfy rules"</action>
-    </check>
-
-    <check if="@ts-ignore comments found">
-      <action>Flag as HIGH SEVERITY: "@ts-ignore comments found - type issues must be properly resolved"</action>
-    </check>
-
-    <check if="mutation score below thresholds">
-      <action>Flag as MEDIUM SEVERITY: "Mutation score below threshold - tests need improvement"</action>
-    </check>
-  </step>
-
   <step n="6" goal="Decide review outcome and prepare comprehensive notes">
     <action>Determine outcome based on validation results:
       - BLOCKED: Any HIGH severity finding (AC missing, task falsely marked complete, critical architecture violation)

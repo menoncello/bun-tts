@@ -1,0 +1,772 @@
+import { describe, it, expect } from 'bun:test';
+import {
+  MarkdownParseError,
+  MarkdownParseErrorCode,
+} from '../../../src/errors/index';
+
+describe('MarkdownParseError', () => {
+  describe('Constructor', () => {
+    it('should create error with required parameters', () => {
+      const message = 'Test error message';
+      const code = MarkdownParseErrorCode.INVALID_SYNTAX;
+      const error = new MarkdownParseError(message, code);
+
+      expect(error).toBeInstanceOf(Error);
+      expect(error.name).toBe('MarkdownParseError');
+      expect(error.message).toBe(message);
+      expect(error.code).toBe(code);
+      expect(error.category).toBe('parsing');
+    });
+
+    it('should create error with all options', () => {
+      const message = 'Test error message';
+      const code = MarkdownParseErrorCode.FILE_TOO_LARGE;
+      const options: MarkdownParseErrorOptions = {
+        location: { line: 10, column: 5, chapter: 2, paragraph: 3 },
+        extractedContent: 'Problematic content here',
+        recoverable: false,
+        details: { fileSize: 1000000 },
+        cause: new Error('Original error'),
+      };
+
+      const error = new MarkdownParseError(code, message, options);
+
+      expect(error.location).toEqual(options.location);
+      expect(error.extractedContent).toBe(options.extractedContent);
+      expect(error.recoverable).toBe(options.recoverable);
+      expect(error.details).toEqual(options.details);
+      expect(error.cause).toBe(options.cause);
+    });
+
+    it('should create error with partial location information', () => {
+      const message = 'Test error message';
+      const code = MarkdownParseErrorCode.INVALID_SYNTAX;
+      const location = { line: 5, column: 10 };
+
+      const error = new MarkdownParseError(code, message, { location });
+
+      expect(error.location).toEqual(location);
+    });
+
+    it('should maintain proper error stack trace', () => {
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.UNEXPECTED_ERROR
+      );
+
+      expect(error.stack).toBeDefined();
+      expect(error.stack).toContain('MarkdownParseError');
+    });
+
+    it('should handle missing options gracefully', () => {
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.INVALID_SYNTAX
+      );
+
+      expect(error.location).toBeUndefined();
+      expect(error.extractedContent).toBeUndefined();
+      expect(error.recoverable).toBe(false); // Default when not specified
+    });
+  });
+
+  describe('getUserMessage', () => {
+    it('should format basic error message', () => {
+      const message = 'Invalid markdown syntax';
+      const code = MarkdownParseErrorCode.INVALID_SYNTAX;
+      const error = new MarkdownParseError(code, message);
+
+      const userMessage = error.getUserMessage();
+      expect(userMessage).toBe(`${message} (Error code: ${code})`);
+    });
+
+    it('should include line information in user message', () => {
+      const message = 'Syntax error';
+      const location = { line: 25 };
+      const error = new MarkdownParseError(
+        message,
+        MarkdownParseErrorCode.INVALID_SYNTAX,
+        { location }
+      );
+
+      const userMessage = error.getUserMessage();
+      expect(userMessage).toBe(
+        `${message} (Error code: ${MarkdownParseErrorCode.INVALID_SYNTAX}) at line 25`
+      );
+    });
+
+    it('should include line and column information in user message', () => {
+      const message = 'Syntax error';
+      const location = { line: 25, column: 15 };
+      const error = new MarkdownParseError(
+        message,
+        MarkdownParseErrorCode.INVALID_SYNTAX,
+        { location }
+      );
+
+      const userMessage = error.getUserMessage();
+      expect(userMessage).toBe(
+        `${message} (Error code: ${MarkdownParseErrorCode.INVALID_SYNTAX}) at line 25, column 15`
+      );
+    });
+
+    it('should include chapter information when available', () => {
+      const message = 'Chapter error';
+      const location = { line: 25, chapter: 3 };
+      const error = new MarkdownParseError(
+        message,
+        MarkdownParseErrorCode.CHAPTER_DETECTION_FAILED,
+        { location }
+      );
+
+      const userMessage = error.getUserMessage();
+      expect(userMessage).toContain(message);
+      expect(userMessage).toContain('line 25');
+    });
+
+    it('should include extracted content when within length limit', () => {
+      const message = 'Content error';
+      const extractedContent = 'Short content';
+      const error = new MarkdownParseError(
+        message,
+        MarkdownParseErrorCode.INVALID_SYNTAX,
+        { extractedContent }
+      );
+
+      const userMessage = error.getUserMessage();
+      expect(userMessage).toContain(message);
+      expect(userMessage).toContain(
+        `Problematic content: "${extractedContent}"`
+      );
+    });
+
+    it('should truncate extracted content when too long', () => {
+      const message = 'Long content error';
+      const extractedContent = 'x'.repeat(100); // Longer than MAX_CONTENT_LENGTH
+      const error = new MarkdownParseError(
+        message,
+        MarkdownParseErrorCode.INVALID_SYNTAX,
+        { extractedContent }
+      );
+
+      const userMessage = error.getUserMessage();
+      expect(userMessage).toContain(message);
+      expect(userMessage).toContain('Problematic content: "');
+      expect(userMessage).toContain('...');
+      // Ensure truncation happened - should be much shorter than original content
+      expect(userMessage.length).toBeLessThan(
+        message.length + extractedContent.length + 10
+      ); // Allow for formatting overhead
+    });
+
+    it('should include both location and content information', () => {
+      const message = 'Complex error';
+      const location = { line: 10, column: 5 };
+      const extractedContent = 'Problematic text';
+      const error = new MarkdownParseError(
+        message,
+        MarkdownParseErrorCode.INVALID_SYNTAX,
+        { location, extractedContent }
+      );
+
+      const userMessage = error.getUserMessage();
+      expect(userMessage).toContain(message);
+      expect(userMessage).toContain('line 10, column 5');
+      expect(userMessage).toContain(
+        `Problematic content: "${extractedContent}"`
+      );
+    });
+  });
+
+  describe('shouldLogDetails', () => {
+    it('should return true for invalid syntax errors', () => {
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.INVALID_SYNTAX
+      );
+      expect(error.shouldLogDetails()).toBe(true);
+    });
+
+    it('should return true for unexpected errors', () => {
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.UNEXPECTED_ERROR
+      );
+      expect(error.shouldLogDetails()).toBe(true);
+    });
+
+    it('should return false for file read errors', () => {
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.FILE_READ_ERROR
+      );
+      expect(error.shouldLogDetails()).toBe(false);
+    });
+
+    it('should return false for file too large errors', () => {
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.FILE_TOO_LARGE
+      );
+      expect(error.shouldLogDetails()).toBe(false);
+    });
+
+    it('should return false for invalid encoding errors', () => {
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.INVALID_ENCODING
+      );
+      expect(error.shouldLogDetails()).toBe(false);
+    });
+
+    it('should return false for chapter detection failed errors', () => {
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.CHAPTER_DETECTION_FAILED
+      );
+      expect(error.shouldLogDetails()).toBe(false);
+    });
+
+    it('should return false for sentence detection failed errors', () => {
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.SENTENCE_DETECTION_FAILED
+      );
+      expect(error.shouldLogDetails()).toBe(false);
+    });
+
+    it('should return false for structure validation failed errors', () => {
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.STRUCTURE_VALIDATION_FAILED
+      );
+      expect(error.shouldLogDetails()).toBe(false);
+    });
+
+    it('should return false for low confidence errors', () => {
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.LOW_CONFIDENCE
+      );
+      expect(error.shouldLogDetails()).toBe(false);
+    });
+  });
+
+  describe('toJSON', () => {
+    it('should include basic error properties', () => {
+      const message = 'Test error';
+      const code = MarkdownParseErrorCode.INVALID_SYNTAX;
+      const error = new MarkdownParseError(code, message);
+
+      const json = error.toJSON();
+
+      expect(json.name).toBe('MarkdownParseError');
+      expect(json.message).toBe(message);
+      expect(json.code).toBe(code);
+      expect(json.category).toBe('parsing');
+    });
+
+    it('should include location information when present', () => {
+      const location = { line: 10, column: 5, chapter: 2 };
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.INVALID_SYNTAX,
+        { location }
+      );
+
+      const json = error.toJSON();
+
+      expect(json.location).toEqual(location);
+    });
+
+    it('should include extracted content when present', () => {
+      const extractedContent = 'Problematic content';
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.INVALID_SYNTAX,
+        { extractedContent }
+      );
+
+      const json = error.toJSON();
+
+      expect(json.extractedContent).toBe(extractedContent);
+    });
+
+    it('should include all standard error properties', () => {
+      const details = { fileSize: 1000 };
+      const cause = new Error('Cause');
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.FILE_TOO_LARGE,
+        {
+          details,
+          cause,
+          recoverable: false,
+        }
+      );
+
+      const json = error.toJSON();
+
+      expect(json.details).toEqual(details);
+      expect(json.recoverable).toBe(false);
+      // Note: cause is usually not included in JSON serialization
+    });
+  });
+
+  describe('getExitCode', () => {
+    it('should return file system exit code for file read errors', () => {
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.FILE_READ_ERROR
+      );
+      expect(error.getExitCode()).toBe(2);
+    });
+
+    it('should return resource limit exit code for file too large errors', () => {
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.FILE_TOO_LARGE
+      );
+      expect(error.getExitCode()).toBe(3);
+    });
+
+    it('should return encoding exit code for invalid encoding errors', () => {
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.INVALID_ENCODING
+      );
+      expect(error.getExitCode()).toBe(4);
+    });
+
+    it('should return general error exit code for other errors', () => {
+      const errorCodes = [
+        MarkdownParseErrorCode.INVALID_SYNTAX,
+        MarkdownParseErrorCode.CHAPTER_DETECTION_FAILED,
+        MarkdownParseErrorCode.SENTENCE_DETECTION_FAILED,
+        MarkdownParseErrorCode.STRUCTURE_VALIDATION_FAILED,
+        MarkdownParseErrorCode.LOW_CONFIDENCE,
+        MarkdownParseErrorCode.UNEXPECTED_ERROR,
+      ];
+
+      for (const code of errorCodes) {
+        const error = new MarkdownParseError('Test', code);
+        expect(error.getExitCode()).toBe(1);
+      }
+    });
+  });
+
+  describe('Static Factory Methods', () => {
+    describe('invalidSyntax', () => {
+      it('should create invalid syntax error', () => {
+        const message = 'Invalid markdown syntax';
+        const location = { line: 15, column: 10 };
+        const extractedContent = '# Bad header';
+
+        const error = MarkdownParseError.invalidSyntax(
+          message,
+          location,
+          extractedContent
+        );
+
+        expect(error.name).toBe('MarkdownParseError');
+        expect(error.message).toBe(message);
+        expect(error.code).toBe(MarkdownParseErrorCode.INVALID_SYNTAX);
+        expect(error.category).toBe('parsing');
+        expect(error.location).toEqual(location);
+        expect(error.extractedContent).toBe(extractedContent);
+        expect(error.recoverable).toBe(true);
+      });
+
+      it('should create invalid syntax error without optional parameters', () => {
+        const message = 'Syntax error';
+
+        const error = MarkdownParseError.invalidSyntax(message);
+
+        expect(error.code).toBe(MarkdownParseErrorCode.INVALID_SYNTAX);
+        expect(error.message).toBe(message);
+        expect(error.location).toBeUndefined();
+        expect(error.extractedContent).toBeUndefined();
+        expect(error.recoverable).toBe(true);
+      });
+    });
+
+    describe('fileReadError', () => {
+      it('should create file read error', () => {
+        const filePath = '/path/to/file.md';
+        const originalError = new Error('Permission denied');
+
+        const error = MarkdownParseError.fileReadError(filePath, originalError);
+
+        expect(error.code).toBe(MarkdownParseErrorCode.FILE_READ_ERROR);
+        expect(error.message).toBe(`Failed to read Markdown file: ${filePath}`);
+        expect(error.category).toBe('parsing');
+        expect(error.recoverable).toBe(false);
+        expect(error.details).toEqual({
+          filePath,
+          originalError: originalError.message,
+        });
+      });
+
+      it('should create file read error without original error', () => {
+        const filePath = '/path/to/file.md';
+
+        const error = MarkdownParseError.fileReadError(filePath);
+
+        expect(error.code).toBe(MarkdownParseErrorCode.FILE_READ_ERROR);
+        expect(error.details?.filePath).toBe(filePath);
+        expect(error.details?.originalError).toBeUndefined();
+      });
+    });
+
+    describe('fileTooLarge', () => {
+      it('should create file too large error', () => {
+        const fileSize = 5000000;
+        const maxSize = 1000000;
+
+        const error = MarkdownParseError.fileTooLarge(fileSize, maxSize);
+
+        expect(error.code).toBe(MarkdownParseErrorCode.FILE_TOO_LARGE);
+        expect(error.message).toBe(
+          `File size (${fileSize} bytes) exceeds maximum allowed size (${maxSize} bytes)`
+        );
+        expect(error.category).toBe('parsing');
+        expect(error.recoverable).toBe(false);
+        expect(error.details).toEqual({ fileSize, maxSize });
+      });
+
+      it('should handle large numbers correctly', () => {
+        const fileSize = Number.MAX_SAFE_INTEGER;
+        const maxSize = 1000000;
+
+        const error = MarkdownParseError.fileTooLarge(fileSize, maxSize);
+
+        expect(error.details?.fileSize).toBe(fileSize);
+        expect(error.details?.maxSize).toBe(maxSize);
+      });
+    });
+
+    describe('lowConfidence', () => {
+      it('should create low confidence error', () => {
+        const confidence = 0.65;
+        const threshold = 0.8;
+
+        const error = MarkdownParseError.lowConfidence(confidence, threshold);
+
+        expect(error.code).toBe(MarkdownParseErrorCode.LOW_CONFIDENCE);
+        expect(error.message).toBe(
+          `Parsing confidence (${confidence}) is below required threshold (${threshold})`
+        );
+        expect(error.category).toBe('parsing');
+        expect(error.recoverable).toBe(true);
+        expect(error.details).toEqual({ confidence, threshold });
+      });
+
+      it('should handle decimal confidence values', () => {
+        const confidence = 0.754321;
+        const threshold = 0.9;
+
+        const error = MarkdownParseError.lowConfidence(confidence, threshold);
+
+        expect(error.details?.confidence).toBe(confidence);
+        expect(error.details?.threshold).toBe(threshold);
+      });
+    });
+
+    describe('chapterDetectionFailed', () => {
+      it('should create chapter detection failed error', () => {
+        const message = 'Unable to detect chapter boundaries';
+
+        const error = MarkdownParseError.chapterDetectionFailed(message);
+
+        expect(error.code).toBe(
+          MarkdownParseErrorCode.CHAPTER_DETECTION_FAILED
+        );
+        expect(error.message).toBe(message);
+        expect(error.category).toBe('parsing');
+        expect(error.recoverable).toBe(true);
+      });
+    });
+
+    describe('unexpectedError', () => {
+      it('should create unexpected error', () => {
+        const message = 'Unexpected parsing error';
+        const originalError = new Error('Something went wrong');
+
+        const error = MarkdownParseError.unexpectedError(
+          message,
+          originalError
+        );
+
+        expect(error.code).toBe(MarkdownParseErrorCode.UNEXPECTED_ERROR);
+        expect(error.message).toBe(message);
+        expect(error.category).toBe('parsing');
+        expect(error.recoverable).toBe(false);
+        expect(error.details?.originalError).toBe(originalError.message);
+      });
+
+      it('should create unexpected error without original error', () => {
+        const message = 'Unexpected error';
+
+        const error = MarkdownParseError.unexpectedError(message);
+
+        expect(error.code).toBe(MarkdownParseErrorCode.UNEXPECTED_ERROR);
+        expect(error.details?.originalError).toBeUndefined();
+      });
+    });
+  });
+
+  describe('MarkdownParseErrorCode Enum', () => {
+    it('should contain all required error codes', () => {
+      const expectedCodes = [
+        'INVALID_SYNTAX',
+        'FILE_TOO_LARGE',
+        'FILE_READ_ERROR',
+        'INVALID_ENCODING',
+        'CHAPTER_DETECTION_FAILED',
+        'SENTENCE_DETECTION_FAILED',
+        'STRUCTURE_VALIDATION_FAILED',
+        'LOW_CONFIDENCE',
+        'UNEXPECTED_ERROR',
+      ];
+
+      for (const code of expectedCodes) {
+        expect(
+          MarkdownParseErrorCode[code as keyof typeof MarkdownParseErrorCode]
+        ).toBe(code);
+      }
+    });
+
+    it('should have correct string values', () => {
+      expect(MarkdownParseErrorCode.INVALID_SYNTAX).toBe<string>(
+        'INVALID_SYNTAX'
+      );
+      expect(MarkdownParseErrorCode.FILE_TOO_LARGE).toBe<string>(
+        'FILE_TOO_LARGE'
+      );
+      expect(MarkdownParseErrorCode.FILE_READ_ERROR).toBe<string>(
+        'FILE_READ_ERROR'
+      );
+      expect(MarkdownParseErrorCode.INVALID_ENCODING).toBe<string>(
+        'INVALID_ENCODING'
+      );
+      expect(MarkdownParseErrorCode.CHAPTER_DETECTION_FAILED).toBe<string>(
+        'CHAPTER_DETECTION_FAILED'
+      );
+      expect(MarkdownParseErrorCode.SENTENCE_DETECTION_FAILED).toBe<string>(
+        'SENTENCE_DETECTION_FAILED'
+      );
+      expect(MarkdownParseErrorCode.STRUCTURE_VALIDATION_FAILED).toBe<string>(
+        'STRUCTURE_VALIDATION_FAILED'
+      );
+      expect(MarkdownParseErrorCode.LOW_CONFIDENCE).toBe<string>(
+        'LOW_CONFIDENCE'
+      );
+      expect(MarkdownParseErrorCode.UNEXPECTED_ERROR).toBe<string>(
+        'UNEXPECTED_ERROR'
+      );
+    });
+  });
+
+  describe('Error Inheritance and Type Checking', () => {
+    it('should be instance of Error', () => {
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.INVALID_SYNTAX
+      );
+      expect(error).toBeInstanceOf(Error);
+    });
+
+    it('should be instance of MarkdownParseError', () => {
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.INVALID_SYNTAX
+      );
+      expect(error).toBeInstanceOf(MarkdownParseError);
+    });
+
+    it('should have correct error name', () => {
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.INVALID_SYNTAX
+      );
+      expect(error.name).toBe('MarkdownParseError');
+    });
+
+    it('should work with instanceof checking in catch blocks', () => {
+      try {
+        throw new MarkdownParseError(
+          'Test error',
+          MarkdownParseErrorCode.INVALID_SYNTAX
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(MarkdownParseError);
+        if (error instanceof MarkdownParseError) {
+          expect(error.code).toBe(MarkdownParseErrorCode.INVALID_SYNTAX);
+        }
+      }
+    });
+  });
+
+  describe('Edge Cases and Error Handling', () => {
+    it('should handle empty message', () => {
+      const error = new MarkdownParseError(
+        ';',
+        MarkdownParseErrorCode.INVALID_SYNTAX
+      );
+      expect(error.message).toBe(';');
+      expect(error.getUserMessage()).toBe(
+        `; (Error code: ${MarkdownParseErrorCode.INVALID_SYNTAX})`
+      );
+    });
+
+    it('should handle special characters in message', () => {
+      const message = 'Error with special chars: 🚀 \n\t "quotes"';
+      const error = new MarkdownParseError(
+        message,
+        MarkdownParseErrorCode.INVALID_SYNTAX
+      );
+      expect(error.message).toBe(message);
+      expect(error.getUserMessage()).toContain(message);
+    });
+
+    it('should handle very long extracted content', () => {
+      const longContent = 'x'.repeat(10000);
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.INVALID_SYNTAX,
+        {
+          extractedContent: longContent,
+        }
+      );
+
+      const userMessage = error.getUserMessage();
+      expect(userMessage).toContain('...');
+      expect(userMessage.length).toBeLessThan(longContent.length + 100);
+    });
+
+    it('should handle location with minimal information', () => {
+      const location = { line: 1 };
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.INVALID_SYNTAX,
+        { location }
+      );
+
+      expect(error.location).toEqual({ line: 1 });
+      expect(error.getUserMessage()).toContain('line 1');
+    });
+
+    it('should handle location with all information', () => {
+      const location = { line: 10, column: 5, chapter: 2, paragraph: 3 };
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.INVALID_SYNTAX,
+        { location }
+      );
+
+      expect(error.location).toEqual(location);
+      expect(error.getUserMessage()).toContain('line 10, column 5');
+    });
+
+    it('should handle extracted content with special characters', () => {
+      const content = 'Special: 🚀 content\nwith\ttabs';
+      const error = new MarkdownParseError(
+        'Test',
+        MarkdownParseErrorCode.INVALID_SYNTAX,
+        {
+          extractedContent: content,
+        }
+      );
+
+      expect(error.extractedContent).toBe(content);
+      expect(error.getUserMessage()).toContain(content);
+    });
+  });
+
+  describe('Serialization and Deserialization', () => {
+    it('should serialize to JSON and back', () => {
+      const location = { line: 10, column: 5, chapter: 2 };
+      const extractedContent = 'Test content';
+      const originalError = new MarkdownParseError(
+        'Test message',
+        MarkdownParseErrorCode.INVALID_SYNTAX,
+        {
+          location,
+          extractedContent,
+          recoverable: true,
+          details: { test: 'value' },
+        }
+      );
+
+      const json = JSON.parse(JSON.stringify(originalError));
+
+      expect(json.name).toBe('MarkdownParseError');
+      expect(json.message).toBe('Test message');
+      expect(json.code).toBe(MarkdownParseErrorCode.INVALID_SYNTAX);
+      expect(json.category).toBe('parsing');
+      expect(json.location).toEqual(location);
+      expect(json.extractedContent).toBe(extractedContent);
+      expect(json.recoverable).toBe(true);
+      expect(json.details).toEqual({ test: 'value' });
+    });
+
+    it('should handle serialization without optional properties', () => {
+      const originalError = new MarkdownParseError(
+        'Simple error',
+        MarkdownParseErrorCode.INVALID_SYNTAX
+      );
+
+      const json = JSON.parse(JSON.stringify(originalError));
+
+      expect(json.name).toBe('MarkdownParseError');
+      expect(json.message).toBe('Simple error');
+      expect(json.code).toBe(MarkdownParseErrorCode.INVALID_SYNTAX);
+      expect(json.category).toBe('parsing');
+      expect(json.location).toBeUndefined();
+      expect(json.extractedContent).toBeUndefined();
+    });
+  });
+
+  describe('Performance and Memory', () => {
+    it('should create errors quickly', () => {
+      const startTime = performance.now();
+
+      for (let i = 0; i < 1000; i++) {
+        const error = new MarkdownParseError(
+          `Error ${i}`,
+          MarkdownParseErrorCode.INVALID_SYNTAX
+        );
+        // Use the error to avoid "useless object instantiation" warning
+        expect(error.name).toBe('MarkdownParseError');
+      }
+
+      const endTime = performance.now();
+      const averageTime = (endTime - startTime) / 1000;
+
+      expect(averageTime).toBeLessThan(1); // Should be less than 1ms per error
+    });
+
+    it('should not leak memory when creating many errors', () => {
+      const errors: MarkdownParseError[] = [];
+
+      for (let i = 0; i < 1000; i++) {
+        errors.push(
+          new MarkdownParseError(
+            `Error ${i}`,
+            MarkdownParseErrorCode.INVALID_SYNTAX,
+            {
+              location: { line: i, column: i % 100 },
+              extractedContent: `Content ${i}`.repeat(10),
+            }
+          )
+        );
+      }
+
+      expect(errors.length).toBe(1000);
+      for (const [index, error] of errors.entries()) {
+        expect(error.message).toBe(`Error ${index}`);
+        expect(error.location?.line).toBe(index);
+      }
+    });
+  });
+});

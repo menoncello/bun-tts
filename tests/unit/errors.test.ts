@@ -15,7 +15,13 @@ import { ValidationError } from '../../src/errors/validation-error.js';
 
 function createTestError(
   code: string,
-  category: 'configuration' | 'parsing' | 'tts' | 'file' | 'validation'
+  category:
+    | 'configuration'
+    | 'parsing'
+    | 'tts'
+    | 'file'
+    | 'validation'
+    | 'custom'
 ): BunTtsError {
   return new BunTtsError('test error', { code, category });
 }

@@ -141,7 +141,27 @@ export class PinoLoggerAdapter implements Logger {
    * @returns {boolean} True if pretty output is available
    */
   private isPrettyOutput(): boolean {
-    return Boolean(process.stdout.isTTY && !process.env.NO_COLOR);
+    const isTTY = process.stdout.isTTY;
+
+    // Handle different types of isTTY values properly
+    // - Boolean values: use as-is
+    // - String values: convert to boolean, treating common false strings as false
+    // - Other values: treat as false
+    let isTTYValid = false;
+
+    if (typeof isTTY === 'boolean') {
+      isTTYValid = isTTY;
+    } else if (typeof isTTY === 'string') {
+      // Handle string representations of boolean values
+      const lowerIsTTY = (isTTY as string).toLowerCase();
+      isTTYValid =
+        lowerIsTTY !== 'false' && lowerIsTTY !== '0' && lowerIsTTY !== '';
+    } else {
+      // For any other type (including undefined), treat as false
+      // isTTYValid already initialized to false, no assignment needed
+    }
+
+    return Boolean(isTTYValid && !process.env.NO_COLOR);
   }
 
   /**

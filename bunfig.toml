@@ -35,11 +35,6 @@ private = false
 [loglevel]
 level = "info"
 
-[install.scopes]
-"@types" = "dev"
-"@test" = "dev"
-"@testing" = "dev"
-
 [env.development]
 NODE_ENV = "development"
 LOG_LEVEL = "debug"

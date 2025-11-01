@@ -1,6 +1,7 @@
 import { mkdtemp, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import { success, failure, BunTtsBaseError } from '../../src/errors/index.js';
 import type { ConfigOptions } from '../../src/types/index.js';
 import {
   immediate,
@@ -190,5 +191,72 @@ export function createMockFn<T>(returnValue: T): {
       counter.call(...args);
       return returnValue;
     },
+  };
+}
+
+/**
+ * Create a recovery strategy that tracks multiple attempts
+ * @param {{count: number, call: (...args: unknown[]) => void}} attemptCounter - Counter for tracking attempts
+ * @returns {{canRecover: () => boolean, recover: (error: any, context?: any) => Promise<any>, maxRetries: number, retryDelay: number}} Mock recovery strategy
+ */
+export function createRecoveryStrategyWithMultipleAttempts(attemptCounter: {
+  count: number;
+  call: (...args: unknown[]) => void;
+}): {
+  canRecover: () => boolean;
+  recover: (error: any, context?: any) => Promise<any>;
+  maxRetries: number;
+  retryDelay: number;
+} {
+  return {
+    canRecover: () => true,
+    recover: async (error: any, context?: any) => {
+      attemptCounter.call();
+      if (attemptCounter.count < 3) {
+        // Fail for first 3 attempts
+        return Promise.resolve(
+          failure(
+            new BunTtsBaseError(
+              `Recovery attempt ${attemptCounter.count} failed`,
+              'RECOVERY_FAILED',
+              'configuration'
+            )
+          )
+        );
+      }
+      // Succeed on 4th attempt
+      return Promise.resolve(
+        success({
+          recovered: true,
+          attempts: attemptCounter.count,
+          context,
+        })
+      );
+    },
+    maxRetries: 5,
+    retryDelay: 10,
+  };
+}
+
+/**
+ * Create a failing operation that tracks attempts
+ * @param {{count: number, call: (...args: unknown[]) => void}} attemptCounter - Counter for tracking attempts
+ * @returns {() => Promise<any>} Mock failing operation
+ */
+export function createFailingOperationWithAttempts(attemptCounter: {
+  count: number;
+  call: (...args: unknown[]) => void;
+}): () => Promise<any> {
+  return () => {
+    attemptCounter.call();
+    return Promise.resolve(
+      failure(
+        new BunTtsBaseError(
+          `Operation attempt ${attemptCounter.count} failed`,
+          'OPERATION_FAILED',
+          'configuration'
+        )
+      )
+    );
   };
 }

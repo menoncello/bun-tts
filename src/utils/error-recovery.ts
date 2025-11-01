@@ -1,4 +1,4 @@
-import type { Result } from '../errors/index.js';
+import type { Result, BunTtsBaseError } from '../errors/index.js';
 import type { BunTtsError } from '../types/index.js';
 import { debugManager } from './debug.js';
 import {
@@ -25,11 +25,11 @@ const DEFAULT_MAX_RETRIES = 3;
 const DEFAULT_RETRY_DELAY = 1000;
 
 export interface RecoveryStrategy {
-  canRecover: (error: BunTtsError) => boolean;
+  canRecover: (error: BunTtsError | BunTtsBaseError) => boolean;
   recover: (
-    error: BunTtsError,
+    error: BunTtsError | BunTtsBaseError,
     context?: Record<string, unknown>
-  ) => Promise<Result<unknown, BunTtsError>>;
+  ) => Promise<Result<unknown, BunTtsError | BunTtsBaseError>>;
   maxRetries?: number;
   retryDelay?: number;
 }
@@ -265,33 +265,27 @@ export class ErrorRecoveryManager {
 let _recoveryManager: ErrorRecoveryManager | null = null;
 
 /**
+ * Resets the recovery manager cache (for testing purposes)
+ */
+export const resetRecoveryManager = (): void => {
+  _recoveryManager = null;
+};
+
+/**
  * Gets the recovery manager instance with default strategies registered
  * @returns {ErrorRecoveryManager} The ErrorRecoveryManager instance with default strategies
  */
 export const recoveryManager = (): ErrorRecoveryManager => {
-  if (!_recoveryManager) {
-    _recoveryManager = createRecoveryManager();
+  // Check if the singleton instance has been reset by comparing with current instance
+  const currentInstance = ErrorRecoveryManager.getInstance();
+  if (!_recoveryManager || _recoveryManager !== currentInstance) {
+    _recoveryManager = currentInstance;
+    // Register default strategies for new instance
+    registerConfigurationStrategies(_recoveryManager);
+    registerFileSystemStrategies(_recoveryManager);
+    registerNetworkStrategies(_recoveryManager);
   }
   return _recoveryManager;
-};
-
-/**
- * Creates a new recovery manager instance and registers default strategies
- * @returns {ErrorRecoveryManager} A new ErrorRecoveryManager instance with strategies registered
- */
-const createRecoveryManager = (): ErrorRecoveryManager => {
-  const manager = ErrorRecoveryManager.getInstance();
-
-  // Register configuration strategies
-  registerConfigurationStrategies(manager);
-
-  // Register file system strategies
-  registerFileSystemStrategies(manager);
-
-  // Register network strategies
-  registerNetworkStrategies(manager);
-
-  return manager;
 };
 
 /**

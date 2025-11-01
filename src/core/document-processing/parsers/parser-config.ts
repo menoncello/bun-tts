@@ -33,7 +33,7 @@ export const loadConfiguration = (
       DEFAULT_MARKDOWN_PARSER_CONFIG
     );
     if (!config || Object.keys(config).length === 0) {
-      logger?.warn('Failed to load Markdown parser config, using defaults', {
+      logger?.error('Failed to load Markdown parser config, using defaults', {
         reason: config
           ? 'config is empty object'
           : 'config is null or undefined',
@@ -70,16 +70,13 @@ export const configureMarked = (_config: MarkdownParserConfig): void => {
 export const validateInput = (
   input: string | Buffer
 ): string | MarkdownParseError => {
-  if (!input) {
+  if (input === null || input === undefined) {
     return MarkdownParseError.invalidInput('undefined', 'string');
   }
 
   if (typeof input === 'string') {
     if (input.trim().length === 0) {
-      return MarkdownParseError.invalidInput(
-        'empty string',
-        'non-empty string'
-      );
+      return MarkdownParseError.invalidSyntax('Empty string content');
     }
     return input;
   }
@@ -87,10 +84,7 @@ export const validateInput = (
   if (Buffer.isBuffer(input)) {
     const text = input.toString('utf-8');
     if (text.trim().length === 0) {
-      return MarkdownParseError.invalidInput(
-        'empty buffer',
-        'non-empty string'
-      );
+      return MarkdownParseError.invalidSyntax('Empty buffer content');
     }
     return text;
   }

@@ -1,20 +1,9 @@
 import packageJson from '../../package.json' with { type: 'json' };
 import { PinoLoggerAdapter } from '../adapters/pino-logger-adapter.js';
+import { BunTtsBaseError } from '../errors/index.js';
 import type { Logger } from '../interfaces/logger.js';
 import type { BunTtsError } from '../types/index.js';
-
-// Constants for magic numbers
-const CONSOLE_SEPARATOR_LENGTH = 50;
-
-export interface ErrorReport {
-  error: BunTtsError;
-  timestamp: string;
-  context: Record<string, unknown>;
-  userId?: string;
-  sessionId?: string;
-  environment: string;
-  version: string;
-}
+import { consoleError, type ErrorReport } from './error-display-utils.js';
 
 export interface ErrorReporterOptions {
   environment?: 'development' | 'production' | 'test';
@@ -234,30 +223,77 @@ class ErrorReporter {
     }
 
     if (error instanceof Error) {
-      return {
-        name: error.name,
-        message: error.message,
-        code: 'UNKNOWN_ERROR',
-        category: 'validation',
-        details: {
-          originalError: error.constructor.name,
-          stack: error.stack,
-        },
-        recoverable: true,
-        stack: error.stack,
-      };
+      return this.normalizeStandardError(error);
     }
 
+    return this.normalizeUnknownError(error);
+  }
+
+  /**
+   * Normalize a standard Error instance into BunTtsError format.
+   * @param {Error} error - The standard Error to normalize
+   * @returns {BunTtsError} A normalized BunTtsError object
+   */
+  private normalizeStandardError(error: Error): BunTtsError {
+    const baseError = new BunTtsBaseError(
+      error.message,
+      'UNKNOWN_ERROR',
+      'validation',
+      {
+        recoverable: true,
+        details: this.createErrorDetails(error),
+      }
+    );
+    baseError.name = error.name;
+    return baseError;
+  }
+
+  /**
+   * Create error details from a standard Error.
+   * @param {Error} error - The error to extract details from
+   * @returns {{ originalError: string; stack?: string }} Error details object
+   */
+  private createErrorDetails(error: Error): {
+    originalError: string;
+    stack?: string;
+  } {
     return {
-      name: 'UnknownError',
-      message: String(error),
-      code: 'UNKNOWN_ERROR',
-      category: 'validation',
-      details: {
-        type: typeof error,
-        value: error,
-      },
-      recoverable: true,
+      originalError: error.constructor.name,
+      stack: error.stack,
+    };
+  }
+
+  /**
+   * Normalize an unknown error type into BunTtsError format.
+   * @param {unknown} error - The unknown error to normalize
+   * @returns {BunTtsError} A normalized BunTtsError object
+   */
+  private normalizeUnknownError(error: unknown): BunTtsError {
+    const baseError = new BunTtsBaseError(
+      String(error),
+      'UNKNOWN_ERROR',
+      'validation',
+      {
+        recoverable: true,
+        details: this.createUnknownErrorDetails(error),
+      }
+    );
+    baseError.name = 'UnknownError';
+    return baseError;
+  }
+
+  /**
+   * Create error details from an unknown error type.
+   * @param {unknown} error - The unknown error to extract details from
+   * @returns {{ type: string; value: unknown }} Error details object
+   */
+  private createUnknownErrorDetails(error: unknown): {
+    type: string;
+    value: unknown;
+  } {
+    return {
+      type: typeof error,
+      value: error,
     };
   }
 
@@ -308,87 +344,10 @@ class ErrorReporter {
    * Display error information to the console.
    * In development mode, shows detailed error information.
    * In production mode, shows a simplified error message.
-   * @param {ErrorReport} report - The error report to display
+   * @param {ErrorReport} report - The error report to display to console
    */
   private consoleError(report: ErrorReport): void {
-    if (this.options.environment === 'development') {
-      this.displayDetailedError(report);
-    } else {
-      this.displaySimpleError(report);
-    }
-  }
-
-  /**
-   * Display detailed error information for development environment.
-   * @param {ErrorReport} report - The error report to display
-   */
-  private displayDetailedError(report: ErrorReport): void {
-    this.logger.error(`\n🚨 ${report.error.name} [${report.error.code}]`);
-    this.logger.error(`📋 Message: ${report.error.message}`);
-    this.logger.error(`🏷️  Category: ${report.error.category}`);
-    this.logger.error(
-      `🔄 Recoverable: ${report.error.recoverable ? 'Yes' : 'No'}`
-    );
-
-    this.displayErrorDetails(report.error.details);
-    this.displayContext(report.context);
-
-    this.logger.error(`⏰ Time: ${report.timestamp}`);
-    this.logger.error(`🔧 Environment: ${report.environment}`);
-    this.logger.error(`📦 Version: ${report.version}`);
-
-    if (report.error.stack) {
-      this.logger.error('📚 Stack trace:');
-      this.logger.error(report.error.stack);
-    }
-
-    this.logger.error('─'.repeat(CONSOLE_SEPARATOR_LENGTH));
-  }
-
-  /**
-   * Display simple error information for production environment.
-   * @param {ErrorReport} report - The error report to display
-   */
-  private displaySimpleError(report: ErrorReport): void {
-    this.logger.error(
-      `[${report.error.category.toUpperCase()}] ${report.error.message}`
-    );
-  }
-
-  /**
-   * Display error details if they exist.
-   * @param {unknown} details - The error details to display
-   */
-  private displayErrorDetails(details: unknown): void {
-    if (
-      details &&
-      typeof details === 'object' &&
-      details !== null &&
-      Object.keys(details).length > 0
-    ) {
-      this.logger.error('📊 Details:');
-      for (const [key, value] of Object.entries(details)) {
-        this.logger.error(`   ${key}: ${JSON.stringify(value)}`);
-      }
-    }
-  }
-
-  /**
-   * Display context information if it exists.
-   * @param {unknown} context - The context information to display
-   */
-  private displayContext(context: unknown): void {
-    if (
-      context &&
-      typeof context === 'object' &&
-      context !== null &&
-      Object.keys(context).length > 0
-    ) {
-      this.logger.error('🌍 Context:');
-      for (const [key, value] of Object.entries(context)) {
-        this.logger.error(`   ${key}: ${JSON.stringify(value)}`);
-      }
-    }
+    consoleError(report, this.options.environment, this.logger);
   }
 
   /**
@@ -444,7 +403,7 @@ class ErrorReporter {
   }
 }
 
-export { ErrorReporter };
+export { ErrorReporter, type ErrorReport };
 
 // Export singleton instance (lazy initialization)
 let _errorReporter: ErrorReporter | null = null;

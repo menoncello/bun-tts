@@ -61,7 +61,7 @@ describe('ConvertCommand Basic Execution', () => {
       flags: { verbose: false, config: undefined },
     });
 
-    await convertCommand.execute(context);
+    await convertCommand.executeLegacy(context);
 
     expect(mockLogger.info.calls).toContainEqual([
       'Convert command started',
@@ -92,7 +92,7 @@ describe('ConvertCommand Basic Execution', () => {
       flags: { verbose: false },
     });
 
-    await convertCommand.execute(context);
+    await convertCommand.executeLegacy(context);
 
     expect(mockLogger.info.calls).toContainEqual([
       'Convert command started',
@@ -119,7 +119,7 @@ describe('ConvertCommand Basic Execution', () => {
       flags: { verbose: false },
     });
 
-    await convertCommand.execute(context);
+    await convertCommand.executeLegacy(context);
 
     expect(mockLogger.info.calls).toContainEqual([
       'Convert command started',
@@ -161,7 +161,7 @@ describe('ConvertCommand Verbose Flag', () => {
       flags: { verbose: true },
     });
 
-    await convertCommand.execute(context);
+    await convertCommand.executeLegacy(context);
 
     expect(mockLogger.info.calls).toContainEqual([
       'Convert command started',
@@ -179,7 +179,7 @@ describe('ConvertCommand Verbose Flag', () => {
       flags: { verbose: false },
     });
 
-    await convertCommand.execute(context);
+    await convertCommand.executeLegacy(context);
 
     expect(mockLogger.info.calls).toContainEqual([
       'Convert command started',
@@ -222,7 +222,7 @@ describe('ConvertCommand Configuration Loading', () => {
         flags: { config: 'config.json', verbose: false },
       });
 
-      await convertCommand.execute(context);
+      await convertCommand.executeLegacy(context);
 
       expect(mockConfigManager.loadConfig.calls).toHaveLength(1);
       expect(mockConfigManager.loadConfig.calls[0]).toEqual([
@@ -258,7 +258,7 @@ describe('ConvertCommand Configuration Loading', () => {
           flags: { config: configPath },
         });
 
-        await convertCommand.execute(context);
+        await convertCommand.executeLegacy(context);
 
         expect(mockConfigManager.loadConfig.calls).toHaveLength(1);
         expect(mockConfigManager.loadConfig.calls[0]).toEqual([{ configPath }]);
@@ -292,7 +292,7 @@ describe('ConvertCommand Configuration Loading', () => {
         flags: { config: 'config.json' },
       });
 
-      await convertCommand.execute(context);
+      await convertCommand.executeLegacy(context);
 
       expect(mockLogger.debug.calls).toContainEqual([
         'Loading configuration',
@@ -332,7 +332,7 @@ describe('ConvertCommand Configuration Loading', () => {
         flags: { config: 'invalid.json' },
       });
 
-      await convertCommand.execute(context);
+      await convertCommand.executeLegacy(context);
 
       expect(mockLogger.error.calls).toContainEqual([
         'Failed to load configuration',
@@ -354,7 +354,7 @@ describe('ConvertCommand Configuration Loading', () => {
         flags: { config: 'remote-config.json' },
       });
 
-      await expect(convertCommand.execute(context)).rejects.toThrow(
+      await expect(convertCommand.executeLegacy(context)).rejects.toThrow(
         networkError
       );
 
@@ -372,7 +372,7 @@ describe('ConvertCommand Configuration Loading', () => {
         flags: { config: undefined },
       });
 
-      await convertCommand.execute(context);
+      await convertCommand.executeLegacy(context);
 
       expect(mockConfigManager.loadConfig.calls).toHaveLength(0);
       expect(mockLogger.debug.calls).not.toContainEqual(
@@ -386,7 +386,7 @@ describe('ConvertCommand Configuration Loading', () => {
         flags: { config: null },
       });
 
-      await convertCommand.execute(context);
+      await convertCommand.executeLegacy(context);
 
       expect(mockConfigManager.loadConfig.calls).toHaveLength(0);
     });
@@ -397,7 +397,7 @@ describe('ConvertCommand Configuration Loading', () => {
         flags: { config: '' },
       });
 
-      await convertCommand.execute(context);
+      await convertCommand.executeLegacy(context);
 
       expect(mockConfigManager.loadConfig.calls).toHaveLength(0);
     });
@@ -424,7 +424,7 @@ describe('ConvertCommand Output and Format Options', () => {
       flags: { output: '/path/to/output', format: undefined },
     });
 
-    await convertCommand.execute(context);
+    await convertCommand.executeLegacy(context);
 
     expect(mockLogger.info.calls).toContainEqual([
       'Convert command functionality not yet implemented',
@@ -442,7 +442,7 @@ describe('ConvertCommand Output and Format Options', () => {
       flags: { output: undefined, format: 'mp3' },
     });
 
-    await convertCommand.execute(context);
+    await convertCommand.executeLegacy(context);
 
     expect(mockLogger.info.calls).toContainEqual([
       'Convert command functionality not yet implemented',
@@ -460,7 +460,7 @@ describe('ConvertCommand Output and Format Options', () => {
       flags: { output: './audiobooks', format: 'wav' },
     });
 
-    await convertCommand.execute(context);
+    await convertCommand.executeLegacy(context);
 
     expect(mockLogger.info.calls).toContainEqual([
       'Convert command functionality not yet implemented',
@@ -488,7 +488,7 @@ describe('ConvertCommand Output and Format Options', () => {
         flags: { output: 'output', format: 'mp3' },
       });
 
-      await convertCommand.execute(context);
+      await convertCommand.executeLegacy(context);
 
       expect(mockLogger.info.calls).toContainEqual([
         'Convert command functionality not yet implemented',
@@ -523,7 +523,7 @@ describe('ConvertCommand Edge Cases', () => {
       logLevel: 'info' as const,
     };
 
-    await convertCommand.execute(minimalContext);
+    await convertCommand.executeLegacy(minimalContext);
 
     expect(mockLogger.info.calls).toContainEqual([
       'Convert command started',
@@ -553,7 +553,7 @@ describe('ConvertCommand Edge Cases', () => {
 
     // The command should not crash but handle gracefully
     await expect(
-      convertCommand.execute(contextWithNullFlags)
+      convertCommand.executeLegacy(contextWithNullFlags)
     ).resolves.toBeUndefined();
   });
 
@@ -566,7 +566,7 @@ describe('ConvertCommand Edge Cases', () => {
 
     // The command should not crash but handle gracefully
     await expect(
-      convertCommand.execute(contextWithUndefinedFlags)
+      convertCommand.executeLegacy(contextWithUndefinedFlags)
     ).resolves.toBeUndefined();
   });
 
@@ -581,9 +581,9 @@ describe('ConvertCommand Edge Cases', () => {
     );
 
     // Execute multiple times
-    await convertCommand.execute(context);
-    await convertCommand.execute(context);
-    await convertCommand.execute(context);
+    await convertCommand.executeLegacy(context);
+    await convertCommand.executeLegacy(context);
+    await convertCommand.executeLegacy(context);
 
     expect(mockLogger.info.calls).toHaveLength(12); // 4 calls per execution (start, placeholder, config success, completed)
     expect(mockConfigManager.loadConfig.calls).toHaveLength(3); // 1 call per execution
@@ -624,7 +624,7 @@ describe('ConvertCommand Integration Scenarios', () => {
       },
     });
 
-    await convertCommand.execute(context);
+    await convertCommand.executeLegacy(context);
 
     // Verify complete logging flow
     expect(mockLogger.info.calls).toContainEqual([
@@ -673,7 +673,7 @@ describe('ConvertCommand Integration Scenarios', () => {
       success({ batchMode: true })
     );
 
-    await convertCommand.execute(context);
+    await convertCommand.executeLegacy(context);
 
     expect(mockLogger.info.calls).toContainEqual([
       'Convert command started',

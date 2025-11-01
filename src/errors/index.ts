@@ -1,5 +1,8 @@
 import type { BunTtsError } from '../types/index.js';
 
+// Re-export the BunTtsError interface for use in tests and other modules
+export type { BunTtsError } from '../types/index.js';
+
 /**
  * Configuration interface for BunTtsBaseError constructor.
  */
@@ -53,11 +56,38 @@ export class BunTtsBaseError extends Error implements BunTtsError {
   }
 
   /**
+   * Gets a user-friendly error message that includes the error code.
+   *
+   * @returns {string} A formatted error message with code
+   */
+  public getUserMessage(): string {
+    return `${this.message} (Error code: ${this.code})`;
+  }
+
+  /**
+   * Determines whether this error should be logged with full details.
+   *
+   * @returns {boolean} True if the error should be logged with full details
+   */
+  public shouldLogDetails(): boolean {
+    return true;
+  }
+
+  /**
+   * Gets the exit code for CLI applications when this error occurs.
+   *
+   * @returns {number} The exit code (1 for general error)
+   */
+  public getExitCode(): number {
+    return 1;
+  }
+
+  /**
    * Serializes the error to a JSON object for logging or API responses.
    *
-   * @returns {any} A JSON representation of the error
+   * @returns {Record<string, unknown>} A JSON representation of the error
    */
-  toJSON(): BunTtsError {
+  toJSON(): Record<string, unknown> {
     return {
       name: this.name,
       message: this.message,
