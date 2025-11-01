@@ -61,7 +61,16 @@ export const commands: Record<string, Command> = {
       const convertCommand = resolve<DIContainer['convertCommand']>(
         DEPENDENCIES.CONVERT_COMMAND
       );
-      await convertCommand.execute(context);
+      // Convert CliContext to ConvertOptions
+      const options = {
+        inputFile: context.input[0] || '',
+        outputFile: context.flags.output || 'output.audiobook',
+        format: context.flags.format,
+        engine: context.flags.engine,
+        voice: context.flags.voice as Record<string, unknown> | undefined,
+        verbose: context.flags.verbose,
+      };
+      await convertCommand.execute(options, context);
     },
     examples: [
       'bun-tts convert document.pdf',

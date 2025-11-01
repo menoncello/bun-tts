@@ -230,32 +230,11 @@ You may need to run sprint-planning to refresh tracking, or manually set the sto
       </output>
     </check>
 
-    <substep n="7.5" goal="Validate code examples quality">
-      <critical>All code examples in story must meet production quality standards</critical>
-
-      <action>Extract all code examples from story content</action>
-      <action>For each code example:
-        1. Check TypeScript types are properly defined
-        2. Verify code would compile in strict mode
-        3. Check ESLint compliance (no linting errors)
-        4. Verify proper formatting
-      </action>
-
-      <check if="code examples have TypeScript errors">
-        <action>Fix type issues in code examples before saving story</action>
-      </check>
-
-      <check if="code examples have ESLint violations">
-        <action>Refactor examples to satisfy ESLint rules</action>
-      </check>
-
-      <action>Story templates guide developers - examples must be copy-paste ready</action>
-    </substep>
-
     <action>Report created/updated story path</action>
     <output>**✅ Story Created Successfully, {user_name}!**
 
 **Story Details:**
+
 - Story ID: {{story_id}}
 - Story Key: {{story_key}}
 - File: {{story_file}}
@@ -264,6 +243,7 @@ You may need to run sprint-planning to refresh tracking, or manually set the sto
 **⚠️ Important:** The following workflows are context-intensive. It's recommended to clear context and restart the SM agent before running the next command.
 
 **Next Steps:**
+
 1. Review the drafted story in {{story_file}}
 2. **[RECOMMENDED]** Run `story-context` to generate technical context XML and mark story ready for development (combines context + ready in one step)
 3. Or run `story-ready` to manually mark the story ready without generating technical context

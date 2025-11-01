@@ -23,7 +23,7 @@ export class ConfigAccess {
     _key: string,
     defaultValue?: T
   ): T {
-    if (!config) {
+    if (!config || !_key) {
       return defaultValue as T;
     }
 
@@ -57,12 +57,39 @@ export class ConfigAccess {
     _key: string,
     _value: unknown
   ): BunTtsConfig {
-    if (!config) {
-      config = {} as BunTtsConfig;
+    if (!_key) {
+      return this.normalizeConfig(config);
     }
 
-    // Support dot notation for nested keys
+    const normalizedConfig = this.normalizeConfig(config);
     const keys = _key.split('.');
+    const current = this.buildNestedPath(normalizedConfig, keys);
+    this.setFinalValue(current, keys, _value);
+
+    return normalizedConfig;
+  }
+
+  /**
+   * Normalizes the config object, ensuring it's defined
+   *
+   * @param {BunTtsConfig | undefined} config - The config to normalize
+   * @returns {BunTtsConfig} A valid config object
+   */
+  private normalizeConfig(config: BunTtsConfig | undefined): BunTtsConfig {
+    return config || ({} as BunTtsConfig);
+  }
+
+  /**
+   * Builds the nested path for setting a value
+   *
+   * @param {BunTtsConfig} config - The config object
+   * @param {string[]} keys - The keys array from dot notation
+   * @returns {Record<string, unknown>} The final parent object
+   */
+  private buildNestedPath(
+    config: BunTtsConfig,
+    keys: string[]
+  ): Record<string, unknown> {
     let current: Record<string, unknown> = config as unknown as Record<
       string,
       unknown
@@ -78,22 +105,162 @@ export class ConfigAccess {
       }
     }
 
+    return current;
+  }
+
+  /**
+   * Sets the final value in the target object
+   *
+   * @param {Record<string, unknown>} current - The target object
+   * @param {string[]} keys - The keys array
+   * @param {unknown} value - The value to set
+   */
+  private setFinalValue(
+    current: Record<string, unknown>,
+    keys: string[],
+    value: unknown
+  ): void {
     const lastKey = keys[keys.length - 1];
-    if (lastKey) {
-      current[lastKey] = _value;
+    if (!lastKey) {
+      return;
     }
 
-    return config;
+    if (value === undefined) {
+      delete current[lastKey];
+    } else {
+      current[lastKey] = value;
+    }
   }
 
   /**
    * Check if configuration key exists
+   *
+   * Checks if a configuration key exists in the provided configuration object.
+   * Supports dot notation for nested keys. Returns true if the key exists,
+   * even if its value is undefined or null.
    *
    * @param {object} config - The configuration object to search in
    * @param {any} _key - The configuration key to check (supports dot notation)
    * @returns {boolean} True if the key exists, false otherwise
    */
   has(config: BunTtsConfig | undefined, _key: string): boolean {
-    return this.get(config, _key) !== undefined;
+    if (!config || !_key) {
+      return false;
+    }
+
+    // Support dot notation for nested keys, filtering out empty parts
+    const keys = _key.split('.').filter((k) => k !== '');
+    let current: unknown = config;
+
+    for (const k of keys) {
+      if (current && typeof current === 'object' && k in current) {
+        current = (current as Record<string, unknown>)[k];
+      } else {
+        return false;
+      }
+    }
+
+    // Return true if we successfully navigated to the target, even if value is undefined/null
+    return true;
+  }
+
+  /**
+   * Delete configuration value by key
+   *
+   * Deletes a configuration value using dot notation for nested keys.
+   * Returns a new configuration object with the specified key removed.
+   *
+   * @param {BunTtsConfig} config - The configuration object to modify
+   * @param {string} _key - The configuration key to delete (supports dot notation)
+   * @returns {BunTtsConfig} The modified configuration object
+   */
+  delete(config: BunTtsConfig | undefined, _key: string): BunTtsConfig {
+    if (!config) {
+      return {} as BunTtsConfig;
+    }
+
+    if (!_key) {
+      return config;
+    }
+
+    const newConfig = this.createConfigCopy(config);
+    const keys = _key.split('.').filter((k) => k !== '');
+
+    if (!this.canDeleteKey(newConfig, keys)) {
+      return config;
+    }
+
+    this.performDelete(newConfig, keys);
+    return newConfig;
+  }
+
+  /**
+   * Creates a deep copy of the config object
+   *
+   * @param {BunTtsConfig} config - The config to copy
+   * @returns {BunTtsConfig} The deep copy
+   */
+  private createConfigCopy(config: BunTtsConfig): BunTtsConfig {
+    return JSON.parse(JSON.stringify(config));
+  }
+
+  /**
+   * Checks if a key can be deleted (path exists)
+   *
+   * @param {BunTtsConfig} config - The config object
+   * @param {string[]} keys - The keys array
+   * @returns {boolean} True if the key can be deleted
+   */
+  private canDeleteKey(config: BunTtsConfig, keys: string[]): boolean {
+    if (keys.length === 0) {
+      return false;
+    }
+
+    let current: Record<string, unknown> = config as unknown as Record<
+      string,
+      unknown
+    >;
+
+    for (let i = 0; i < keys.length - 1; i++) {
+      const k = keys[i];
+      if (
+        !k ||
+        current[k] === undefined ||
+        typeof current[k] !== 'object' ||
+        current[k] === null
+      ) {
+        return false;
+      }
+      current = current[k] as Record<string, unknown>;
+    }
+
+    return true;
+  }
+
+  /**
+   * Performs the actual deletion of the key
+   *
+   * @param {BunTtsConfig} config - The config object
+   * @param {string[]} keys - The keys array
+   */
+  private performDelete(config: BunTtsConfig, keys: string[]): void {
+    const lastKey = keys[keys.length - 1];
+    if (!lastKey) {
+      return;
+    }
+
+    let current: Record<string, unknown> = config as unknown as Record<
+      string,
+      unknown
+    >;
+
+    for (let i = 0; i < keys.length - 1; i++) {
+      const k = keys[i];
+      if (k) {
+        current = current[k] as Record<string, unknown>;
+      }
+    }
+
+    delete current[lastKey];
   }
 }

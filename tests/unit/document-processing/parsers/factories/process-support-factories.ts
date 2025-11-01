@@ -59,6 +59,15 @@ const createBasicBuildStructureCallback = (
     0
   );
 
+  const imageCount = documentData.chapters.reduce(
+    (sum, chapter) => sum + (chapter.images?.length || 0),
+    0
+  );
+  const tableCount = documentData.chapters.reduce(
+    (sum, chapter) => sum + (chapter.tables?.length || 0),
+    0
+  );
+
   return {
     chapters: documentData.chapters,
     stats: {
@@ -67,8 +76,8 @@ const createBasicBuildStructureCallback = (
       totalWords,
       estimatedReadingTime: Math.ceil(totalWords / 200), // Assume 200 words per minute
       chapterCount: documentData.chapters.length,
-      imageCount: 0,
-      tableCount: 0,
+      imageCount,
+      tableCount,
     },
     documentStructure: {
       chapters: documentData.chapters,
@@ -161,23 +170,46 @@ const createDataProcessingBuildStructureCallback = (
     processed: true,
   }));
 
+  // Calculate additional stats for processed chapters
+  const totalParagraphs = processedChapters.reduce(
+    (sum, chapter) => sum + chapter.paragraphs.length,
+    0
+  );
+  const totalSentences = processedChapters.reduce(
+    (sum, chapter) =>
+      sum +
+      chapter.paragraphs.reduce(
+        (paraSum, paragraph) => paraSum + paragraph.sentences.length,
+        0
+      ),
+    0
+  );
+  const imageCount = processedChapters.reduce(
+    (sum, chapter) => sum + (chapter.images?.length || 0),
+    0
+  );
+  const tableCount = processedChapters.reduce(
+    (sum, chapter) => sum + (chapter.tables?.length || 0),
+    0
+  );
+
   return {
     chapters: processedChapters,
     stats: {
-      totalParagraphs: 15,
-      totalSentences: 30,
+      totalParagraphs,
+      totalSentences,
       totalWords: 1500,
-      estimatedReadingTime: 7,
+      estimatedReadingTime: Math.ceil(1500 / 200), // Assume 200 words per minute
       chapterCount: processedChapters.length,
-      imageCount: 0,
-      tableCount: 0,
+      imageCount,
+      tableCount,
     },
     documentStructure: {
       chapters: processedChapters,
       metadata: documentData.metadata,
       tableOfContents: documentData.tableOfContents,
-      totalParagraphs: 15,
-      totalSentences: 30,
+      totalParagraphs,
+      totalSentences,
       totalWordCount: 1500,
       totalChapters: processedChapters.length,
       estimatedTotalDuration: 450,

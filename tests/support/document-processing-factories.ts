@@ -40,18 +40,32 @@ export class MockLoggerFactory {
    * @returns {Logger} A mock logger instance with expectation tracking
    */
   static createWithExpectations(): Logger & {
+    mock: ReturnType<typeof mock>;
     debug: ReturnType<typeof mock>;
     info: ReturnType<typeof mock>;
     warn: ReturnType<typeof mock>;
     error: ReturnType<typeof mock>;
   } {
     // Reuse the basic mock logger but with expectation tracking type
-    return this.create() as Logger & {
-      debug: ReturnType<typeof mock>;
-      info: ReturnType<typeof mock>;
-      warn: ReturnType<typeof mock>;
-      error: ReturnType<typeof mock>;
-    };
+    const mockFn = mock(() => {
+      // Intentionally empty mock for testing
+    });
+
+    return {
+      debug: mock(() => {
+        // Intentionally empty mock for testing
+      }),
+      info: mock(() => {
+        // Intentionally empty mock for testing
+      }),
+      warn: mock(() => {
+        // Intentionally empty mock for testing
+      }),
+      error: mock(() => {
+        // Intentionally empty mock for testing
+      }),
+      mock: mockFn,
+    } as any;
   }
 }
 

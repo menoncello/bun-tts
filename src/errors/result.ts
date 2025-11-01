@@ -52,7 +52,7 @@ export function map<T, U, E extends BunTtsError>(
   if (result.success) {
     return Ok(fn(result.data)) as Result<U, E>;
   }
-  return result;
+  return result as Result<U, E>;
 }
 
 /**
@@ -74,7 +74,7 @@ export function chain<T, U, E extends BunTtsError>(
   if (result.success) {
     return fn(result.data);
   }
-  return result;
+  return result as Result<U, E>;
 }
 
 /**
@@ -97,7 +97,7 @@ export function match<T, U, E extends BunTtsError>(
   if (result.success) {
     return onSuccess(result.data);
   }
-  return onError(result.error);
+  return onError((result as { success: false; error: E }).error);
 }
 
 /**
@@ -115,7 +115,7 @@ export function unwrap<T, E extends BunTtsError>(result: Result<T, E>): T {
   if (result.success) {
     return result.data;
   }
-  throw result.error;
+  throw (result as { success: false; error: E }).error;
 }
 
 /**

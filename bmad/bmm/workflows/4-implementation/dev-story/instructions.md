@@ -156,43 +156,14 @@ Expected ready-for-dev or in-progress. Continuing anyway...
     <action>Cover edge cases and error handling scenarios noted in the test plan or story notes</action>
   </step>
 
-  <step n="4" goal="Run quality gates and validations">
-    <critical>Quality validation is MANDATORY - ALL substeps must pass with ZERO errors</critical>
-
-    <substep n="4.1" goal="TypeScript type checking">
-      <action>Run: bun run typecheck (or tsc --noEmit)</action>
-      <check>ZERO TypeScript errors required - no exceptions</check>
-      <critical>NEVER use @ts-ignore or @ts-expect-error - fix the actual type issue</critical>
-      <action if="TypeScript errors > 0">STOP and fix all type errors before continuing</action>
-    </substep>
-
-    <substep n="4.2" goal="ESLint validation">
-      <action>Run: bun run lint</action>
-      <check>ZERO ESLint errors required</check>
-      <critical>NEVER add eslint-disable comments - refactor code to satisfy the rule</critical>
-      <action if="ESLint errors > 0">STOP and fix all linting errors before continuing</action>
-    </substep>
-
-    <substep n="4.3" goal="Code formatting validation">
-      <action>Run: bun run format:check</action>
-      <check>100% Prettier compliance required</check>
-      <action if="formatting issues found">Run: bun run format and commit formatting fixes</action>
-    </substep>
-
-    <substep n="4.4" goal="Unit/integration tests">
-      <action>Run: bun test</action>
-      <check>100% test pass rate required</check>
-      <action if="any tests fail">STOP and fix failing tests before continuing</action>
-    </substep>
-
-    <substep n="4.5" goal="Mutation testing">
-      <action>Run: bun run test:mutation</action>
-      <check>Mutation score must meet thresholds: High 90%, Low 80%, Break 70%</check>
-      <action if="mutation score below thresholds">STOP and improve tests to kill more mutants</action>
-    </substep>
-
+  <step n="4" goal="Run validations and tests">
+    <action>Determine how to run tests for this repo (infer or use {{run_tests_command}} if provided)</action>
+    <action>Run all existing tests to ensure no regressions</action>
+    <action>Run the new tests to verify implementation correctness</action>
+    <action>Run linting and code quality checks if configured</action>
     <action>Validate implementation meets ALL story acceptance criteria; if ACs include quantitative thresholds (e.g., test pass rate), ensure they are met before marking complete</action>
-    <action if="any quality gate fails">STOP - All quality gates must pass before story completion</action>
+    <action if="regression tests fail">STOP and fix before continuing, consider how current changes made broke regression</action>
+    <action if="new tests fail">STOP and fix before continuing</action>
   </step>
 
   <step n="5" goal="Mark task complete, track review resolutions, and update story">

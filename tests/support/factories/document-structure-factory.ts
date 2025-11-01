@@ -82,6 +82,16 @@ export const createDocumentStructure = (
     ...statistics,
     confidence: faker.number.float({ min: 0.8, max: 1.0 }),
     processingMetrics,
+    elements: [], // Empty elements array for testing
+    stats: {
+      totalWords: statistics.totalWordCount,
+      processingTime: processingMetrics.parseDurationMs,
+      confidenceScore: faker.number.float({ min: 0.8, max: 1.0 }),
+      extractionMethod: 'test-factory',
+      errorCount: 0,
+      fallbackCount: 0,
+      processingTimeMs: processingMetrics.parseDurationMs,
+    },
     ...overrides,
   };
 };
@@ -102,13 +112,26 @@ const createSentences = (
     const sentenceEnd = currentIndexRef.value + sentenceText.length;
     currentIndexRef.value = sentenceEnd + 1; // +1 for space or punctuation
 
+    const trimmedText = sentenceText.trim();
+    const wordCount = trimmedText.split(/\s+/).length;
     return {
       id: `sentence-${paragraphIndex}-${sentenceIndex}`,
-      text: sentenceText.trim(),
+      text: trimmedText,
       position: sentenceIndex,
-      wordCount: sentenceText.trim().split(/\s+/).length,
-      estimatedDuration: sentenceText.trim().split(/\s+/).length * 0.5, // 0.5 seconds per word
+      wordCount,
+      estimatedDuration: wordCount * 0.5, // 0.5 seconds per word
       hasFormatting: false,
+      charRange: {
+        start: sentenceEnd - sentenceText.length,
+        end: sentenceEnd,
+      },
+      documentPosition: {
+        chapter: 0,
+        paragraph: paragraphIndex,
+        sentence: sentenceIndex,
+        startChar: sentenceEnd - sentenceText.length,
+        endChar: sentenceEnd,
+      },
     };
   });
 };
@@ -126,16 +149,28 @@ const createParagraph = (
   const sentences = createSentences(rawText, paragraphIndex, currentIndexRef);
   currentIndexRef.value = paragraphEnd + 2; // +2 for paragraph break
 
+  const wordCount = rawText.split(/\s+/).length;
   return {
     id: `paragraph-${paragraphIndex}`,
     type: 'text' as const,
     sentences,
     position: paragraphIndex,
-    wordCount: rawText.split(/\s+/).length,
+    wordCount,
     rawText,
     includeInAudio: true,
     confidence: faker.number.float({ min: 0.8, max: 1.0 }),
     text: rawText,
+    charRange: {
+      start: currentIndexRef.value - rawText.length,
+      end: currentIndexRef.value,
+    },
+    documentPosition: {
+      chapter: 0,
+      paragraph: paragraphIndex,
+      startChar: currentIndexRef.value - rawText.length,
+      endChar: currentIndexRef.value,
+    },
+    contentType: 'text' as const,
   };
 };
 
@@ -181,6 +216,13 @@ export const createChapter = (overrides: Partial<Chapter> = {}): Chapter => {
     startIndex,
     wordCount: totalWords,
     estimatedDuration: totalWords * 0.5, // 0.5 seconds per word
+    charRange: {
+      start: startPosition,
+      end: endPosition,
+    },
+    depth: 1,
+    content: paragraphs.map((p) => p.text).join('\n\n'),
+    index: startPosition,
     ...overrides,
   };
 };
@@ -190,16 +232,27 @@ export const createChapter = (overrides: Partial<Chapter> = {}): Chapter => {
  */
 export const createDocumentMetadata = (
   overrides: Partial<DocumentMetadata> = {}
-): DocumentMetadata => ({
-  title: faker.lorem.words(3),
-  author: faker.person.fullName(),
-  language: 'en',
-  publisher: faker.company.name(),
-  identifier: faker.string.uuid(),
-  wordCount: faker.number.int({ min: 1000, max: 10000 }),
-  customMetadata: {
-    description: faker.lorem.sentence(),
-    tags: [faker.lorem.word(), faker.lorem.word()],
-  },
-  ...overrides,
-});
+): DocumentMetadata => {
+  const wordCount = faker.number.int({ min: 1000, max: 10000 });
+  return {
+    title: faker.lorem.words(3),
+    author: faker.person.fullName(),
+    language: 'en',
+    publisher: faker.company.name(),
+    identifier: faker.string.uuid(),
+    wordCount,
+    totalWords: wordCount, // Add alias for compatibility
+    characterCount: wordCount * 6, // Average 6 characters per word
+    createdDate: faker.date.past(),
+    modifiedDate: faker.date.recent(),
+    date: faker.date.recent().toISOString().split('T')[0],
+    format: 'pdf',
+    estimatedReadingTime: Math.ceil(wordCount / 250), // Average reading speed
+    chapterCount: faker.number.int({ min: 1, max: 10 }),
+    customMetadata: {
+      description: faker.lorem.sentence(),
+      tags: [faker.lorem.word(), faker.lorem.word()],
+    },
+    ...overrides,
+  };
+};

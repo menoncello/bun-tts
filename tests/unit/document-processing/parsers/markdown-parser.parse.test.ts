@@ -196,7 +196,7 @@ const testEmptyInputHandling = async (parser: MarkdownParser) => {
   }
 
   expect(result.error).toBeInstanceOf(MarkdownParseError);
-  expect(result.error.code).toBe('INVALID_INPUT');
+  expect(result.error.code).toBe('INVALID_SYNTAX');
 };
 
 // Test function for invalid input type handling

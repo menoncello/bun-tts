@@ -30,6 +30,14 @@ interface SentenceValidationParams {
 }
 
 /**
+ * Error messages for validation
+ */
+const VALIDATION_MESSAGES = {
+  NO_CHAPTERS: 'Document contains no chapters',
+  NO_PARAGRAPHS: 'Document contains no paragraphs',
+} as const;
+
+/**
  * Validate basic document structure
  *
  * @param {DocumentStructure} structure - Document structure to validate containing chapters and metadata
@@ -40,25 +48,81 @@ export function validateBasicStructure(
 ): ValidationError[] {
   const errors: ValidationError[] = [];
 
-  if (structure.chapters.length === 0) {
-    errors.push({
-      code: 'NO_CHAPTERS',
-      message: 'Document contains no chapters',
-      location: {},
-      severity: 'critical',
-    });
+  // Handle null/undefined or malformed structure
+  if (!structure) {
+    addNoChaptersError(errors);
+    addNoParagraphsError(errors);
+    return errors;
   }
 
-  if (structure.totalParagraphs === 0) {
-    errors.push({
-      code: 'NO_PARAGRAPHS',
-      message: 'Document contains no paragraphs',
-      location: {},
-      severity: 'critical',
-    });
-  }
+  // Handle chapters validation
+  validateChapters(structure, errors);
+
+  // Handle paragraphs validation
+  validateParagraphs(structure, errors);
 
   return errors;
+}
+
+/**
+ * Add no chapters error to errors array
+ *
+ * @param {ValidationError[]} errors - Array to add error to
+ */
+function addNoChaptersError(errors: ValidationError[]): void {
+  errors.push({
+    code: 'NO_CHAPTERS',
+    message: VALIDATION_MESSAGES.NO_CHAPTERS,
+    location: {},
+    severity: 'high',
+  });
+}
+
+/**
+ * Add no paragraphs error to errors array
+ *
+ * @param {ValidationError[]} errors - Array to add error to
+ */
+function addNoParagraphsError(errors: ValidationError[]): void {
+  errors.push({
+    code: 'NO_PARAGRAPHS',
+    message: VALIDATION_MESSAGES.NO_PARAGRAPHS,
+    location: {},
+    severity: 'high',
+  });
+}
+
+/**
+ * Validate chapters in structure
+ *
+ * @param {DocumentStructure} structure - Document structure to validate
+ * @param {ValidationError[]} errors - Array to add errors to
+ */
+function validateChapters(
+  structure: DocumentStructure,
+  errors: ValidationError[]
+): void {
+  if (!structure.chapters || structure.chapters.length === 0) {
+    addNoChaptersError(errors);
+  }
+}
+
+/**
+ * Validate paragraphs in structure
+ *
+ * @param {DocumentStructure} structure - Document structure to validate
+ * @param {ValidationError[]} errors - Array to add errors to
+ */
+function validateParagraphs(
+  structure: DocumentStructure,
+  errors: ValidationError[]
+): void {
+  if (
+    structure.totalParagraphs === undefined ||
+    structure.totalParagraphs === 0
+  ) {
+    addNoParagraphsError(errors);
+  }
 }
 
 /**
@@ -78,11 +142,11 @@ export function validateChapter(
   const warnings: ValidationWarning[] = [];
 
   if (!chapter.title || chapter.title.trim().length === 0) {
-    errors.push({
+    warnings.push({
       code: 'EMPTY_CHAPTER_TITLE',
       message: `Chapter ${chapterIndex + 1} has empty title`,
       location: { chapter: chapterIndex },
-      severity: 'medium',
+      suggestion: 'Consider adding a meaningful title',
     });
   }
 

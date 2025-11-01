@@ -101,6 +101,31 @@ export interface Section {
 }
 
 /**
+ * Represents a markdown element within a document.
+ * Used for structured parsing of markdown content.
+ */
+export interface MarkdownElement {
+  /** Type of markdown element */
+  type:
+    | 'heading'
+    | 'paragraph'
+    | 'list'
+    | 'code'
+    | 'quote'
+    | 'table'
+    | 'image'
+    | 'link';
+  /** Raw markdown text for the element */
+  raw: string;
+  /** Optional element content */
+  content?: string;
+  /** Element level (for headings) */
+  level?: number;
+  /** Element attributes */
+  attributes?: Record<string, unknown>;
+}
+
+/**
  * Metadata information about the document.
  * Contains authorship, content statistics, and classification information.
  */
@@ -161,11 +186,23 @@ export interface BunTtsError extends Error {
   /** Unique error code for programmatic handling */
   code: string;
   /** Error category for routing and handling decisions */
-  category: 'configuration' | 'parsing' | 'tts' | 'file' | 'validation';
+  category:
+    | 'configuration'
+    | 'parsing'
+    | 'tts'
+    | 'file'
+    | 'validation'
+    | 'custom';
   /** Additional error context and debugging information */
   details?: Record<string, unknown>;
   /** Whether the operation can be retried or recovered from */
   recoverable: boolean;
+  /** Gets a user-friendly error message that includes the error code */
+  getUserMessage: () => string;
+  /** Determines whether this error should be logged with full details */
+  shouldLogDetails: () => boolean;
+  /** Gets the exit code for CLI applications when this error occurs */
+  getExitCode: () => number;
 }
 
 // CLI types

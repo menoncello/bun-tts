@@ -193,6 +193,13 @@ export default [
       yoda: 'error',
     },
   },
+  // Disable false positive for PASSWORD_PROTECTED enum in error descriptions
+  {
+    files: ['src/errors/pdf-parse-error-descriptions.ts'],
+    rules: {
+      'sonarjs/no-hardcoded-passwords': 'off',
+    },
+  },
   // Test files - Relaxed rules
   {
     files: ['**/*.test.ts', '**/*.spec.ts', '**/tests/**/*.ts'],

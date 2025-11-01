@@ -81,7 +81,7 @@ describe('MarkdownParser Constructor', () => {
       mockConfigManagerEmpty
     );
     expect(parserWithEmptyConfig).toBeDefined();
-    expect(mockLogger.warn).toHaveBeenCalledWith(
+    expect(mockLogger.error).toHaveBeenCalledWith(
       'Failed to load Markdown parser config, using defaults',
       expect.any(Object)
     );
