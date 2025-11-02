@@ -63,7 +63,7 @@ describe('Config Show Action - Success', () => {
       success(mockConfig)
     );
 
-    const context = createTestCliContext({ args: ['show'] });
+    const context = createTestCliContext({ args: ['config', 'show'] });
     await configCommand.execute(context);
 
     expect(mockConfigManager.loadConfig.calls).toHaveLength(1);
@@ -95,7 +95,7 @@ describe('Config Show Action - Error', () => {
       error: mockError,
     });
 
-    const context = createTestCliContext({ args: ['show'] });
+    const context = createTestCliContext({ args: ['config', 'show'] });
     await configCommand.execute(context);
 
     expect(mockLogger.error.calls).toContainEqual([
@@ -128,7 +128,7 @@ describe('Config Sample Action', () => {
     const sampleConfig = '# Sample Configuration Content';
     mockConfigManager.createSampleConfig.mockReturnValue = sampleConfig;
 
-    const context = createTestCliContext({ args: ['sample'] });
+    const context = createTestCliContext({ args: ['config', 'sample'] });
     await configCommand.execute(context);
 
     expect(mockConfigManager.createSampleConfig.calls).toHaveLength(1);
@@ -160,7 +160,7 @@ describe('Config Validate Action', () => {
       );
 
       const context = createTestCliContext({
-        args: ['validate'],
+        args: ['config', 'validate'],
         flags: { config: 'test.json' },
       });
       await configCommand.execute(context);
@@ -172,7 +172,7 @@ describe('Config Validate Action', () => {
 
   describe('Without Config Path', () => {
     it('should handle validation without config path', async () => {
-      const context = createTestCliContext({ args: ['validate'] });
+      const context = createTestCliContext({ args: ['config', 'validate'] });
       await configCommand.execute(context);
 
       expect(mockConfigManager.loadConfig.calls).toHaveLength(0);
@@ -199,8 +199,8 @@ describe('ConfigCommand Integration', () => {
       success({})
     );
 
-    await configCommand.execute(createTestCliContext({ args: ['show'] }));
-    await configCommand.execute(createTestCliContext({ args: ['sample'] }));
+    await configCommand.execute(createTestCliContext({ args: ['config', 'show'] }));
+    await configCommand.execute(createTestCliContext({ args: ['config', 'sample'] }));
 
     expect(mockConfigManager.loadConfig.calls.length).toBeGreaterThan(0);
     expect(mockConfigManager.createSampleConfig.calls.length).toBeGreaterThan(
@@ -225,7 +225,7 @@ describe('ConfigCommand Error Handling', () => {
   beforeEach(() => clearMocks(mockLogger, mockConfigManager));
 
   it('should handle unknown actions gracefully', async () => {
-    const context = createTestCliContext({ args: ['unknown'] });
+    const context = createTestCliContext({ args: ['config', 'unknown'] });
     await configCommand.execute(context);
 
     expect(mockLogger.error.calls).toContainEqual([

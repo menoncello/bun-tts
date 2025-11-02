@@ -16,7 +16,7 @@ import type {
 import {
   setupEPUBParserFixture,
   cleanupEPUBParserFixture,
-} from '../../../support/fixtures/epub-parser.fixture';
+} from '../../../support/fixtures/epub-parser.fixture.js';
 
 // Helper functions for test setup
 const createCompatibilityConfig = (

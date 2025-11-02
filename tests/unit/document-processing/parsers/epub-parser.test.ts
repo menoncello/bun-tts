@@ -1,10 +1,6 @@
 import { describe, test, beforeEach, afterEach, mock } from 'bun:test';
 import { EPUBParser } from '../../../../src/core/document-processing/parsers/epub-parser.js';
 import {
-  setupEPUBParserFixture,
-  cleanupEPUBParserFixture,
-} from '../../../support/fixtures/epub-parser.fixture';
-import {
   testDefaultConstructor,
   testCustomConstructor,
   testNullInput,
@@ -181,15 +177,13 @@ mock.module('@smoores/epub', () => ({
 
 describe('EPUBParser Constructor', () => {
   let parser: EPUBParser;
-  let fixture: any;
 
   beforeEach(() => {
-    fixture = setupEPUBParserFixture();
-    parser = fixture.parser;
+    parser = new EPUBParser();
   });
 
-  afterEach(async () => {
-    await cleanupEPUBParserFixture(fixture);
+  afterEach(() => {
+    // No cleanup needed for direct parser instantiation
   });
 
   test('AC1-TC01: should create parser with default options', () => {
@@ -210,15 +204,13 @@ describe('EPUBParser Constructor', () => {
 
 describe('EPUBParser Parse Method', () => {
   let parser: EPUBParser;
-  let fixture: any;
 
   beforeEach(() => {
-    fixture = setupEPUBParserFixture();
-    parser = fixture.parser;
+    parser = new EPUBParser();
   });
 
-  afterEach(async () => {
-    await cleanupEPUBParserFixture(fixture);
+  afterEach(() => {
+    // No cleanup needed for direct parser instantiation
   });
 
   test('AC1-TC03: should handle null input', async () => {
@@ -238,21 +230,19 @@ describe('EPUBParser Parse Method', () => {
   });
 
   test('AC1-TC07: should handle invalid EPUB content', async () => {
-    await testInvalidEPUBContent(parser, fixture.corruptedEPUB);
+    await testInvalidEPUBContent(parser);
   });
 });
 
 describe('EPUBParser Configuration and Stats', () => {
   let parser: EPUBParser;
-  let fixture: any;
 
   beforeEach(() => {
-    fixture = setupEPUBParserFixture();
-    parser = fixture.parser;
+    parser = new EPUBParser();
   });
 
-  afterEach(async () => {
-    await cleanupEPUBParserFixture(fixture);
+  afterEach(() => {
+    // No cleanup needed for direct parser instantiation
   });
 
   test('AC1-TC08: should update parser options', () => {
@@ -266,23 +256,21 @@ describe('EPUBParser Configuration and Stats', () => {
 
 describe('EPUBParser Error Handling', () => {
   let parser: EPUBParser;
-  let fixture: any;
 
   beforeEach(() => {
-    fixture = setupEPUBParserFixture();
-    parser = fixture.parser;
+    parser = new EPUBParser();
   });
 
-  afterEach(async () => {
-    await cleanupEPUBParserFixture(fixture);
+  afterEach(() => {
+    // No cleanup needed for direct parser instantiation
   });
 
   test('AC1-TC10: should normalize Error objects to DocumentParseError', async () => {
-    await testErrorNormalization(parser, fixture.corruptedEPUB);
+    await testErrorNormalization(parser);
   });
 
   test('AC1-TC11: should handle unknown error types', async () => {
-    await testUnknownErrorTypes(parser, fixture.corruptedEPUB);
+    await testUnknownErrorTypes(parser);
   });
 });
 
@@ -314,19 +302,17 @@ describe('EPUBParser Content Processing', () => {
 
 describe('EPUBParser Statistics and Interface', () => {
   let parser: EPUBParser;
-  let fixture: any;
 
   beforeEach(() => {
-    fixture = setupEPUBParserFixture();
-    parser = fixture.parser;
+    parser = new EPUBParser();
   });
 
-  afterEach(async () => {
-    await cleanupEPUBParserFixture(fixture);
+  afterEach(() => {
+    // No cleanup needed for direct parser instantiation
   });
 
   test('AC1-TC12: should update performance stats after parsing attempt', async () => {
-    await testPerformanceStatsUpdate(parser, fixture.corruptedEPUB);
+    await testPerformanceStatsUpdate(parser);
   });
 
   test('AC1-TC13: should implement DocumentParser interface', () => {

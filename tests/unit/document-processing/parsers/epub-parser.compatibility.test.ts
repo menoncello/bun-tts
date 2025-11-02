@@ -3,7 +3,7 @@ import { EPUBParser } from '../../../../src/core/document-processing/parsers/epu
 import {
   setupEPUBParserFixture,
   cleanupEPUBParserFixture,
-} from '../../../support/fixtures/epub-parser.fixture';
+} from '../../../support/fixtures/epub-parser.fixture.js';
 
 describe('EPUBParser Compatibility Tests - Version', () => {
   let fixture: any;

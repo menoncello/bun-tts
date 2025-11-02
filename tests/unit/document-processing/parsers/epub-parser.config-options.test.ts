@@ -3,7 +3,7 @@ import { EPUBParser } from '../../../../src/core/document-processing/parsers/epu
 import {
   setupEPUBParserFixture,
   cleanupEPUBParserFixture,
-} from '../../../support/fixtures/epub-parser.fixture';
+} from '../../../support/fixtures/epub-parser.fixture.js';
 import { VALID_PARSER_OPTIONS } from './epub-parser-test-utils.js';
 
 describe('EPUBParser Configuration Options Tests', () => {
