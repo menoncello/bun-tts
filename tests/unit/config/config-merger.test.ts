@@ -144,11 +144,11 @@ function testBasicObjectMerging(): void {
   describe('simple merging operations', () => {
     it('should merge simple objects', () => {
       const configMerger = new ConfigMerger();
-      const target = { a: 1, b: 2 };
-      const source = { b: 3, c: 4 };
+      const target: Record<string, unknown> = { a: 1, b: 2 };
+      const source: Record<string, unknown> = { b: 3, c: 4 };
 
-      const result = configMerger.deepMerge(target, source as any);
-      expect(result).toEqual({ a: 1, b: 3, c: 4 } as any);
+      const result = configMerger.deepMerge(target, source);
+      expect(result).toEqual({ a: 1, b: 3, c: 4 });
     });
 
     it('should replace arrays instead of merging', () => {
@@ -182,7 +182,7 @@ function testBasicObjectMerging(): void {
   describe('nested object merging', () => {
     it('should merge nested objects recursively', () => {
       const configMerger = new ConfigMerger();
-      const target = {
+      const target: Record<string, unknown> = {
         level1: {
           level2: {
             a: 1,
@@ -191,8 +191,8 @@ function testBasicObjectMerging(): void {
           c: 3,
         },
         d: 4,
-      } as any;
-      const source = {
+      };
+      const source: Record<string, unknown> = {
         level1: {
           level2: {
             b: 5,
@@ -201,7 +201,7 @@ function testBasicObjectMerging(): void {
           f: 7,
         },
         g: 8,
-      } as any;
+      };
 
       const result = configMerger.deepMerge(target, source);
       expect(result).toEqual({
@@ -216,27 +216,27 @@ function testBasicObjectMerging(): void {
         },
         d: 4,
         g: 8,
-      } as any);
+      });
     });
   });
 
   describe('object integrity', () => {
     it('should create new result object', () => {
       const configMerger = new ConfigMerger();
-      const target = { a: 1 } as any;
-      const source = { b: 2 } as any;
+      const target: Record<string, unknown> = { a: 1 };
+      const source: Record<string, unknown> = { b: 2 };
 
       const result = configMerger.deepMerge(target, source);
 
       expect(result).not.toBe(target);
       expect(result).not.toBe(source);
-      expect(result).toEqual({ a: 1, b: 2 } as any);
+      expect(result).toEqual({ a: 1, b: 2 });
     });
 
     it('should not modify target object', () => {
       const configMerger = new ConfigMerger();
-      const target = { a: 1, b: { c: 2 } } as any;
-      const source = { b: { d: 3 } } as any;
+      const target: Record<string, unknown> = { a: 1, b: { c: 2 } };
+      const source: Record<string, unknown> = { b: { d: 3 } };
       const originalTarget = JSON.parse(JSON.stringify(target));
 
       configMerger.deepMerge(target, source);
@@ -250,17 +250,17 @@ function testSpecialValueHandling(): void {
   describe('special value handling', () => {
     it('should handle undefined source values', () => {
       const configMerger = new ConfigMerger();
-      const target = { a: 1, b: 2 } as any;
-      const source = { b: undefined, c: 3 } as any;
+      const target: Record<string, unknown> = { a: 1, b: 2 };
+      const source: Record<string, unknown> = { b: undefined, c: 3 };
 
       const result = configMerger.deepMerge(target, source);
-      expect(result).toEqual({ a: 1, b: 2, c: 3 } as any);
+      expect(result).toEqual({ a: 1, b: 2, c: 3 });
     });
 
     it('should preserve target values when source has undefined', () => {
       const configMerger = new ConfigMerger();
-      const target = { a: 1, b: { c: 2, d: 3 } } as any;
-      const source = { b: { c: undefined } } as any;
+      const target: Record<string, unknown> = { a: 1, b: { c: 2, d: 3 } };
+      const source: Record<string, unknown> = { b: { c: undefined } };
 
       const result = configMerger.deepMerge(target, source);
       expect(result).toEqual({ a: 1, b: { c: 2, d: 3 } });
@@ -268,17 +268,17 @@ function testSpecialValueHandling(): void {
 
     it('should handle null values', () => {
       const configMerger = new ConfigMerger();
-      const target = { a: 1, b: 2 } as any;
-      const source = { b: null, c: 3 } as any;
+      const target: Record<string, unknown> = { a: 1, b: 2 };
+      const source: Record<string, unknown> = { b: null, c: 3 };
 
       const result = configMerger.deepMerge(target, source);
-      expect(result).toEqual({ a: 1, b: null, c: 3 } as any);
+      expect(result).toEqual({ a: 1, b: null, c: 3 });
     });
 
     it('should handle primitive values', () => {
       const configMerger = new ConfigMerger();
-      const target = { a: 'string', b: 42, c: true } as any;
-      const source = { b: 'changed', d: false } as any;
+      const target: Record<string, unknown> = { a: 'string', b: 42, c: true };
+      const source: Record<string, unknown> = { b: 'changed', d: false };
 
       const result = configMerger.deepMerge(target, source);
       expect(result).toEqual({
@@ -286,7 +286,7 @@ function testSpecialValueHandling(): void {
         b: 'changed',
         c: true,
         d: false,
-      } as any);
+      });
     });
 
     it('should handle function objects', () => {
@@ -305,7 +305,7 @@ function testComplexStructures(): void {
   describe('deep nesting levels', () => {
     it('should handle deep nesting levels', () => {
       const configMerger = new ConfigMerger();
-      const target = {
+      const target: Record<string, unknown> = {
         level1: {
           level2: {
             level3: {
@@ -315,8 +315,8 @@ function testComplexStructures(): void {
             },
           },
         },
-      } as any;
-      const source = {
+      };
+      const source: Record<string, unknown> = {
         level1: {
           level2: {
             level3: {
@@ -324,7 +324,7 @@ function testComplexStructures(): void {
             },
           },
         },
-      } as any;
+      };
 
       const result = configMerger.deepMerge(target, source);
       expect(result).toEqual({
@@ -338,14 +338,14 @@ function testComplexStructures(): void {
             },
           },
         },
-      } as any);
+      });
     });
   });
 
   describe('mixed type structures', () => {
     it('should handle mixed types in nested structures', () => {
       const configMerger = new ConfigMerger();
-      const target = {
+      const target: Record<string, unknown> = {
         mixed: {
           string: 'original',
           number: 42,
@@ -353,15 +353,15 @@ function testComplexStructures(): void {
           array: [1, 2, 3],
           object: { nested: 'value' },
         },
-      } as any;
-      const source = {
+      };
+      const source: Record<string, unknown> = {
         mixed: {
           string: 'changed',
           number: 100,
           array: [4, 5],
           newField: 'added',
         },
-      } as any;
+      };
 
       const result = configMerger.deepMerge(target, source);
       expect(result).toEqual({
@@ -373,7 +373,7 @@ function testComplexStructures(): void {
           object: { nested: 'value' }, // Preserved
           newField: 'added',
         },
-      } as any);
+      });
     });
   });
 
@@ -383,8 +383,8 @@ function testComplexStructures(): void {
       const date1 = new Date('2023-01-01');
       const date2 = new Date('2023-12-31');
 
-      const target = { date: date1 };
-      const source = { date: date2 };
+      const target: Record<string, unknown> = { date: date1 };
+      const source: Record<string, unknown> = { date: date2 };
 
       const result = configMerger.deepMerge(target, source);
       // Date objects are not plain objects, so they are replaced
@@ -393,11 +393,11 @@ function testComplexStructures(): void {
 
     it('should handle sparse objects', () => {
       const configMerger = new ConfigMerger();
-      const sparseTarget: any = {};
+      const sparseTarget: Record<number, unknown> = {};
       sparseTarget[100] = 'hundred';
       sparseTarget[200] = 'two hundred';
 
-      const sparseSource: any = {};
+      const sparseSource: Record<number, unknown> = {};
       sparseSource[150] = 'one fifty';
       sparseSource[200] = 'changed';
 
@@ -410,17 +410,17 @@ function testComplexStructures(): void {
     it('should handle symbol keys', () => {
       const configMerger = new ConfigMerger();
       const symbolKey = Symbol('test');
-      const target = { a: 1 };
-      (target as any)[symbolKey] = 'symbol-value';
+      const target: Record<string | symbol, unknown> = { a: 1 };
+      target[symbolKey] = 'symbol-value';
 
-      const source = { b: 2 };
-      (source as any)[symbolKey] = 'changed-symbol';
+      const source: Record<string | symbol, unknown> = { b: 2 };
+      source[symbolKey] = 'changed-symbol';
 
-      const result = configMerger.deepMerge(target as any, source as any);
-      expect((result as any).a).toBe(1);
-      expect((result as any).b).toBe(2);
+      const result = configMerger.deepMerge(target, source);
+      expect(result.a).toBe(1);
+      expect(result.b).toBe(2);
       // Symbol keys are not handled by Object.hasOwnProperty.call in the current implementation
-      expect((result as any)[symbolKey]).toBe('symbol-value'); // Original value preserved
+      expect(result[symbolKey]).toBe('symbol-value'); // Original value preserved
     });
   });
 }
@@ -475,8 +475,8 @@ function testPerformanceAndEdgeCases(): void {
   describe('performance tests', () => {
     it('should handle large objects efficiently', () => {
       const configMerger = new ConfigMerger();
-      const largeTarget: Record<string, any> = {};
-      const largeSource: Record<string, any> = {};
+      const largeTarget: Record<string, unknown> = {};
+      const largeSource: Record<string, unknown> = {};
 
       // Create large objects with 1000 properties each
       for (let i = 0; i < 1000; i++) {
@@ -489,8 +489,15 @@ function testPerformanceAndEdgeCases(): void {
       const endTime = performance.now();
 
       expect(Object.keys(result).length).toBe(1000);
-      expect(result.prop0.value).toBe(1000);
-      expect(result.prop0.nested.deep).toBe(0); // Preserved nested value
+      expect((result.prop0 as Record<string, unknown>).value).toBe(1000);
+      expect(
+        (
+          (result.prop0 as Record<string, unknown>).nested as Record<
+            string,
+            unknown
+          >
+        ).deep
+      ).toBe(0); // Preserved nested value
       expect(endTime - startTime).toBeLessThan(100); // Should complete within 100ms
     });
   });
@@ -498,8 +505,8 @@ function testPerformanceAndEdgeCases(): void {
   describe('edge cases', () => {
     it('should handle moderately nested structures', () => {
       const configMerger = new ConfigMerger();
-      let deepTarget: any = { value: 'target' };
-      let deepSource: any = { value: 'source' };
+      let deepTarget: Record<string, unknown> = { value: 'target' };
+      let deepSource: Record<string, unknown> = { value: 'source' };
 
       // Create 5 levels of nesting (reduced to avoid implementation issues)
       for (let i = 0; i < 5; i++) {
@@ -510,16 +517,16 @@ function testPerformanceAndEdgeCases(): void {
       expect(() => {
         const result = configMerger.deepMerge(deepTarget, deepSource);
         expect(result).toBeDefined();
-        expect(result.level).toBe(4); // Last level should be from 'source
+        expect((result as Record<string, unknown>).level).toBe(4); // Last level should be from 'source
       }).not.toThrow();
     });
 
     it('should handle circular references (may cause stack overflow)', () => {
       const configMerger = new ConfigMerger();
-      const circularTarget: any = { a: 1 };
+      const circularTarget: Record<string, unknown> = { a: 1 };
       circularTarget.self = circularTarget;
 
-      const circularSource: any = { b: 2 };
+      const circularSource: Record<string, unknown> = { b: 2 };
       circularSource.self = circularSource;
 
       // Current implementation doesn't handle circular references gracefully
@@ -580,14 +587,14 @@ function testCompleteConfigMerging(): void {
   });
 }
 
-function verifyLoggingConfig(result: any): void {
+function verifyLoggingConfig(result: BunTtsConfig): void {
   expect(result.logging.level).toBe('debug');
   expect(result.logging.pretty).toBe(false);
   expect(result.logging.file).toBe(true);
   expect(result.logging.filePath).toBe('/custom/path.log');
 }
 
-function verifyTtsConfig(result: any): void {
+function verifyTtsConfig(result: BunTtsConfig): void {
   expect(result.tts.defaultEngine).toBe('chatterbox');
   expect(result.tts.outputFormat).toBe('wav');
   expect(result.tts.sampleRate).toBe(44100);
@@ -597,20 +604,20 @@ function verifyTtsConfig(result: any): void {
   expect(result.tts.volume).toBe(0.8);
 }
 
-function verifyProcessingConfig(result: any): void {
+function verifyProcessingConfig(result: BunTtsConfig): void {
   expect(result.processing.maxFileSize).toBe(200);
   expect(result.processing.parallel).toBe(false);
   expect(result.processing.maxWorkers).toBe(2);
   expect(result.processing.tempDir).toBe('/custom/tmp');
 }
 
-function verifyCliConfig(result: any): void {
+function verifyCliConfig(result: BunTtsConfig): void {
   expect(result.cli.showProgress).toBe(false);
   expect(result.cli.colors).toBe(false);
   expect(result.cli.debug).toBe(true);
 }
 
-function verifyCacheConfig(result: any): void {
+function verifyCacheConfig(result: BunTtsConfig): void {
   expect(result.cache.enabled).toBe(false);
   expect(result.cache.maxSize).toBe(2048);
   expect(result.cache.ttl).toBe(7200);
@@ -640,6 +647,11 @@ function createDefaultConfig(): BunTtsConfig {
       showProgress: true,
       colors: true,
       debug: false,
+    },
+    output: {
+      format: 'mp3',
+      quality: 'high',
+      directory: './output',
     },
     cache: {
       enabled: true,

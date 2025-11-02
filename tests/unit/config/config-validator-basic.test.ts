@@ -6,6 +6,9 @@ import {
 import { ConfigurationError } from '../../../src/errors/configuration-error';
 import type { BunTtsConfig } from '../../../src/types/config';
 
+// Type alias for log levels to replace union types
+type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+
 describe('ConfigValidator - Basic Validation', () => {
   beforeEach(() => {
     // ConfigValidator setup if needed
@@ -79,7 +82,9 @@ function testBasicValidation(): void {
 
     it('should handle undefined configuration gracefully', () => {
       const configValidator = new ConfigValidator();
-      const result = configValidator.validate(undefined as any);
+      const result = configValidator.validate(
+        undefined as unknown as Partial<BunTtsConfig>
+      );
       expect(result.success).toBe(true); // undefined should be treated as empty config and validate successfully
     });
   });
@@ -91,7 +96,8 @@ function testInvalidConfigurations(): void {
       const configValidator = new ConfigValidator();
       const invalidConfig: Partial<BunTtsConfig> = {
         logging: {
-          level: 'invalid' as any,
+          // Using a wider type to test invalid values
+          level: 'invalid' as unknown as LogLevel,
           pretty: true,
           file: false,
         },
@@ -99,17 +105,21 @@ function testInvalidConfigurations(): void {
 
       const result = configValidator.validate(invalidConfig);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBeInstanceOf(ConfigurationError);
-        expect(result.error.message).toContain('Invalid log level');
-      }
+
+      // Type assertion to help TypeScript understand this is an error case
+      const errorResult = result as {
+        success: false;
+        error: ConfigurationError;
+      };
+      expect(errorResult.error).toBeInstanceOf(ConfigurationError);
+      expect(errorResult.error.message).toContain('Invalid log level');
     });
 
     it('should return error for invalid TTS configuration', () => {
       const configValidator = new ConfigValidator();
       const invalidConfig: Partial<BunTtsConfig> = {
         tts: {
-          defaultEngine: 'invalid' as any,
+          defaultEngine: 'invalid' as unknown as 'kokoro' | 'chatterbox',
           outputFormat: 'mp3',
           sampleRate: 22050,
           quality: 0.8,
@@ -120,10 +130,14 @@ function testInvalidConfigurations(): void {
 
       const result = configValidator.validate(invalidConfig);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBeInstanceOf(ConfigurationError);
-        expect(result.error.message).toContain('Invalid TTS engine');
-      }
+
+      // Type assertion to help TypeScript understand this is an error case
+      const errorResult = result as {
+        success: false;
+        error: ConfigurationError;
+      };
+      expect(errorResult.error).toBeInstanceOf(ConfigurationError);
+      expect(errorResult.error.message).toContain('Invalid TTS engine');
     });
 
     it('should return error for invalid processing configuration', () => {
@@ -138,12 +152,16 @@ function testInvalidConfigurations(): void {
 
       const result = configValidator.validate(invalidConfig);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBeInstanceOf(ConfigurationError);
-        expect(result.error.message).toContain(
-          'Max file size must be positive'
-        );
-      }
+
+      // Type assertion to help TypeScript understand this is an error case
+      const errorResult = result as {
+        success: false;
+        error: ConfigurationError;
+      };
+      expect(errorResult.error).toBeInstanceOf(ConfigurationError);
+      expect(errorResult.error.message).toContain(
+        'Max file size must be positive'
+      );
     });
 
     it('should return error for invalid cache configuration', () => {
@@ -158,19 +176,23 @@ function testInvalidConfigurations(): void {
 
       const result = configValidator.validate(invalidConfig);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBeInstanceOf(ConfigurationError);
-        expect(result.error.message).toContain(
-          'Cache max size must be positive'
-        );
-      }
+
+      // Type assertion to help TypeScript understand this is an error case
+      const errorResult = result as {
+        success: false;
+        error: ConfigurationError;
+      };
+      expect(errorResult.error).toBeInstanceOf(ConfigurationError);
+      expect(errorResult.error.message).toContain(
+        'Cache max size must be positive'
+      );
     });
 
     it('should return error for invalid CLI configuration', () => {
       const configValidator = new ConfigValidator();
       const invalidConfig: Partial<BunTtsConfig> = {
         cli: {
-          showProgress: 'yes' as any,
+          showProgress: 'yes' as unknown as boolean,
           colors: true,
           debug: false,
         },
@@ -178,10 +200,16 @@ function testInvalidConfigurations(): void {
 
       const result = configValidator.validate(invalidConfig);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBeInstanceOf(ConfigurationError);
-        expect(result.error.message).toContain('Invalid show progress value');
-      }
+
+      // Type assertion to help TypeScript understand this is an error case
+      const errorResult = result as {
+        success: false;
+        error: ConfigurationError;
+      };
+      expect(errorResult.error).toBeInstanceOf(ConfigurationError);
+      expect(errorResult.error.message).toContain(
+        'Invalid show progress value'
+      );
     });
   });
 }
@@ -263,9 +291,15 @@ function testBoundaryValues(): void {
 
       const result = configValidator.validate(belowMinConfig);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.message).toContain('Sample rate must be between');
-      }
+
+      // Type assertion to help TypeScript understand this is an error case
+      const errorResult = result as {
+        success: false;
+        error: ConfigurationError;
+      };
+      expect(errorResult.error.message).toContain(
+        'Sample rate must be between'
+      );
     });
 
     it('should reject values above maximum', () => {
@@ -283,9 +317,13 @@ function testBoundaryValues(): void {
 
       const result = configValidator.validate(aboveMaxConfig);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.message).toContain('Quality must be between');
-      }
+
+      // Type assertion to help TypeScript understand this is an error case
+      const errorResult = result as {
+        success: false;
+        error: ConfigurationError;
+      };
+      expect(errorResult.error.message).toContain('Quality must be between');
     });
   });
 }
@@ -315,28 +353,36 @@ function testValidateLogLevel(): void {
 
       for (const level of invalidLevels) {
         const result = configValidator.validateLoggingConfig({
-          level: level as any,
+          level: level as unknown as LogLevel,
           pretty: true,
           file: false,
         });
         expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error.message).toContain('Invalid log level');
-        }
+
+        // Type assertion to help TypeScript understand this is an error case
+        const errorResult = result as {
+          success: false;
+          error: ConfigurationError;
+        };
+        expect(errorResult.error.message).toContain('Invalid log level');
       }
     });
 
     it('should handle empty string', () => {
       const configValidator = new ConfigValidator();
       const result = configValidator.validateLoggingConfig({
-        level: ';' as any,
+        level: ';' as unknown as LogLevel,
         pretty: true,
         file: false,
       });
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.message).toContain('Invalid log level');
-      }
+
+      // Type assertion to help TypeScript understand this is an error case
+      const errorResult = result as {
+        success: false;
+        error: ConfigurationError;
+      };
+      expect(errorResult.error.message).toContain('Invalid log level');
     });
   });
 }
@@ -361,11 +407,15 @@ function testValidateTTSEngine(): void {
       const invalidEngines = ['invalid', 'google', 'azure', 'aws', 123];
 
       for (const engine of invalidEngines) {
-        const result = configValidator.validateTtsEngine(engine as any);
+        const result = configValidator.validateTtsEngine(engine as string);
         expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error.message).toContain('Invalid TTS engine');
-        }
+
+        // Type assertion to help TypeScript understand this is an error case
+        const errorResult = result as {
+          success: false;
+          error: ConfigurationError;
+        };
+        expect(errorResult.error.message).toContain('Invalid TTS engine');
       }
     });
 
@@ -373,9 +423,13 @@ function testValidateTTSEngine(): void {
       const configValidator = new ConfigValidator();
       const result = configValidator.validateTtsEngine(';');
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.message).toContain('Invalid TTS engine');
-      }
+
+      // Type assertion to help TypeScript understand this is an error case
+      const errorResult = result as {
+        success: false;
+        error: ConfigurationError;
+      };
+      expect(errorResult.error.message).toContain('Invalid TTS engine');
     });
   });
 }
@@ -400,11 +454,17 @@ function testValidateOutputFormat(): void {
       const invalidFormats = ['flac', 'ogg', 'aac', 123];
 
       for (const format of invalidFormats) {
-        const result = configValidator.validateTtsOutputFormat(format as any);
+        const result = configValidator.validateTtsOutputFormat(
+          format as string
+        );
         expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error.message).toContain('Invalid output format');
-        }
+
+        // Type assertion to help TypeScript understand this is an error case
+        const errorResult = result as {
+          success: false;
+          error: ConfigurationError;
+        };
+        expect(errorResult.error.message).toContain('Invalid output format');
       }
     });
 
@@ -412,9 +472,13 @@ function testValidateOutputFormat(): void {
       const configValidator = new ConfigValidator();
       const result = configValidator.validateTtsOutputFormat(';');
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.message).toContain('Invalid output format');
-      }
+
+      // Type assertion to help TypeScript understand this is an error case
+      const errorResult = result as {
+        success: false;
+        error: ConfigurationError;
+      };
+      expect(errorResult.error.message).toContain('Invalid output format');
     });
   });
 }
@@ -499,10 +563,12 @@ function testValidateNumericValues(): void {
       // Valid values
       const validSizes = [1, 100, 500, 1000, 10000];
       for (const size of validSizes) {
-        const result = configValidator.validateProcessingConfig({
-          maxFileSize: size,
-          parallel: true,
-          maxWorkers: 4,
+        const result = configValidator.validate({
+          processing: {
+            maxFileSize: size,
+            parallel: true,
+            maxWorkers: 4,
+          },
         });
         expect(result.success).toBe(true);
       }
@@ -510,10 +576,12 @@ function testValidateNumericValues(): void {
       // Invalid values
       const invalidSizes = [0, -1];
       for (const size of invalidSizes) {
-        const result = configValidator.validateProcessingConfig({
-          maxFileSize: size,
-          parallel: true,
-          maxWorkers: 4,
+        const result = configValidator.validate({
+          processing: {
+            maxFileSize: size,
+            parallel: true,
+            maxWorkers: 4,
+          },
         });
         expect(result.success).toBe(false);
       }
@@ -525,10 +593,12 @@ function testValidateNumericValues(): void {
       // Valid values
       const validWorkers = [1, 4, 8, 16];
       for (const workers of validWorkers) {
-        const result = configValidator.validateProcessingConfig({
-          maxFileSize: 100,
-          parallel: true,
-          maxWorkers: workers,
+        const result = configValidator.validate({
+          processing: {
+            maxFileSize: 100,
+            parallel: true,
+            maxWorkers: workers,
+          },
         });
         expect(result.success).toBe(true);
       }
@@ -536,10 +606,12 @@ function testValidateNumericValues(): void {
       // Invalid values
       const invalidWorkers = [0, -1, 33];
       for (const workers of invalidWorkers) {
-        const result = configValidator.validateProcessingConfig({
-          maxFileSize: 100,
-          parallel: true,
-          maxWorkers: workers,
+        const result = configValidator.validate({
+          processing: {
+            maxFileSize: 100,
+            parallel: true,
+            maxWorkers: workers,
+          },
         });
         expect(result.success).toBe(false);
       }
@@ -551,10 +623,12 @@ function testValidateNumericValues(): void {
       // Valid values
       const validSizes = [1, 1024, 5000, 10000, 100000];
       for (const size of validSizes) {
-        const result = configValidator.validateCacheConfig({
-          enabled: true,
-          maxSize: size,
-          ttl: 3600,
+        const result = configValidator.validate({
+          cache: {
+            enabled: true,
+            maxSize: size,
+            ttl: 3600,
+          },
         });
         expect(result.success).toBe(true);
       }
@@ -562,10 +636,12 @@ function testValidateNumericValues(): void {
       // Invalid values
       const invalidSizes = [0, -1];
       for (const size of invalidSizes) {
-        const result = configValidator.validateCacheConfig({
-          enabled: true,
-          maxSize: size,
-          ttl: 3600,
+        const result = configValidator.validate({
+          cache: {
+            enabled: true,
+            maxSize: size,
+            ttl: 3600,
+          },
         });
         expect(result.success).toBe(false);
       }
@@ -577,10 +653,12 @@ function testValidateNumericValues(): void {
       // Valid values
       const validTtls = [1, 3600, 7200, 86400];
       for (const ttl of validTtls) {
-        const result = configValidator.validateCacheConfig({
-          enabled: true,
-          maxSize: 1024,
-          ttl,
+        const result = configValidator.validate({
+          cache: {
+            enabled: true,
+            maxSize: 1024,
+            ttl,
+          },
         });
         expect(result.success).toBe(true);
       }
@@ -588,10 +666,12 @@ function testValidateNumericValues(): void {
       // Invalid values
       const invalidTtls = [0, -1];
       for (const ttl of invalidTtls) {
-        const result = configValidator.validateCacheConfig({
-          enabled: true,
-          maxSize: 1024,
-          ttl,
+        const result = configValidator.validate({
+          cache: {
+            enabled: true,
+            maxSize: 1024,
+            ttl,
+          },
         });
         expect(result.success).toBe(false);
       }

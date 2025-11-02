@@ -1,0 +1,90 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>6</storyId>
+    <title>Configuration Management System</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-11-01T04:31:41.538Z</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-6-configuration-management-system.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user with specific preferences</asA>
+    <iWant>manage configuration settings and profiles</iWant>
+    <soThat>I can customize the audiobook creation process to my needs</soThat>
+    <tasks>
+      - [ ] Implement ConfigManager core with Cosmiconfig integration (AC: 1, 4, 5)
+      - [ ] Implement user profiles system (AC: 2)
+      - [ ] Implement configuration import/export (AC: 3)
+      - [ ] Implement configuration validation system (AC: 5)
+      - [ ] Implement CLI commands for configuration (AC: 6)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. Persistent configuration storage (JSON/YAML files)
+    2. User profiles for different types of projects
+    3. Configuration import/export functionality
+    4. Default settings with user override capabilities
+    5. Configuration validation and error handling
+    6. CLI commands for configuration management
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/architecture.md">
+        <title>Decision Architecture - bun-tts</title>
+        <section>Configuration</section>
+        <snippet>Cosmiconfig v9.0.0 library requirement and ConfigManager architecture. Configuration model with tts, processing, and output sections.</snippet>
+      </doc>
+      <doc path="docs/architecture.md">
+        <title>Decision Architecture - bun-tts</title>
+        <section>Project Structure</section>
+        <snippet>Directory layout for configuration components. Create src/config/ConfigManager.ts, defaults.ts, and types.ts.</snippet>
+      </doc>
+      <doc path="docs/architecture.md">
+        <title>Decision Architecture - bun-tts</title>
+        <section>Data Architecture</section>
+        <snippet>BunTTSConfig model defines tts, processing, and output configuration sections with proper TypeScript interfaces.</snippet>
+      </doc>
+      <doc path="docs/epics.md">
+        <title>Epic 1 Story Breakdown</title>
+        <section>Story 1.6: Configuration Management System</section>
+        <snippet>Original requirements and acceptance criteria for configuration management system with 6 specific ACs.</snippet>
+      </doc>
+      <doc path="docs/PRD.md">
+        <title>Product Requirements Document</title>
+        <section>FR014: Persistent Configuration Management</section>
+        <snippet>Support persistent configuration management with profiles, import/export, and versioning requirements.</snippet>
+      </doc>
+    </docs>
+    <code></code>
+    <dependencies></dependencies>
+  </artifacts>
+
+  <constraints>
+    Use Cosmiconfig v9.0.0 library as specified in architecture.md Decision Summary
+    Implement configuration components in src/config/ directory per project structure
+    Follow Dependency Injection pattern with Awilix established in Story 1.4
+    Implement error handling pattern matching architecture.md standards (custom classes + Result pattern)
+    Follow structured logging with Pino for all configuration operations
+    Use TypeScript strict mode with comprehensive type guards
+    Support multiple storage locations (project, user home, global)
+    Integrate with existing DI system via Awilix
+    Follow standard Result pattern for error propagation
+  </constraints>
+  <interfaces></interfaces>
+  <tests>
+    <standards>Use Bun Test framework with mutation testing via StrykerJS. Follow patterns from Story 1.4: comprehensive test coverage, edge case handling for invalid configurations, performance validation, zero ESLint violations, TypeScript strict mode compliance. Create unit tests for each ConfigManager method and integration tests for config file workflows.</standards>
+    <locations>tests/unit/config/ for unit tests, tests/integration/ for integration test workflows</locations>
+    <ideas>
+      - Test AC1: Verify JSON and YAML configuration file persistence
+      - Test AC2: Validate profile switching and activation
+      - Test AC3: Test import/export functionality with merge strategies
+      - Test AC4: Validate default configuration loading and user override
+      - Test AC5: Test configuration validation and error handling
+      - Test AC6: Verify all CLI commands work correctly
+    </ideas>
+  </tests>
+</story-context>

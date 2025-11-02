@@ -1,14 +1,15 @@
 import { describe, it, expect, beforeEach } from 'bun:test';
-import { ConfigAccess } from '../../../src/config/config-access';
+import { ConfigAccess } from '../../../src/config/config-access.js';
+import type { BunTtsConfig } from '../../../src/types/config.js';
 import {
   createTestConfig,
   createConfigWithUndefinedLogging,
   createConfigWithNullLogging,
-} from './config-test-helpers';
+} from './config-test-helpers.js';
 
 describe('ConfigAccess get method', () => {
   let configAccess: ConfigAccess;
-  let testConfig: any;
+  let testConfig: BunTtsConfig;
 
   beforeEach(() => {
     configAccess = new ConfigAccess();
@@ -73,7 +74,7 @@ describe('ConfigAccess get method', () => {
       const configWithUndefined = createConfigWithUndefinedLogging();
 
       const result = configAccess.get(
-        configWithUndefined,
+        configWithUndefined as BunTtsConfig,
         'logging.level',
         'default'
       );
@@ -84,7 +85,7 @@ describe('ConfigAccess get method', () => {
       const configWithNull = createConfigWithNullLogging();
 
       const result = configAccess.get(
-        configWithNull,
+        configWithNull as unknown as BunTtsConfig,
         'logging.level',
         'default'
       );
@@ -106,7 +107,7 @@ describe('ConfigAccess get method', () => {
     });
 
     it('should handle null key', () => {
-      const result = configAccess.get(testConfig, null as any, 'default');
+      const result = configAccess.get(testConfig, null, 'default');
       expect(result).toBe('default');
     });
   });
@@ -123,7 +124,7 @@ describe('ConfigAccess get method', () => {
         },
       };
       const result = configAccess.get(
-        deepConfig as any,
+        deepConfig as unknown as BunTtsConfig,
         'level1.level2.level3.value'
       );
       expect(result).toBe('deep-value');
@@ -133,7 +134,10 @@ describe('ConfigAccess get method', () => {
       const arrayConfig = {
         items: ['first', 'second', 'third'],
       };
-      const result = configAccess.get(arrayConfig as any, 'items.1');
+      const result = configAccess.get(
+        arrayConfig as unknown as BunTtsConfig,
+        'items.1'
+      );
       expect(result).toBe('second');
     });
   });

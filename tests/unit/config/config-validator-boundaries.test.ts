@@ -12,6 +12,16 @@ import {
 } from '../../../src/config/config-validator';
 import { ConfigurationError } from '../../../src/errors/configuration-error';
 
+// Type guard for error results
+function isErrorResult<T, E extends Error>(
+  result: { success: boolean } & (
+    | { success: true; data: T }
+    | { success: false; error: E }
+  )
+): result is { success: false; error: E } {
+  return !result.success;
+}
+
 describe('ConfigValidator - Boundary Value Testing', () => {
   let configValidator: ConfigValidator;
 
@@ -33,7 +43,7 @@ describe('ConfigValidator - Boundary Value Testing', () => {
     it('should reject just below minimum sample rate', () => {
       const result = configValidator.validateTtsSampleRate(MIN_SAMPLE_RATE - 1);
       expect(result.success).toBe(false);
-      if (!result.success) {
+      if (isErrorResult(result)) {
         expect(result.error).toBeInstanceOf(ConfigurationError);
         expect(result.error.message).toContain('Sample rate must be between');
       }
@@ -42,7 +52,7 @@ describe('ConfigValidator - Boundary Value Testing', () => {
     it('should reject just above maximum sample rate', () => {
       const result = configValidator.validateTtsSampleRate(MAX_SAMPLE_RATE + 1);
       expect(result.success).toBe(false);
-      if (!result.success) {
+      if (isErrorResult(result)) {
         expect(result.error).toBeInstanceOf(ConfigurationError);
         expect(result.error.message).toContain('Sample rate must be between');
       }
@@ -84,7 +94,7 @@ describe('ConfigValidator - Boundary Value Testing', () => {
     it('should reject just below minimum quality', () => {
       const result = configValidator.validateTtsQuality(MIN_QUALITY - 0.001);
       expect(result.success).toBe(false);
-      if (!result.success) {
+      if (isErrorResult(result)) {
         expect(result.error).toBeInstanceOf(ConfigurationError);
         expect(result.error.message).toContain('Quality must be between');
       }
@@ -93,7 +103,7 @@ describe('ConfigValidator - Boundary Value Testing', () => {
     it('should reject just above maximum quality', () => {
       const result = configValidator.validateTtsQuality(MAX_QUALITY + 0.001);
       expect(result.success).toBe(false);
-      if (!result.success) {
+      if (isErrorResult(result)) {
         expect(result.error).toBeInstanceOf(ConfigurationError);
         expect(result.error.message).toContain('Quality must be between');
       }
@@ -124,12 +134,16 @@ describe('ConfigValidator - Boundary Value Testing', () => {
     it('should reject just below minimum rate', () => {
       const result = configValidator.validateTtsRate(MIN_RATE - 0.001);
       expect(result.success).toBe(false);
+      if (isErrorResult(result)) {
+        expect(result.error).toBeInstanceOf(ConfigurationError);
+        expect(result.error.message).toContain('Rate must be between');
+      }
     });
 
     it('should reject just above maximum rate', () => {
       const result = configValidator.validateTtsRate(MAX_RATE + 0.001);
       expect(result.success).toBe(false);
-      if (!result.success) {
+      if (isErrorResult(result)) {
         expect(result.error).toBeInstanceOf(ConfigurationError);
         expect(result.error.message).toContain('Rate must be between');
       }
@@ -167,7 +181,7 @@ describe('ConfigValidator - Boundary Value Testing', () => {
     it('should reject just below minimum volume', () => {
       const result = configValidator.validateTtsVolume(MIN_VOLUME - 0.001);
       expect(result.success).toBe(false);
-      if (!result.success) {
+      if (isErrorResult(result)) {
         expect(result.error).toBeInstanceOf(ConfigurationError);
         expect(result.error.message).toContain('Volume must be between');
       }
@@ -176,7 +190,7 @@ describe('ConfigValidator - Boundary Value Testing', () => {
     it('should reject just above maximum volume', () => {
       const result = configValidator.validateTtsVolume(MAX_VOLUME + 0.001);
       expect(result.success).toBe(false);
-      if (!result.success) {
+      if (isErrorResult(result)) {
         expect(result.error).toBeInstanceOf(ConfigurationError);
         expect(result.error.message).toContain('Volume must be between');
       }

@@ -1,31 +1,45 @@
 import { ConfigurationError } from '../errors/configuration-error.js';
 import { Result, Ok, Err } from '../errors/result.js';
 import type { BunTtsConfig } from '../types/config.js';
+import { CacheValidator } from './cache-validator.js';
+import { CliValidator } from './cli-validator.js';
+import { VALID_LOG_LEVELS } from './config-validator-constants.js';
+import { OutputValidator } from './output-validator.js';
+import { ProcessingValidator } from './processing-validator.js';
+import { SchemaValidator } from './schema-validator.js';
+import { TtsValidator } from './tts-validator.js';
+
+// Export constants for testing (unused in this file but needed by tests)
+export {
+  VALID_LOG_LEVELS,
+  VALID_TTS_ENGINES,
+  VALID_OUTPUT_FORMATS,
+  MIN_WORKERS,
+  MAX_WORKERS,
+  MIN_SAMPLE_RATE,
+  MAX_SAMPLE_RATE,
+  MIN_QUALITY,
+  MAX_QUALITY,
+  MIN_RATE,
+  MAX_RATE,
+  MIN_VOLUME,
+  MAX_VOLUME,
+} from './config-validator-constants.js';
 
 /**
- * Configuration validation constants
+ * Context for configuration validation containing existing profiles
  */
-export const VALID_LOG_LEVELS = [
-  'trace',
-  'debug',
-  'info',
-  'warn',
-  'error',
-  'fatal',
-] as const;
+export interface ValidationContext {
+  existingProfiles?: string[];
+}
 
-export const VALID_TTS_ENGINES = ['kokoro', 'chatterbox'] as const;
-export const VALID_OUTPUT_FORMATS = ['mp3', 'wav', 'm4a'] as const;
-export const MIN_SAMPLE_RATE = 8000;
-export const MAX_SAMPLE_RATE = 48000;
-export const MIN_QUALITY = Number.EPSILON;
-export const MAX_QUALITY = 1;
-export const MIN_RATE = 0.1;
-export const MAX_RATE = 3.0;
-export const MIN_VOLUME = 0;
-export const MAX_VOLUME = 2.0;
-export const MIN_WORKERS = 1;
-export const MAX_WORKERS = 32;
+/**
+ * Warning information for schema validation
+ */
+export interface SchemaWarning {
+  code: string;
+  message: string;
+}
 
 /**
  * Configuration validator for bun-tts
@@ -34,6 +48,12 @@ export const MAX_WORKERS = 32;
  * logging, TTS, processing, and cache configurations.
  */
 export class ConfigValidator {
+  private readonly outputValidator = new OutputValidator();
+  private readonly processingValidator = new ProcessingValidator();
+  private readonly cacheValidator = new CacheValidator();
+  private readonly cliValidator = new CliValidator();
+  private readonly schemaValidator = new SchemaValidator();
+
   /**
    * Validate configuration values
    *
@@ -41,12 +61,34 @@ export class ConfigValidator {
    * have valid types. Returns a Result indicating success or failure.
    *
    * @param {Partial<BunTtsConfig>} config - The configuration object to validate
-   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
+   * @param {ValidationContext} [context] - Optional context for validation (e.g., existing profiles)
+   * @returns {Result<true, ConfigurationError>} A Result containing true on success or a ConfigurationError on failure
    */
-  validate(config: Partial<BunTtsConfig>): Result<true, ConfigurationError> {
+  validate(
+    config: Partial<BunTtsConfig>,
+    context?: ValidationContext
+  ): Result<true, ConfigurationError> {
     // Handle undefined config - treat as empty config
     if (!config) {
       return Ok(true);
+    }
+
+    // Validate profile references if context provided
+    if (
+      context?.existingProfiles &&
+      config.profiles?.active &&
+      !context.existingProfiles.includes(config.profiles.active)
+    ) {
+      return Err(
+        new ConfigurationError(
+          `Active profile '${config.profiles.active}' does not exist`,
+          {
+            path: 'profiles.active',
+            profile: config.profiles.active,
+            existingProfiles: context.existingProfiles,
+          }
+        )
+      );
     }
 
     return this.validateAllConfigSections(config);
@@ -64,9 +106,11 @@ export class ConfigValidator {
     const validators = [
       () => this.validateLoggingConfig(config.logging),
       () => this.validateTtsConfig(config.tts),
-      () => this.validateProcessingConfig(config.processing),
-      () => this.validateCacheConfig(config.cache),
-      () => this.validateCliConfig(config.cli),
+      () =>
+        this.processingValidator.validateProcessingConfig(config.processing),
+      () => this.outputValidator.validateOutputConfig(config.output),
+      () => this.cacheValidator.validateCacheConfig(config.cache),
+      () => this.cliValidator.validateCliConfig(config.cli),
     ];
 
     return this.executeValidators(validators);
@@ -109,237 +153,173 @@ export class ConfigValidator {
    * Validate TTS configuration
    *
    * @param {BunTtsConfig['tts']} tts - The TTS configuration to validate
-   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
+   * @returns {Result<true, ConfigurationError>} A Result containing true on success or a ConfigurationError on failure
    */
   validateTtsConfig(
     tts?: BunTtsConfig['tts']
   ): Result<true, ConfigurationError> {
-    if (!tts) {
-      return Ok(true);
-    }
+    if (!tts) return Ok(true);
+
+    const validator = this.createTtsValidator();
 
     const validations = [
-      () => this.validateTtsEngine(tts.defaultEngine),
-      () => this.validateTtsOutputFormat(tts.outputFormat),
-      () => this.validateTtsSampleRate(tts.sampleRate),
-      () => this.validateTtsQuality(tts.quality),
-      () => this.validateTtsRate(tts.rate),
-      () => this.validateTtsVolume(tts.volume),
+      () => validator.validateTtsEngine(tts.defaultEngine),
+      () => validator.validateTtsOutputFormat(tts.outputFormat),
+      () => validator.validateTtsSampleRate(tts.sampleRate),
+      () => validator.validateTtsQuality(tts.quality),
+      () => validator.validateTtsRate(tts.rate),
+      () => validator.validateTtsVolume(tts.volume),
     ];
 
-    for (const validation of validations) {
-      const result = validation();
-      if (!result.success) {
-        return result;
-      }
-    }
-
-    return Ok(true);
+    return this.executeValidators(validations);
   }
 
   /**
-   * Validate TTS engine
+   * Create and return a TTS validator instance
    *
-   * @param {any} engine - The engine to validate
-   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
+   * @private
+   * @returns {TtsValidator} TTS validator instance
+   */
+  private createTtsValidator(): TtsValidator {
+    return new TtsValidator();
+  }
+
+  /**
+   * Validate TTS engine (wrapper method for testing)
+   *
+   * @param {string} engine - The engine to validate
+   * @returns {Result<true, ConfigurationError>} Validation result
    */
   validateTtsEngine(engine?: string): Result<true, ConfigurationError> {
-    if (engine && typeof engine !== 'string') {
-      return Err(
-        new ConfigurationError('Invalid TTS engine: must be a string')
-      );
-    }
-
-    if (
-      engine &&
-      !VALID_TTS_ENGINES.includes(engine as (typeof VALID_TTS_ENGINES)[number])
-    ) {
-      return Err(new ConfigurationError(`Invalid TTS engine: ${engine}`));
-    }
-    return Ok(true);
+    return this.createTtsValidator().validateTtsEngine(engine);
   }
 
   /**
-   * Validate TTS output format
+   * Validate TTS output format (wrapper method for testing)
    *
-   * @param {any} format - The output format to validate
-   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
+   * @param {string} format - The output format to validate
+   * @returns {Result<true, ConfigurationError>} Validation result
    */
   validateTtsOutputFormat(format?: string): Result<true, ConfigurationError> {
-    if (format && typeof format !== 'string') {
-      return Err(
-        new ConfigurationError('Invalid output format: must be a string')
-      );
-    }
-
-    if (
-      format &&
-      !VALID_OUTPUT_FORMATS.includes(
-        format as (typeof VALID_OUTPUT_FORMATS)[number]
-      )
-    ) {
-      return Err(new ConfigurationError(`Invalid output format: ${format}`));
-    }
-    return Ok(true);
+    return this.createTtsValidator().validateTtsOutputFormat(format);
   }
 
   /**
-   * Validate TTS sample rate
+   * Validate TTS sample rate (wrapper method for testing)
    *
-   * @param {any} sampleRate - The sample rate to validate
-   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
+   * @param {number} sampleRate - The sample rate to validate
+   * @returns {Result<true, ConfigurationError>} Validation result
    */
   validateTtsSampleRate(sampleRate?: number): Result<true, ConfigurationError> {
-    if (
-      sampleRate !== undefined &&
-      (sampleRate <= 0 ||
-        sampleRate < MIN_SAMPLE_RATE ||
-        sampleRate > MAX_SAMPLE_RATE)
-    ) {
-      return Err(
-        new ConfigurationError(
-          `Sample rate must be between ${MIN_SAMPLE_RATE} and ${MAX_SAMPLE_RATE}`
-        )
-      );
-    }
-    return Ok(true);
+    return this.createTtsValidator().validateTtsSampleRate(sampleRate);
   }
 
   /**
-   * Validate TTS quality
+   * Validate TTS quality (wrapper method for testing)
    *
-   * @param {any} quality - The quality to validate
-   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
+   * @param {number} quality - The quality to validate
+   * @returns {Result<true, ConfigurationError>} Validation result
    */
   validateTtsQuality(quality?: number): Result<true, ConfigurationError> {
-    if (
-      quality !== undefined &&
-      (quality < MIN_QUALITY || quality > MAX_QUALITY)
-    ) {
-      return Err(
-        new ConfigurationError(
-          `Quality must be between ${MIN_QUALITY} and ${MAX_QUALITY}`
-        )
-      );
-    }
-    return Ok(true);
+    return this.createTtsValidator().validateTtsQuality(quality);
   }
 
   /**
-   * Validate TTS rate
+   * Validate TTS rate (wrapper method for testing)
    *
-   * @param {any} rate - The rate to validate
-   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
+   * @param {number} rate - The rate to validate
+   * @returns {Result<true, ConfigurationError>} Validation result
    */
   validateTtsRate(rate?: number): Result<true, ConfigurationError> {
-    if (
-      rate !== undefined &&
-      (rate <= 0 || rate < MIN_RATE || rate > MAX_RATE)
-    ) {
-      return Err(
-        new ConfigurationError(
-          `Rate must be between ${MIN_RATE} and ${MAX_RATE}`
-        )
-      );
-    }
-    return Ok(true);
+    return this.createTtsValidator().validateTtsRate(rate);
   }
 
   /**
-   * Validate TTS volume
+   * Validate TTS volume (wrapper method for testing)
    *
-   * @param {any} volume - The volume to validate
-   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
+   * @param {number} volume - The volume to validate
+   * @returns {Result<true, ConfigurationError>} Validation result
    */
   validateTtsVolume(volume?: number): Result<true, ConfigurationError> {
-    if (volume && (volume < MIN_VOLUME || volume > MAX_VOLUME)) {
-      return Err(
-        new ConfigurationError(
-          `Volume must be between ${MIN_VOLUME} and ${MAX_VOLUME}`
-        )
-      );
-    }
-    return Ok(true);
+    return this.createTtsValidator().validateTtsVolume(volume);
   }
 
   /**
-   * Validate processing configuration
+   * Type guard to check if a config is valid at runtime
+   *
+   * @param {Partial<BunTtsConfig>} config - The configuration to check
+   * @returns {boolean} True if config is valid
+   */
+  isValidConfig(config: Partial<BunTtsConfig>): config is BunTtsConfig {
+    return this.validate(config).success;
+  }
+
+  /**
+   * Type guard to check if a config is valid for profiles
+   *
+   * @param {Partial<BunTtsConfig>} config - The configuration to check
+   * @returns {boolean} True if config is valid for profiles
+   */
+  isValidProfileConfig(config: Partial<BunTtsConfig>): boolean {
+    return this.isValidConfig(config);
+  }
+
+  /**
+   * Validate configuration before saving
+   *
+   * @param {Partial<BunTtsConfig>} config - The configuration to validate
+   * @param {object} options - Validation options
+   * @param {boolean} [options.allowUnknownFields] - Whether to allow unknown fields
+   * @returns {Promise<Result<true, ConfigurationError>>} Validation result
+   */
+  async validateBeforeSave(
+    config: Partial<BunTtsConfig>,
+    options?: { allowUnknownFields?: boolean }
+  ): Promise<Result<true, ConfigurationError>> {
+    const result = this.validate(config);
+    return result.success
+      ? this.schemaValidator.validateUnknownFields(
+          config,
+          options?.allowUnknownFields
+        )
+      : result;
+  }
+
+  /**
+   * Validate configuration for import
+   *
+   * @param {Partial<BunTtsConfig>} config - The configuration to validate
+   * @returns {Promise<Result<{ valid: boolean; warnings?: SchemaWarning[] }, ConfigurationError>>} Validation result with warnings
+   */
+  async validateForImport(
+    config: Partial<BunTtsConfig>
+  ): Promise<
+    Result<{ valid: boolean; warnings?: SchemaWarning[] }, ConfigurationError>
+  > {
+    return this.schemaValidator.validateForImport(config);
+  }
+
+  /**
+   * Validate processing configuration (wrapper method for testing)
    *
    * @param {BunTtsConfig['processing']} processing - The processing configuration to validate
-   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
+   * @returns {Result<true, ConfigurationError>} Validation result
    */
   validateProcessingConfig(
     processing?: BunTtsConfig['processing']
   ): Result<true, ConfigurationError> {
-    if (processing?.maxFileSize !== undefined && processing.maxFileSize <= 0) {
-      return Err(new ConfigurationError(`Max file size must be positive`));
-    }
-
-    if (
-      processing?.maxWorkers !== undefined &&
-      (processing.maxWorkers < MIN_WORKERS ||
-        processing.maxWorkers > MAX_WORKERS)
-    ) {
-      return Err(
-        new ConfigurationError(
-          `Max workers must be between ${MIN_WORKERS} and ${MAX_WORKERS}`
-        )
-      );
-    }
-
-    return Ok(true);
+    return this.processingValidator.validateProcessingConfig(processing);
   }
 
   /**
-   * Validate cache configuration
+   * Validate cache configuration (wrapper method for testing)
    *
    * @param {BunTtsConfig['cache']} cache - The cache configuration to validate
-   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
+   * @returns {Result<true, ConfigurationError>} Validation result
    */
   validateCacheConfig(
     cache?: BunTtsConfig['cache']
   ): Result<true, ConfigurationError> {
-    if (cache?.maxSize !== undefined && cache.maxSize <= 0) {
-      return Err(new ConfigurationError(`Cache max size must be positive`));
-    }
-
-    if (cache?.ttl !== undefined && cache.ttl <= 0) {
-      return Err(new ConfigurationError(`Cache TTL must be positive`));
-    }
-
-    return Ok(true);
-  }
-
-  /**
-   * Validate CLI configuration
-   *
-   * @param {BunTtsConfig['cli']} cli - The CLI configuration to validate
-   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
-   */
-  validateCliConfig(
-    cli?: BunTtsConfig['cli']
-  ): Result<true, ConfigurationError> {
-    if (
-      cli?.showProgress !== undefined &&
-      typeof cli.showProgress !== 'boolean'
-    ) {
-      return Err(
-        new ConfigurationError(`Invalid show progress value: must be boolean`)
-      );
-    }
-
-    if (cli?.colors !== undefined && typeof cli.colors !== 'boolean') {
-      return Err(
-        new ConfigurationError(`Invalid colors value: must be boolean`)
-      );
-    }
-
-    if (cli?.debug !== undefined && typeof cli.debug !== 'boolean') {
-      return Err(
-        new ConfigurationError(`Invalid debug value: must be boolean`)
-      );
-    }
-
-    return Ok(true);
+    return this.cacheValidator.validateCacheConfig(cache);
   }
 }

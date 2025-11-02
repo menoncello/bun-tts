@@ -1,0 +1,27 @@
+/**
+ * Profile management constants
+ */
+
+// Export constants as read-only
+export const PROFILE_CONSTANTS = {
+  JSON_INDENT_SIZE: 2,
+  MINIMUM_NAME_LENGTH: 2,
+  MAXIMUM_NAME_LENGTH: 50,
+  MAXIMUM_DESCRIPTION_LENGTH: 500,
+  MAXIMUM_TAG_COUNT: 10,
+  MAXIMUM_TAG_LENGTH: 50,
+  DEFAULT_PROFILES_DIR: './profiles',
+  ACTIVE_PROFILE_FILENAME: 'active.json',
+} as const;
+
+// Export individual constants for better type inference
+export const {
+  JSON_INDENT_SIZE,
+  MINIMUM_NAME_LENGTH,
+  MAXIMUM_NAME_LENGTH,
+  MAXIMUM_DESCRIPTION_LENGTH,
+  MAXIMUM_TAG_COUNT,
+  MAXIMUM_TAG_LENGTH,
+  DEFAULT_PROFILES_DIR,
+  ACTIVE_PROFILE_FILENAME,
+} = PROFILE_CONSTANTS;
