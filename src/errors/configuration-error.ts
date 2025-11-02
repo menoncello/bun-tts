@@ -9,19 +9,32 @@ const CONFIG_ERROR_EXIT_CODE = 2;
  */
 export class ConfigurationError extends BunTtsError {
   /**
+   * Error path (dot-notation for nested properties)
+   */
+  path?: string;
+
+  /**
+   * Suggestions for fixing the error
+   */
+  suggestions?: string[];
+
+  /**
    * Creates a new ConfigurationError instance.
    *
    * @param {string} message - Human-readable error message describing the configuration issue
    * @param {Record<string, unknown>} details - Additional context information about the configuration error
    */
   constructor(message: string, details?: Record<string, unknown>) {
+    const code = (details?.code as string) || 'CONFIG_ERROR';
     super(message, {
-      code: 'CONFIG_ERROR',
+      code,
       category: 'configuration',
       recoverable: false,
       details,
     });
     this.name = 'ConfigurationError';
+    this.path = details?.path as string | undefined;
+    this.suggestions = details?.suggestions as string[] | undefined;
   }
 
   /**

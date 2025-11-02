@@ -1,3 +1,5 @@
+import { promises as fs } from 'fs';
+import { dirname } from 'path';
 import { cosmiconfig, type CosmiconfigResult } from 'cosmiconfig';
 import { ConfigurationError } from '../errors/configuration-error.js';
 import { Result, Ok, Err } from '../errors/result.js';
@@ -6,6 +8,17 @@ import { ConfigAccess } from './config-access.js';
 import { ConfigMerger } from './config-merger.js';
 import { ConfigPaths } from './config-paths.js';
 import { ConfigValidator } from './config-validator.js';
+import {
+  ensureDirectoryExists,
+  initializeExportStats,
+  processConfigExports,
+  formatExportResult,
+} from './export-helpers.js';
+import {
+  readFileContent,
+  parseJsonContent,
+  validateAndReturnConfig,
+} from './import-helpers.js';
 
 /**
  * Configuration constants
@@ -35,7 +48,7 @@ export class ConfigManager {
    * Merges the loaded configuration with default values and validates the result.
    *
    * @param {string} [configPath] - Optional path to a specific configuration file to load
-   * @returns {any} Promise<Result<BunTtsConfig, ConfigurationError>> Promise resolving to a Result containing the loaded configuration or a ConfigurationError
+   * @returns {Promise<Result<BunTtsConfig, ConfigurationError>>} Promise resolving to a Result containing the loaded configuration or a ConfigurationError
    */
   async load(
     configPath?: string
@@ -124,7 +137,7 @@ export class ConfigManager {
    *
    * @param {object} [options] - Options object containing optional configPath
    * @param {string} [options.configPath] - Optional path to a specific configuration file to load
-   * @returns {any} Promise<Result<BunTtsConfig, ConfigurationError>> Promise resolving to a Result containing the loaded configuration or a ConfigurationError
+   * @returns {Promise<Result<BunTtsConfig, ConfigurationError>>} Promise resolving to a Result containing the loaded configuration or a ConfigurationError
    */
   async loadConfig(options?: {
     configPath?: string;
@@ -199,7 +212,7 @@ export class ConfigManager {
    * have valid types. Returns a Result indicating success or failure.
    *
    * @param {Partial<BunTtsConfig>} config - The configuration object to validate
-   * @returns {any} Result<true, ConfigurationError> A Result containing true on success or a ConfigurationError on failure
+   * @returns {Result<true, ConfigurationError>} A Result containing true on success or a ConfigurationError on failure
    */
   validate(config: Partial<BunTtsConfig>): Result<true, ConfigurationError> {
     return this.validator.validate(config);
@@ -254,7 +267,7 @@ export class ConfigManager {
    * Retrieves a configuration value using dot notation for nested keys.
    * Returns the provided default value if the key is not found.
    *
-   * @param {any} key - The configuration key to retrieve (supports dot notation)
+   * @param {string} key - The configuration key to retrieve (supports dot notation)
    * @param {T} [defaultValue] - Default value to return if key is not found
    * @returns {T} The configuration value or default
    */
@@ -267,8 +280,8 @@ export class ConfigManager {
    *
    * Sets a configuration value using dot notation for nested keys.
    *
-   * @param {any} key - The configuration key to set (supports dot notation)
-   * @param {any} value - The value to set
+   * @param {string} key - The configuration key to set (supports dot notation)
+   * @param {unknown} value - The value to set
    * @returns {void}
    */
   set(key: string, value: unknown): void {
@@ -280,7 +293,7 @@ export class ConfigManager {
   /**
    * Check if configuration key exists
    *
-   * @param {any} key - The configuration key to check (supports dot notation)
+   * @param {string} key - The configuration key to check (supports dot notation)
    * @returns {boolean} True if the key exists, false otherwise
    */
   has(key: string): boolean {
@@ -303,9 +316,9 @@ export class ConfigManager {
    * Validates the provided configuration and saves it to the specified file path
    * as a JSON file with proper formatting.
    *
-   * @param {object} config - The configuration object to save
-   * @param {any} filePath - The path where the configuration should be saved
-   * @returns {any} Promise<Result<void, ConfigurationError>> A Result indicating success or containing a ConfigurationError on failure
+   * @param {BunTtsConfig} config - The configuration object to save
+   * @param {string} filePath - The path where the configuration should be saved
+   * @returns {Promise<Result<void, ConfigurationError>>} A Result indicating success or containing a ConfigurationError on failure
    */
   async save(
     config: BunTtsConfig,
@@ -339,5 +352,100 @@ export class ConfigManager {
       );
       return Err(wrappedError);
     }
+  }
+
+  /**
+   * Export configuration to file
+   *
+   * Exports the provided configuration to a file in JSON format.
+   *
+   * @param {Record<string, unknown>} config - The configuration object to export
+   * @param {string} filePath - The path where the configuration should be exported
+   * @param {string} format - The format to export ('json')
+   * @returns {Promise<Result<{ success: true }, ConfigurationError>>} A Result indicating success
+   */
+  async export(
+    config: Record<string, unknown>,
+    filePath: string,
+    format: 'json'
+  ): Promise<Result<{ success: true }, ConfigurationError>> {
+    try {
+      await fs.mkdir(dirname(filePath), { recursive: true });
+
+      const content = JSON.stringify(config, null, JSON_INDENTATION);
+
+      await fs.writeFile(filePath, content, 'utf-8');
+      return Ok({ success: true });
+    } catch (error) {
+      const wrappedError = new ConfigurationError(
+        `Failed to export configuration: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        { filePath, format, error }
+      );
+      return Err(wrappedError);
+    }
+  }
+
+  /**
+   * Import configuration from file
+   *
+   * Imports configuration from a JSON file.
+   *
+   * @param {string} filePath - The path to the configuration file to import
+   * @returns {Promise<Result<BunTtsConfig, ConfigurationError>>} A Result containing the imported configuration or an error
+   */
+  async import(
+    filePath: string
+  ): Promise<Result<BunTtsConfig, ConfigurationError>> {
+    const fileContent = await readFileContent(filePath);
+    if (fileContent.error) {
+      return Err(fileContent.error);
+    }
+
+    const parsedConfig = await parseJsonContent(fileContent.content, filePath);
+    if (parsedConfig.error) {
+      return Err(parsedConfig.error);
+    }
+
+    return validateAndReturnConfig(parsedConfig.content, (config) =>
+      this.validate(config)
+    );
+  }
+
+  /**
+   * Export multiple configurations in batch
+   *
+   * Exports multiple configurations to files in the specified directory.
+   *
+   * @param {Array<{ name: string; data: Record<string, unknown> }>} configs - Array of configurations to export
+   * @param {string} directory - The directory where configurations should be exported
+   * @returns {Promise<Result<{ successful: number; failed: number; errors?: Array<{ name: string; error: string }> }, ConfigurationError>>} A Result containing export statistics
+   */
+  async exportBatch(
+    configs: Array<{ name: string; data: Record<string, unknown> }>,
+    directory: string
+  ): Promise<
+    Result<
+      {
+        successful: number;
+        failed: number;
+        errors?: Array<{ name: string; error: string }>;
+      },
+      ConfigurationError
+    >
+  > {
+    await ensureDirectoryExists(directory);
+
+    const exportStats = initializeExportStats();
+    await processConfigExports(
+      configs,
+      directory,
+      exportStats,
+      (config, filePath, format) =>
+        this.export(config, filePath, format as 'json')
+    );
+
+    return formatExportResult(exportStats);
   }
 }

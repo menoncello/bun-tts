@@ -1,15 +1,16 @@
 import { describe, it, expect, beforeEach } from 'bun:test';
-import { ConfigAccess } from '../../../src/config/config-access';
+import { ConfigAccess } from '../../../src/config/config-access.js';
+import type { BunTtsConfig } from '../../../src/types/config';
 import {
   createTestConfig,
   createConfigWithUndefinedLogging,
   createConfigWithNullLogging,
   createConfigWithTestArray,
-} from './config-test-helpers';
+} from './config-test-helpers.js';
 
 describe('ConfigAccess has method', () => {
   let configAccess: ConfigAccess;
-  let testConfig: any;
+  let testConfig: BunTtsConfig;
 
   beforeEach(() => {
     configAccess = new ConfigAccess();
@@ -46,13 +47,19 @@ describe('ConfigAccess has method', () => {
   describe('undefined and null handling', () => {
     it('should return false for undefined intermediate values', () => {
       const configWithUndefined = createConfigWithUndefinedLogging();
-      const result = configAccess.has(configWithUndefined, 'logging.level');
+      const result = configAccess.has(
+        configWithUndefined as BunTtsConfig,
+        'logging.level'
+      );
       expect(result).toBe(false);
     });
 
     it('should return false for null intermediate values', () => {
       const configWithNull = createConfigWithNullLogging();
-      const result = configAccess.has(configWithNull, 'logging.level');
+      const result = configAccess.has(
+        configWithNull as unknown as BunTtsConfig,
+        'logging.level'
+      );
       expect(result).toBe(false);
     });
 
@@ -76,7 +83,7 @@ describe('ConfigAccess has method', () => {
         ...testConfig,
         logging: {
           ...testConfig.logging,
-          filePath: null,
+          filePath: null as any,
         },
       };
       const result = configAccess.has(configWithNullLeaf, 'logging.filePath');
@@ -110,13 +117,19 @@ describe('ConfigAccess has method', () => {
     });
 
     it('should handle null key', () => {
-      const result = configAccess.has(testConfig, null as any);
+      const result = configAccess.has(testConfig, null);
       expect(result).toBe(false);
     });
 
     it('should handle empty key parts', () => {
       const result = configAccess.has(testConfig, '.logging..level.');
       expect(result).toBe(true); // Should find the path ignoring empty parts
+    });
+
+    it('should return false for paths with only dots', () => {
+      expect(configAccess.has(testConfig, '.')).toBe(false);
+      expect(configAccess.has(testConfig, '..')).toBe(false);
+      expect(configAccess.has(testConfig, '...')).toBe(false);
     });
 
     it('should handle deeply nested paths', () => {
@@ -130,7 +143,7 @@ describe('ConfigAccess has method', () => {
         },
       };
       const result = configAccess.has(
-        deepConfig as any,
+        deepConfig as unknown as BunTtsConfig,
         'level1.level2.level3.value'
       );
       expect(result).toBe(true);
@@ -143,7 +156,7 @@ describe('ConfigAccess has method', () => {
         },
       };
       const result = configAccess.has(
-        deepConfig as any,
+        deepConfig as unknown as BunTtsConfig,
         'level1.level2.level3.value'
       );
       expect(result).toBe(false);

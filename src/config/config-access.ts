@@ -14,16 +14,21 @@ export class ConfigAccess {
    * Returns the provided default value if the key is not found.
    *
    * @param {object} config - The configuration object to search in
-   * @param {any} _key - The configuration key to retrieve (supports dot notation)
+   * @param {string | null} _key - The configuration key to retrieve (supports dot notation)
    * @param {T} [defaultValue] - Default value to return if key is not found
    * @returns {T} The configuration value or default
    */
   get<T = unknown>(
     config: BunTtsConfig | undefined,
-    _key: string,
+    _key: string | null,
     defaultValue?: T
   ): T {
     if (!config || !_key) {
+      return defaultValue as T;
+    }
+
+    // Check if key is empty or contains only invalid characters
+    if (!_key.trim()) {
       return defaultValue as T;
     }
 
@@ -48,13 +53,13 @@ export class ConfigAccess {
    * Sets a configuration value using dot notation for nested keys.
    *
    * @param {object} config - The configuration object to modify
-   * @param {any} _key - The configuration key to set (supports dot notation)
+   * @param {string | null} _key - The configuration key to set (supports dot notation)
    * @param {any} _value - The value to set
    * @returns {BunTtsConfig} The modified configuration object
    */
   set(
     config: BunTtsConfig | undefined,
-    _key: string,
+    _key: string | null,
     _value: unknown
   ): BunTtsConfig {
     if (!_key) {
@@ -137,19 +142,26 @@ export class ConfigAccess {
    *
    * Checks if a configuration key exists in the provided configuration object.
    * Supports dot notation for nested keys. Returns true if the key exists,
-   * even if its value is undefined or null.
+   * even if its value is undefined or null. Returns false for paths that
+   * resolve to empty after filtering empty parts (e.g., ".", "..").
    *
    * @param {object} config - The configuration object to search in
-   * @param {any} _key - The configuration key to check (supports dot notation)
+   * @param {string | null} _key - The configuration key to check (supports dot notation)
    * @returns {boolean} True if the key exists, false otherwise
    */
-  has(config: BunTtsConfig | undefined, _key: string): boolean {
+  has(config: BunTtsConfig | undefined, _key: string | null): boolean {
     if (!config || !_key) {
       return false;
     }
 
     // Support dot notation for nested keys, filtering out empty parts
     const keys = _key.split('.').filter((k) => k !== '');
+
+    // If no valid keys remain after filtering, return false
+    if (keys.length === 0) {
+      return false;
+    }
+
     let current: unknown = config;
 
     for (const k of keys) {
@@ -171,10 +183,10 @@ export class ConfigAccess {
    * Returns a new configuration object with the specified key removed.
    *
    * @param {BunTtsConfig} config - The configuration object to modify
-   * @param {string} _key - The configuration key to delete (supports dot notation)
+   * @param {string | null} _key - The configuration key to delete (supports dot notation)
    * @returns {BunTtsConfig} The modified configuration object
    */
-  delete(config: BunTtsConfig | undefined, _key: string): BunTtsConfig {
+  delete(config: BunTtsConfig | undefined, _key: string | null): BunTtsConfig {
     if (!config) {
       return {} as BunTtsConfig;
     }

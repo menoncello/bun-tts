@@ -56,6 +56,11 @@ export function createCustomTestConfig(tempDir?: string): BunTtsConfig {
       colors: false,
       debug: true,
     },
+    output: {
+      format: 'wav',
+      quality: 'high',
+      directory: join(testTempDir, 'output'),
+    },
     cache: {
       enabled: false,
       dir: join(testTempDir, 'custom-cache'),

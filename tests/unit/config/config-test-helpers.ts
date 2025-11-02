@@ -35,6 +35,11 @@ export function createTestConfig(tempDir?: string): BunTtsConfig {
       colors: true,
       debug: false,
     },
+    output: {
+      format: 'mp3',
+      quality: 'high',
+      directory: './output',
+    },
     cache: {
       enabled: true,
       dir: join(testTempDir, 'cache'),
@@ -47,7 +52,9 @@ export function createTestConfig(tempDir?: string): BunTtsConfig {
 /**
  * Creates a partial configuration for testing with missing logging section
  */
-export function createConfigWithUndefinedLogging(tempDir?: string): any {
+export function createConfigWithUndefinedLogging(
+  tempDir?: string
+): Omit<BunTtsConfig, 'logging'> {
   const testTempDir = tempDir || mkdtempSync(join(tmpdir(), 'bun-tts-test-'));
   return {
     tts: {
@@ -69,6 +76,11 @@ export function createConfigWithUndefinedLogging(tempDir?: string): any {
       colors: true,
       debug: false,
     },
+    output: {
+      format: 'mp3',
+      quality: 'high',
+      directory: './output',
+    },
     cache: {
       enabled: true,
       dir: join(testTempDir, 'cache'),
@@ -81,7 +93,9 @@ export function createConfigWithUndefinedLogging(tempDir?: string): any {
 /**
  * Creates a test configuration with null logging section
  */
-export function createConfigWithNullLogging(tempDir?: string): any {
+export function createConfigWithNullLogging(
+  tempDir?: string
+): Omit<BunTtsConfig, 'logging'> & { logging: null } {
   const testTempDir = tempDir || mkdtempSync(join(tmpdir(), 'bun-tts-test-'));
   return {
     logging: null,
@@ -104,6 +118,11 @@ export function createConfigWithNullLogging(tempDir?: string): any {
       colors: true,
       debug: false,
     },
+    output: {
+      format: 'mp3',
+      quality: 'high',
+      directory: './output',
+    },
     cache: {
       enabled: true,
       dir: join(testTempDir, 'cache'),
@@ -116,7 +135,9 @@ export function createConfigWithNullLogging(tempDir?: string): any {
 /**
  * Creates a test configuration with test array property
  */
-export function createConfigWithTestArray(): any {
+export function createConfigWithTestArray(): BunTtsConfig & {
+  testArray: string[];
+} {
   const baseConfig = createTestConfig();
   return {
     ...baseConfig,

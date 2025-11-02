@@ -88,13 +88,19 @@ describe('ConfigValidator - TTS Validation', () => {
         volume: 5.0,
       };
 
-      const result = configValidator.validateTtsConfig(invalidTts);
+      const result = configValidator.validateTtsConfig(invalidTts as any);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.message).toContain('Invalid TTS engine');
+        const errorResult = result as {
+          success: false;
+          error: ConfigurationError;
+        };
+        expect(errorResult.error.message).toContain('Invalid TTS engine');
         // Should not mention other errors
-        expect(result.error.message).not.toContain('Invalid output format');
-        expect(result.error.message).not.toContain('Sample rate');
+        expect(errorResult.error.message).not.toContain(
+          'Invalid output format'
+        );
+        expect(errorResult.error.message).not.toContain('Sample rate');
       }
     });
   });
@@ -128,7 +134,13 @@ describe('ConfigValidator - TTS Validation', () => {
       const result = configValidator.validateTtsEngine('KOKORO');
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.message).toContain('Invalid TTS engine: KOKORO');
+        const errorResult = result as {
+          success: false;
+          error: ConfigurationError;
+        };
+        expect(errorResult.error.message).toContain(
+          'Invalid TTS engine: KOKORO'
+        );
       }
     });
   });
@@ -157,8 +169,12 @@ describe('ConfigValidator - TTS Validation', () => {
         const result = configValidator.validateTtsOutputFormat(invalidFormat);
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error).toBeInstanceOf(ConfigurationError);
-          expect(result.error.message).toContain('Invalid output format');
+          const errorResult = result as {
+            success: false;
+            error: ConfigurationError;
+          };
+          expect(errorResult.error).toBeInstanceOf(ConfigurationError);
+          expect(errorResult.error.message).toContain('Invalid output format');
         }
       }
     });
@@ -167,7 +183,13 @@ describe('ConfigValidator - TTS Validation', () => {
       const result = configValidator.validateTtsOutputFormat('MP3');
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.message).toContain('Invalid output format: MP3');
+        const errorResult = result as {
+          success: false;
+          error: ConfigurationError;
+        };
+        expect(errorResult.error.message).toContain(
+          'Invalid output format: MP3'
+        );
       }
     });
   });
@@ -199,9 +221,15 @@ describe('ConfigValidator - TTS Validation', () => {
       const result = configValidator.validateTtsSampleRate(MIN_SAMPLE_RATE - 1);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBeInstanceOf(ConfigurationError);
-        expect(result.error.message).toContain('Sample rate must be between');
-        expect(result.error.message).toContain(
+        const errorResult = result as {
+          success: false;
+          error: ConfigurationError;
+        };
+        expect(errorResult.error).toBeInstanceOf(ConfigurationError);
+        expect(errorResult.error.message).toContain(
+          'Sample rate must be between'
+        );
+        expect(errorResult.error.message).toContain(
           `${MIN_SAMPLE_RATE} and ${MAX_SAMPLE_RATE}`
         );
       }
@@ -211,8 +239,14 @@ describe('ConfigValidator - TTS Validation', () => {
       const result = configValidator.validateTtsSampleRate(MAX_SAMPLE_RATE + 1);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBeInstanceOf(ConfigurationError);
-        expect(result.error.message).toContain('Sample rate must be between');
+        const errorResult = result as {
+          success: false;
+          error: ConfigurationError;
+        };
+        expect(errorResult.error).toBeInstanceOf(ConfigurationError);
+        expect(errorResult.error.message).toContain(
+          'Sample rate must be between'
+        );
       }
     });
 
@@ -249,9 +283,13 @@ describe('ConfigValidator - TTS Validation', () => {
       const result = configValidator.validateTtsQuality(MIN_QUALITY - 0.1);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBeInstanceOf(ConfigurationError);
-        expect(result.error.message).toContain('Quality must be between');
-        expect(result.error.message).toContain(
+        const errorResult = result as {
+          success: false;
+          error: ConfigurationError;
+        };
+        expect(errorResult.error).toBeInstanceOf(ConfigurationError);
+        expect(errorResult.error.message).toContain('Quality must be between');
+        expect(errorResult.error.message).toContain(
           `${MIN_QUALITY} and ${MAX_QUALITY}`
         );
       }
@@ -261,8 +299,12 @@ describe('ConfigValidator - TTS Validation', () => {
       const result = configValidator.validateTtsQuality(MAX_QUALITY + 0.1);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBeInstanceOf(ConfigurationError);
-        expect(result.error.message).toContain('Quality must be between');
+        const errorResult = result as {
+          success: false;
+          error: ConfigurationError;
+        };
+        expect(errorResult.error).toBeInstanceOf(ConfigurationError);
+        expect(errorResult.error.message).toContain('Quality must be between');
       }
     });
 
@@ -308,8 +350,12 @@ describe('ConfigValidator - TTS Validation', () => {
       const result = configValidator.validateTtsRate(MAX_RATE + 0.1);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBeInstanceOf(ConfigurationError);
-        expect(result.error.message).toContain('Rate must be between');
+        const errorResult = result as {
+          success: false;
+          error: ConfigurationError;
+        };
+        expect(errorResult.error).toBeInstanceOf(ConfigurationError);
+        expect(errorResult.error.message).toContain('Rate must be between');
       }
     });
 
@@ -349,9 +395,13 @@ describe('ConfigValidator - TTS Validation', () => {
       const result = configValidator.validateTtsVolume(MIN_VOLUME - 0.1);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBeInstanceOf(ConfigurationError);
-        expect(result.error.message).toContain('Volume must be between');
-        expect(result.error.message).toContain(
+        const errorResult = result as {
+          success: false;
+          error: ConfigurationError;
+        };
+        expect(errorResult.error).toBeInstanceOf(ConfigurationError);
+        expect(errorResult.error.message).toContain('Volume must be between');
+        expect(errorResult.error.message).toContain(
           `${MIN_VOLUME} and ${MAX_VOLUME}`
         );
       }
@@ -361,8 +411,12 @@ describe('ConfigValidator - TTS Validation', () => {
       const result = configValidator.validateTtsVolume(MAX_VOLUME + 0.1);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBeInstanceOf(ConfigurationError);
-        expect(result.error.message).toContain('Volume must be between');
+        const errorResult = result as {
+          success: false;
+          error: ConfigurationError;
+        };
+        expect(errorResult.error).toBeInstanceOf(ConfigurationError);
+        expect(errorResult.error.message).toContain('Volume must be between');
       }
     });
 
@@ -428,8 +482,12 @@ describe('ConfigValidator - TTS Validation', () => {
       const result = configValidator.validateCacheConfig(invalidCache);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBeInstanceOf(ConfigurationError);
-        expect(result.error.message).toContain(
+        const errorResult = result as {
+          success: false;
+          error: ConfigurationError;
+        };
+        expect(errorResult.error).toBeInstanceOf(ConfigurationError);
+        expect(errorResult.error.message).toContain(
           'Cache max size must be positive'
         );
       }
@@ -444,6 +502,13 @@ describe('ConfigValidator - TTS Validation', () => {
 
       const result = configValidator.validateCacheConfig(invalidCache);
       expect(result.success).toBe(false); // Zero should be rejected as invalid
+      if (!result.success) {
+        const errorResult = result as {
+          success: false;
+          error: ConfigurationError;
+        };
+        expect(errorResult.error).toBeInstanceOf(ConfigurationError);
+      }
     });
 
     it('should return error for negative ttl', () => {
@@ -456,8 +521,14 @@ describe('ConfigValidator - TTS Validation', () => {
       const result = configValidator.validateCacheConfig(invalidCache);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBeInstanceOf(ConfigurationError);
-        expect(result.error.message).toContain('Cache TTL must be positive');
+        const errorResult = result as {
+          success: false;
+          error: ConfigurationError;
+        };
+        expect(errorResult.error).toBeInstanceOf(ConfigurationError);
+        expect(errorResult.error.message).toContain(
+          'Cache TTL must be positive'
+        );
       }
     });
 

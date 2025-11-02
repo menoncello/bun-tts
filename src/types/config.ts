@@ -1,4 +1,72 @@
 /**
+ * Individual engine configuration options
+ */
+export interface EngineOptions {
+  /**
+   * Speech rate
+   */
+  rate?: number;
+  /**
+   * Voice pitch
+   */
+  pitch?: number;
+  /**
+   * Volume level
+   */
+  volume?: number;
+  /**
+   * Voice selection
+   */
+  voice?: string;
+  /**
+   * Custom engine-specific options
+   */
+  [key: string]: unknown;
+}
+
+/**
+ * Individual engine configuration
+ */
+export interface EngineConfig {
+  /**
+   * Whether the engine is enabled
+   */
+  enabled: boolean;
+  /**
+   * Engine-specific options
+   */
+  options?: EngineOptions;
+}
+
+/**
+ * TTS engines configuration
+ */
+export interface TtsEngines {
+  /**
+   * Engine-specific configurations
+   */
+  [engineName: string]: EngineConfig;
+}
+
+/**
+ * Profile configuration interface
+ */
+export interface ProfileConfig {
+  /**
+   * Active profile name
+   */
+  active?: string;
+  /**
+   * List of profiles
+   */
+  list?: Array<{
+    name: string;
+    description?: string;
+    config: Record<string, unknown>;
+  }>;
+}
+
+/**
  * Base configuration interface for bun-tts
  */
 export interface BunTtsConfig {
@@ -56,6 +124,18 @@ export interface BunTtsConfig {
      * Volume multiplier
      */
     volume: number;
+    /**
+     * Speed multiplier (alias for rate)
+     */
+    speed?: number;
+    /**
+     * Voice selection
+     */
+    voice?: string;
+    /**
+     * Engine configurations
+     */
+    engines?: TtsEngines;
   };
 
   /**
@@ -78,6 +158,18 @@ export interface BunTtsConfig {
      * Temporary directory for processing
      */
     tempDir?: string;
+    /**
+     * Chunk size for processing
+     */
+    chunkSize?: number;
+    /**
+     * Overlap between chunks
+     */
+    overlap?: number;
+    /**
+     * Maximum concurrency
+     */
+    maxConcurrency?: number;
   };
 
   /**
@@ -96,6 +188,24 @@ export interface BunTtsConfig {
      * Whether to show debug information
      */
     debug: boolean;
+  };
+
+  /**
+   * Output configuration
+   */
+  output: {
+    /**
+     * Output format
+     */
+    format: 'mp3' | 'wav' | 'm4a' | 'ogg';
+    /**
+     * Output quality
+     */
+    quality: 'low' | 'medium' | 'high' | 'lossless';
+    /**
+     * Output directory
+     */
+    directory?: string;
   };
 
   /**
@@ -119,6 +229,11 @@ export interface BunTtsConfig {
      */
     ttl: number;
   };
+
+  /**
+   * Profile configuration
+   */
+  profiles?: ProfileConfig;
 }
 
 /**
@@ -147,6 +262,11 @@ export const DEFAULT_CONFIG: BunTtsConfig = {
     showProgress: true,
     colors: true,
     debug: false,
+  },
+  output: {
+    format: 'mp3',
+    quality: 'high',
+    directory: './output',
   },
   cache: {
     enabled: true,
