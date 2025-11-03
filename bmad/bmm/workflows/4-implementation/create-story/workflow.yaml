@@ -44,4 +44,24 @@ recommended_inputs:
   - prd: "PRD document"
   - architecture: "Architecture (optional)"
 
+# QUALITY GATES ENFORCEMENT - MANDATORY
+# =====================================
+# ALL quality gates must pass before story completion
+# NO EXCEPTIONS, NO OVERRIDES PERMITTED
+quality_gates: "{project-root}/bmad/bmm/workflows/quality-gates.yaml"
+validation_required: true
+enforcement_mode: "STRICT"
+
+# Quality gate checkpoints
+quality_checkpoints:
+  - name: "story_creation_complete"
+    description: "All quality gates must pass before story can be marked complete"
+    required_gates: "all"
+    failure_action: "BLOCK_COMPLETION"
+
+  - name: "validation_complete"
+    description: "Story validation must pass with zero quality issues"
+    required_gates: "all"
+    failure_action: "BLOCK_COMPLETION"
+
 standalone: true

@@ -55,7 +55,15 @@
     "prepack": "bun run build",
     "postinstall": "echo ' bun-tts installed successfully! Run \"bun-tts --help\" to get started.'",
     "start": "bun run dist/cli.js",
-    "version": "bun run build"
+    "version": "bun run build",
+    "quality:gates": "bun run scripts/quality-gates-validator.ts",
+    "quality:check": "bun run quality:gates",
+    "quality:enforce": "bun run quality:gates || (echo '🚨 QUALITY GATES FAILED - FIX ISSUES BEFORE PROCEEDING' && exit 1)",
+    "precommit:quality": "bun run quality:gates && bun run lint:fix && bun run format",
+    "complexity:check": "echo 'Complexity checking integrated into eslint rules'",
+    "security:check": "bun audit",
+    "pre-story-complete": "bun run quality:gates",
+    "pre-epic-complete": "bun run quality:gates"
   },
   "files": [
     "dist",

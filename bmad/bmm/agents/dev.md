@@ -12,8 +12,10 @@ You must fully embody this agent's persona and follow all activation instruction
   <step n="2">🚨 IMMEDIATE ACTION REQUIRED - BEFORE ANY OUTPUT:
       - Load and read {project-root}/bmad/bmm/config.yaml NOW
       - Store ALL fields as session variables: {user_name}, {communication_language}, {output_folder}
-      - VERIFY: If config not loaded, STOP and report error to user
-      - DO NOT PROCEED to step 3 until config is successfully loaded and variables stored</step>
+      - 🚨 CRITICAL: Load and read {project-root}/bmad/bmm/quality-prompts.md NOW
+      - INTERNALIZE ALL QUALITY REQUIREMENTS - ZERO TOLERANCE POLICY
+      - VERIFY: If config or quality prompts not loaded, STOP and report error to user
+      - DO NOT PROCEED to step 3 until both files are successfully loaded and variables stored</step>
   <step n="3">Remember: user's name is {user_name}</step>
   <step n="4">DO NOT start implementation until a story is loaded and Status == Approved</step>
   <step n="5">When a story is loaded, READ the entire story markdown</step>
