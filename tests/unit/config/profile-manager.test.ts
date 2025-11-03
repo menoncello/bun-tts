@@ -106,7 +106,14 @@ describe('ProfileManager', () => {
       const profileData = createProfile({
         name: 'partial-config',
         config: {
-          tts: { defaultEngine: 'custom-engine' }, // Partial override
+          tts: {
+            defaultEngine: 'kokoro',
+            outputFormat: 'mp3',
+            sampleRate: 22050,
+            quality: 0.8,
+            rate: 1.0,
+            volume: 0.8,
+          }, // Valid engine with required fields
         },
       }) as CreateProfileData;
 
@@ -120,7 +127,7 @@ describe('ProfileManager', () => {
           tts?: { defaultEngine?: string };
           logging?: { level?: string };
         };
-        expect(config.tts?.defaultEngine).toBe('custom-engine');
+        expect(config.tts?.defaultEngine).toBe('kokoro');
         expect(config.logging?.level).toBe('info'); // From defaults
       }
     });
@@ -276,7 +283,7 @@ describe('ProfileManager', () => {
         expect(
           (getResult as { success: false; error: ConfigurationError }).error
             .message
-        ).toContain('ENOENT: no such file or directory');
+        ).toContain('not found');
       }
     });
   });
@@ -396,11 +403,17 @@ describe('ProfileManager', () => {
         name: 'override-profile',
         config: {
           tts: {
-            defaultEngine: 'override-engine',
+            defaultEngine: 'chatterbox',
+            outputFormat: 'mp3',
+            sampleRate: 22050,
+            quality: 0.8,
+            rate: 1.0,
+            volume: 0.8,
             speed: 1.5, // Override speed
           },
           output: {
             format: 'mp3', // Override format
+            quality: 'high', // Add required quality
           },
         },
       }) as CreateProfileData;
@@ -416,7 +429,7 @@ describe('ProfileManager', () => {
           tts?: { defaultEngine?: string; speed?: number };
           output?: { format?: string };
         };
-        expect(config.tts?.defaultEngine).toBe('override-engine');
+        expect(config.tts?.defaultEngine).toBe('chatterbox');
         expect(config.tts?.speed).toBe(1.5);
         expect(config.output?.format).toBe('mp3');
       }
@@ -428,8 +441,13 @@ describe('ProfileManager', () => {
         name: 'partial-override',
         config: {
           tts: {
-            defaultEngine: 'custom-engine', // Only override engine
-          },
+            defaultEngine: 'kokoro',
+            outputFormat: 'mp3',
+            sampleRate: 22050,
+            quality: 0.8,
+            rate: 1.0,
+            volume: 0.8,
+          }, // Complete TTS config
           // Other sections should use defaults
         },
       }) as CreateProfileData;
@@ -446,7 +464,7 @@ describe('ProfileManager', () => {
           logging?: { level?: string };
           cache?: { enabled?: boolean };
         };
-        expect(config.tts?.defaultEngine).toBe('custom-engine');
+        expect(config.tts?.defaultEngine).toBe('kokoro');
         expect(config.logging?.level).toBe('info'); // From defaults
         expect(config.cache?.enabled).toBe(true); // From defaults
       }

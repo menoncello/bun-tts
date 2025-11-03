@@ -18,6 +18,7 @@ function setupCommand() {
   const configCommand = new ConfigCommand(
     mockLogger,
     mockConfigManager,
+    {} as any, // ProfileManager mock
     mockOutputWriter
   );
   return { mockLogger, mockConfigManager, configCommand };

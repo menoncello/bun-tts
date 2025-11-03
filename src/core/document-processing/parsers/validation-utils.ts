@@ -147,6 +147,7 @@ export function validateChapter(
       message: `Chapter ${chapterIndex + 1} has empty title`,
       location: { chapter: chapterIndex },
       suggestion: 'Consider adding a meaningful title',
+      severity: 'medium',
     });
   }
 
@@ -156,6 +157,7 @@ export function validateChapter(
       message: `Chapter ${chapterIndex + 1} has no paragraphs`,
       location: { chapter: chapterIndex },
       suggestion: 'Add content to chapter or consider removing it',
+      severity: 'medium',
     });
   }
 
@@ -185,6 +187,7 @@ export function validateParagraph(
       message: `Empty text paragraph found in chapter ${chapterIndex + 1}`,
       location: { chapter: chapterIndex, paragraph: paragraphIndex },
       suggestion: 'Remove empty paragraphs or add content',
+      severity: 'low',
     });
   }
 
@@ -250,6 +253,7 @@ function validateSentenceLength(
       message: `Very short sentence: "${sentence.text}"`,
       location,
       suggestion: 'Consider combining with adjacent sentences',
+      severity: 'low',
     });
   }
 

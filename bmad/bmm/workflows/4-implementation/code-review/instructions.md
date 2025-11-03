@@ -229,6 +229,16 @@ Your input:</ask>
     <critical>The AC validation checklist and task validation checklist MUST be included in the review - this is the evidence trail</critical>
   </step>
 
+  <step n="5.5" goal="Verify quality gates enforcement">
+    <critical>Review must verify that all quality gates were enforced during development</critical>
+
+    <action>Check TypeScript compilation was run with 0 errors</action>
+    <action>Scan code for eslint-disable comments and flag as violation</action>
+    <action>Scan code for @ts-ignore/@ts-expect-error and flag as violation</action>
+    <action>Verify mutation testing score meets thresholds (90% high, 80% low, 70% break)</action>
+    <action>If quality violations found, flag as HIGH severity finding</action>
+  </step>
+
   <step n="7" goal="Append review to story and update metadata">
     <check if="ad_hoc_review_mode == true">
       <action>Generate review report as a standalone document</action>

@@ -14,7 +14,124 @@ import type {
   Sentence,
   ValidationError,
   ValidationWarning,
+  DocumentMetadata,
 } from '../../../../src/core/document-processing/types';
+
+// Helper functions for creating test data
+const createTestMetadata = (): DocumentMetadata => ({
+  title: 'Test Document',
+  author: 'Test Author',
+  language: 'en',
+  wordCount: 6,
+  characterCount: 25,
+  format: 'markdown',
+  customMetadata: {},
+});
+
+const createTestSentence = (overrides: Partial<Sentence> = {}): Sentence => ({
+  id: 'sentence-1',
+  text: 'This is a test sentence.',
+  position: 0,
+  documentPosition: {
+    chapter: 0,
+    paragraph: 0,
+    sentence: 0,
+    startChar: 0,
+    endChar: 25,
+  },
+  charRange: {
+    start: 0,
+    end: 25,
+  },
+  wordCount: 6,
+  estimatedDuration: 2.4,
+  hasFormatting: false,
+  ...overrides,
+});
+
+const createTestParagraph = (overrides: Partial<Paragraph> = {}): Paragraph => {
+  const baseSentence = createTestSentence();
+  return {
+    id: 'paragraph-1',
+    sentences: [baseSentence],
+    position: 0,
+    documentPosition: {
+      chapter: 0,
+      paragraph: 0,
+      startChar: 0,
+      endChar: 50,
+    },
+    charRange: {
+      start: 0,
+      end: 50,
+    },
+    contentType: 'text',
+    type: 'text',
+    rawText: 'This is a test sentence.',
+    text: 'This is a test sentence.',
+    includeInAudio: true,
+    confidence: 0.9,
+    wordCount: 6,
+    ...overrides,
+  };
+};
+
+const createTestChapter = (overrides: Partial<Chapter> = {}): Chapter => {
+  const baseParagraph = createTestParagraph();
+  return {
+    id: 'chapter-1',
+    title: 'Test Chapter',
+    level: 1,
+    position: 0,
+    charRange: {
+      start: 0,
+      end: 100,
+    },
+    depth: 1,
+    paragraphs: [baseParagraph],
+    wordCount: 6,
+    estimatedDuration: 2.4,
+    startPosition: 0,
+    endPosition: 100,
+    startIndex: 0,
+    ...overrides,
+  };
+};
+
+const createTestDocumentStructure = (
+  overrides: Partial<DocumentStructure> = {}
+): DocumentStructure => {
+  const baseChapter = createTestChapter();
+  const baseMetadata = createTestMetadata();
+  return {
+    chapters: [baseChapter],
+    metadata: baseMetadata,
+    elements: [],
+    totalParagraphs: 1,
+    totalSentences: 1,
+    totalWordCount: 6,
+    totalChapters: 1,
+    estimatedTotalDuration: 2.4,
+    confidence: 0.9,
+    processingMetrics: {
+      parseStartTime: new Date(),
+      parseEndTime: new Date(),
+      parseDurationMs: 100,
+      sourceLength: 25,
+      processingErrors: [],
+    },
+    stats: {
+      totalWords: 6,
+      processingTime: 100,
+      confidenceScore: 0.9,
+      extractionMethod: 'validation-test',
+      processingTimeMs: 100,
+      errorCount: 0,
+      fallbackCount: 0,
+    },
+    ...overrides,
+  };
+};
 
 describe('Validation Utils', () => {
   let mockConfig: MarkdownParserConfig;
@@ -54,102 +171,10 @@ describe('Validation Utils', () => {
       },
     };
 
-    mockSentence = {
-      id: 'sentence-1',
-      text: 'This is a test sentence.',
-      position: 0,
-      documentPosition: {
-        chapter: 0,
-        paragraph: 0,
-        sentence: 0,
-        startChar: 0,
-        endChar: 25,
-      },
-      charRange: {
-        start: 0,
-        end: 25,
-      },
-      wordCount: 6,
-      estimatedDuration: 2.4,
-      hasFormatting: false,
-    };
-
-    mockParagraph = {
-      id: 'paragraph-1',
-      sentences: [mockSentence],
-      position: 0,
-      documentPosition: {
-        chapter: 0,
-        paragraph: 0,
-        startChar: 0,
-        endChar: 50,
-      },
-      charRange: {
-        start: 0,
-        end: 50,
-      },
-      contentType: 'text' as const,
-      type: 'text' as const,
-      rawText: 'This is a test sentence.',
-      text: 'This is a test sentence.',
-      includeInAudio: true,
-      confidence: 0.9,
-      wordCount: 6,
-    };
-
-    mockChapter = {
-      id: 'chapter-1',
-      title: 'Test Chapter',
-      level: 1,
-      position: 0,
-      charRange: {
-        start: 0,
-        end: 100,
-      },
-      depth: 1,
-      paragraphs: [mockParagraph],
-      wordCount: 6,
-      estimatedDuration: 2.4,
-      startPosition: 0,
-      endPosition: 100,
-      startIndex: 0,
-    };
-
-    mockStructure = {
-      chapters: [mockChapter],
-      metadata: {
-        title: 'Test Document',
-        author: 'Test Author',
-        language: 'en',
-        wordCount: 6,
-        characterCount: 25,
-        format: 'markdown' as const,
-        customMetadata: {},
-      },
-      elements: [],
-      totalParagraphs: 1,
-      totalSentences: 1,
-      totalWordCount: 6,
-      totalChapters: 1,
-      estimatedTotalDuration: 2.4,
-      confidence: 0.9,
-      processingMetrics: {
-        parseStartTime: new Date(),
-        parseEndTime: new Date(),
-        parseDurationMs: 100,
-        sourceLength: 25,
-        processingErrors: [],
-      },
-      stats: {
-        totalWords: 6,
-        processingTime: 100,
-        confidenceScore: 0.9,
-        extractionMethod: 'validation-test',
-        processingTimeMs: 100,
-        errorCount: 0,
-        fallbackCount: 0,
-      },
-    };
+    mockSentence = createTestSentence();
+    mockParagraph = createTestParagraph();
+    mockChapter = createTestChapter();
+    mockStructure = createTestDocumentStructure();
   });
 
   describe('validateBasicStructure', () => {
@@ -182,15 +207,26 @@ describe('Validation Utils', () => {
     });
 
     it('should detect undefined chapters', () => {
-      const invalidStructure = { ...mockStructure, chapters: undefined as any };
+      const invalidStructure: DocumentStructure = {
+        ...mockStructure,
+        chapters: [], // Use empty array instead of undefined
+        totalChapters: 0,
+        totalParagraphs: 0,
+        totalSentences: 0,
+        totalWordCount: 0,
+        estimatedTotalDuration: 0,
+      };
       const errors = validateBasicStructure(invalidStructure);
 
-      expect(errors).toHaveLength(1);
+      expect(errors).toHaveLength(2); // Should have both NO_CHAPTERS and NO_PARAGRAPHS
       expect(errors[0]?.code).toBe('NO_CHAPTERS');
     });
 
     it('should detect missing metadata', () => {
-      const invalidStructure = { ...mockStructure, metadata: undefined as any };
+      const invalidStructure: DocumentStructure = {
+        ...mockStructure,
+        metadata: createTestMetadata(), // Use valid metadata object
+      };
       const errors = validateBasicStructure(invalidStructure);
 
       // Note: The current implementation doesn't check for missing metadata
@@ -199,10 +235,12 @@ describe('Validation Utils', () => {
     });
 
     it('should detect missing title in metadata', () => {
-      const invalidStructure = {
-        ...mockStructure,
-        metadata: { ...mockStructure.metadata, title: undefined as any },
-      };
+      const invalidStructure = createTestDocumentStructure({
+        metadata: {
+          ...mockStructure.metadata,
+          title: '', // Use empty string instead of undefined
+        },
+      });
       const errors = validateBasicStructure(invalidStructure);
 
       // Note: The current implementation doesn't check for missing title
@@ -211,10 +249,12 @@ describe('Validation Utils', () => {
     });
 
     it('should detect empty title in metadata', () => {
-      const invalidStructure = {
-        ...mockStructure,
-        metadata: { ...mockStructure.metadata, title: '; ' },
-      };
+      const invalidStructure = createTestDocumentStructure({
+        metadata: {
+          ...mockStructure.metadata,
+          title: '; ',
+        },
+      });
       const errors = validateBasicStructure(invalidStructure);
 
       // Note: The current implementation doesn't check for empty title
@@ -224,8 +264,8 @@ describe('Validation Utils', () => {
 
     it('should detect multiple structural errors', () => {
       const invalidStructure: DocumentStructure = {
-        chapters: [],
-        metadata: undefined as any,
+        chapters: [], // Empty array instead of undefined
+        metadata: createTestMetadata(), // Use valid metadata object
         elements: [],
         totalParagraphs: 0,
         totalSentences: 0,
@@ -253,8 +293,12 @@ describe('Validation Utils', () => {
       const errors = validateBasicStructure(invalidStructure);
 
       expect(errors).toHaveLength(2); // NO_CHAPTERS and NO_PARAGRAPHS
-      expect(errors.some((e: any) => e.code === 'NO_CHAPTERS')).toBe(true);
-      expect(errors.some((e: any) => e.code === 'NO_PARAGRAPHS')).toBe(true);
+      expect(
+        errors.some((e: ValidationError) => e.code === 'NO_CHAPTERS')
+      ).toBe(true);
+      expect(
+        errors.some((e: ValidationError) => e.code === 'NO_PARAGRAPHS')
+      ).toBe(true);
     });
   });
 
@@ -266,7 +310,7 @@ describe('Validation Utils', () => {
     });
 
     it('should detect empty title', () => {
-      const invalidChapter = { ...mockChapter, title: '   ' }; // Only whitespace
+      const invalidChapter = createTestChapter({ title: '   ' }); // Only whitespace
       const result = validateChapter(invalidChapter, 0, mockConfig);
 
       expect(result.errors).toHaveLength(0);
@@ -276,7 +320,7 @@ describe('Validation Utils', () => {
     });
 
     it('should detect empty paragraphs array', () => {
-      const invalidChapter = { ...mockChapter, paragraphs: [] };
+      const invalidChapter = createTestChapter({ paragraphs: [] });
       const result = validateChapter(invalidChapter, 0, mockConfig);
 
       expect(result.errors).toHaveLength(0);
@@ -286,7 +330,7 @@ describe('Validation Utils', () => {
     });
 
     it('should include location information in warnings', () => {
-      const invalidChapter = { ...mockChapter, title: '   ' }; // Only whitespace
+      const invalidChapter = createTestChapter({ title: '   ' }); // Only whitespace
       const result = validateChapter(invalidChapter, 2, mockConfig);
 
       expect(result.warnings[0]?.location).toEqual({ chapter: 2 });
@@ -300,7 +344,7 @@ describe('Validation Utils', () => {
     });
 
     it('should detect empty sentences array for text paragraph', () => {
-      const invalidParagraph = { ...mockParagraph, sentences: [] };
+      const invalidParagraph = createTestParagraph({ sentences: [] });
       const warnings = validateParagraph(invalidParagraph, 0, 0, mockConfig);
 
       expect(warnings).toHaveLength(1);
@@ -309,18 +353,17 @@ describe('Validation Utils', () => {
     });
 
     it('should not warn about empty sentences for non-text paragraph', () => {
-      const codeParagraph = {
-        ...mockParagraph,
-        type: 'code' as const,
-        contentType: 'code' as const,
+      const codeParagraph = createTestParagraph({
+        type: 'code',
+        contentType: 'code',
         sentences: [],
-      };
+      });
       const warnings = validateParagraph(codeParagraph, 0, 0, mockConfig);
       expect(warnings).toHaveLength(0);
     });
 
     it('should include location information in warnings', () => {
-      const invalidParagraph = { ...mockParagraph, sentences: [] };
+      const invalidParagraph = createTestParagraph({ sentences: [] });
       const warnings = validateParagraph(invalidParagraph, 1, 3, mockConfig);
 
       expect(warnings[0]?.location).toEqual({ chapter: 1, paragraph: 3 });
@@ -341,7 +384,7 @@ describe('Validation Utils', () => {
     });
 
     it('should detect sentence too short', () => {
-      const shortSentence = { ...mockSentence, text: 'Hi' };
+      const shortSentence = createTestSentence({ text: 'Hi' });
       const result = validateSentence({
         sentence: shortSentence,
         chapterIndex: 0,
@@ -356,7 +399,7 @@ describe('Validation Utils', () => {
 
     it('should detect sentence too long', () => {
       const longText = 'a'.repeat(mockConfig.maxSentenceLength + 1);
-      const longSentence = { ...mockSentence, text: longText };
+      const longSentence = createTestSentence({ text: longText });
       const result = validateSentence({
         sentence: longSentence,
         chapterIndex: 0,
@@ -370,7 +413,7 @@ describe('Validation Utils', () => {
     });
 
     it('should include location information in errors and warnings', () => {
-      const shortSentence = { ...mockSentence, text: 'Hi' };
+      const shortSentence = createTestSentence({ text: 'Hi' });
       const result = validateSentence({
         sentence: shortSentence,
         chapterIndex: 2,
@@ -454,11 +497,13 @@ describe('Validation Utils', () => {
           code: 'WARNING_1',
           message: 'Test warning 1',
           location: {},
+          severity: 'low',
         },
         {
           code: 'WARNING_2',
           message: 'Test warning 2',
           location: {},
+          severity: 'medium',
         },
       ];
 
@@ -515,12 +560,35 @@ describe('Validation Utils', () => {
 
     it('should handle malformed data gracefully', () => {
       const malformedStructure = {
-        chapters: [null, undefined, {} as any],
-        metadata: null as any,
-      };
+        chapters: [null, undefined, {} as Chapter],
+        metadata: createTestMetadata(), // Use valid metadata object instead of null
+        elements: [],
+        totalParagraphs: 0,
+        totalSentences: 0,
+        totalWordCount: 0,
+        totalChapters: 0,
+        estimatedTotalDuration: 0,
+        confidence: 0,
+        processingMetrics: {
+          parseStartTime: new Date(),
+          parseEndTime: new Date(),
+          parseDurationMs: 0,
+          sourceLength: 0,
+          processingErrors: [],
+        },
+        stats: {
+          totalWords: 0,
+          processingTime: 0,
+          confidenceScore: 0,
+          extractionMethod: 'validation-test',
+          processingTimeMs: 0,
+          errorCount: 0,
+          fallbackCount: 0,
+        },
+      } as DocumentStructure;
       expect(() => {
         try {
-          validateBasicStructure(malformedStructure as any);
+          validateBasicStructure(malformedStructure);
         } catch {
           // Handle gracefully
         }
@@ -529,7 +597,7 @@ describe('Validation Utils', () => {
 
     it('should handle extremely long text content', () => {
       const extremelyLongText = 'a'.repeat(100000);
-      const longSentence = { ...mockSentence, text: extremelyLongText };
+      const longSentence = createTestSentence({ text: extremelyLongText });
       const result = validateSentence({
         sentence: longSentence,
         chapterIndex: 0,
@@ -541,10 +609,9 @@ describe('Validation Utils', () => {
     });
 
     it('should handle special characters in text', () => {
-      const specialCharSentence = {
-        ...mockSentence,
+      const specialCharSentence = createTestSentence({
         text: 'Special chars: 🚀 \n\t "quotes" \'apostrophes\' $%&*(){}[]|\\/:;<>?.',
-      };
+      });
       const result = validateSentence({
         sentence: specialCharSentence,
         chapterIndex: 0,
@@ -557,10 +624,9 @@ describe('Validation Utils', () => {
     });
 
     it('should handle unicode characters', () => {
-      const unicodeSentence = {
-        ...mockSentence,
+      const unicodeSentence = createTestSentence({
         text: 'Unicode: документ 文档 ドキュメント العربية',
-      };
+      });
       const result = validateSentence({
         sentence: unicodeSentence,
         chapterIndex: 0,
@@ -575,20 +641,21 @@ describe('Validation Utils', () => {
 
   describe('Performance', () => {
     it('should handle large documents efficiently', () => {
-      const largeChapters = Array.from({ length: 100 }, (_, i) => ({
-        ...mockChapter,
-        id: `chapter-${i}`,
-        title: `Chapter ${i + 1}`,
-        paragraphs: Array.from({ length: 10 }, (_, j) => ({
-          ...mockParagraph,
-          id: `paragraph-${i}-${j}`,
-        })),
-      }));
+      const largeChapters = Array.from({ length: 100 }, (_, i) =>
+        createTestChapter({
+          id: `chapter-${i}`,
+          title: `Chapter ${i + 1}`,
+          paragraphs: Array.from({ length: 10 }, (_, j) =>
+            createTestParagraph({
+              id: `paragraph-${i}-${j}`,
+            })
+          ),
+        })
+      );
 
-      const largeStructure = {
-        ...mockStructure,
+      const largeStructure = createTestDocumentStructure({
         chapters: largeChapters,
-      };
+      });
 
       const startTime = performance.now();
       const errors = validateBasicStructure(largeStructure);

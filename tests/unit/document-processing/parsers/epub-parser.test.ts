@@ -1,4 +1,12 @@
 import { describe, test, beforeEach, afterEach, mock } from 'bun:test';
+import type {
+  Epub,
+  ManifestItem,
+  DcCreator,
+  DcSubject,
+  MetadataEntry,
+} from '@smoores/epub';
+import type { EpubMetadata } from '../../../../src/core/document-processing/parsers/epub-parser-types.js';
 import { EPUBParser } from '../../../../src/core/document-processing/parsers/epub-parser.js';
 import {
   setupEPUBParserFixture,
@@ -29,7 +37,7 @@ import {
 
 // Mock the Epub module before importing the modules that use it
 const mockEpub = {
-  from: mock(async (input: any) => {
+  from: mock(async (input: string | Uint8Array): Promise<Epub> => {
     // Check for empty buffer that should fail EPUB parsing
     if (input && input.length === 0) {
       throw new Error('Invalid EPUB: empty file');
@@ -59,14 +67,34 @@ const mockEpub = {
     // Default success case for valid inputs
     return createMockEpubInstance();
   }),
-  create: mock(async (options: any) => {
-    return createMockEpubInstance(options);
-  }),
+  create: mock(
+    async (
+      options?: Partial<{
+        title: string;
+        author: string;
+        language: string;
+        publisher: string;
+        identifier: string;
+        date: string;
+      }>
+    ): Promise<Epub> => {
+      return createMockEpubInstance(options);
+    }
+  ),
 };
 
 // Mock EPUB instance factory
-function createMockEpubInstance(options: any = {}) {
-  const defaultMetadata = [
+function createMockEpubInstance(
+  options: Partial<{
+    title: string;
+    author: string;
+    language: string;
+    publisher: string;
+    identifier: string;
+    date: string;
+  }> = {}
+): Epub {
+  const defaultMetadata: EpubMetadata = [
     { type: 'dc:title', properties: {}, value: options.title || 'Test Book' },
     {
       type: 'dc:creator',
@@ -90,41 +118,51 @@ function createMockEpubInstance(options: any = {}) {
   return {
     // Metadata methods
     getTitle: mock(async () => options.title || 'Test Book'),
-    getCreators: mock(async () => [
-      { name: options.author || 'Test Author', role: 'author' },
-    ]),
-    getLanguage: mock(async () => ({ textInfo: { direction: 'ltr' } }) as any),
+    getCreators: mock(
+      async (): Promise<DcCreator[]> => [
+        { name: options.author || 'Test Author', role: 'author' },
+      ]
+    ),
+    getLanguage: mock(async () => {
+      return new Intl.Locale(options.language || 'en');
+    }),
     getPublicationDate: mock(
       async () => new Date(options.date || '2023-01-01')
     ),
-    getSubjects: mock(async () => ['Test Subject']),
-    getType: mock(async () => ({
-      type: 'book',
-      properties: {},
-      value: 'book',
-    })),
+    getSubjects: mock(
+      async (): Promise<Array<string | DcSubject>> => ['Test Subject']
+    ),
+    getType: mock(
+      async (): Promise<MetadataEntry> => ({
+        type: 'book',
+        properties: {},
+        value: 'book',
+      })
+    ),
     getMetadata: mock(async () => defaultMetadata),
 
     // Spine and content methods
-    getSpineItems: mock(async () => [
-      {
-        id: 'chapter1',
-        href: 'chapter1.xhtml',
-        mediaType: 'application/xhtml+xml',
-      },
-      {
-        id: 'chapter2',
-        href: 'chapter2.xhtml',
-        mediaType: 'application/xhtml+xml',
-      },
-      {
-        id: 'chapter3',
-        href: 'chapter3.xhtml',
-        mediaType: 'application/xhtml+xml',
-      },
-    ]),
-    readXhtmlItemContents: mock(async (id: string, format?: string) => {
-      if (format === 'text') {
+    getSpineItems: mock(
+      async (): Promise<ManifestItem[]> => [
+        {
+          id: 'chapter1',
+          href: 'chapter1.xhtml',
+          mediaType: 'application/xhtml+xml',
+        },
+        {
+          id: 'chapter2',
+          href: 'chapter2.xhtml',
+          mediaType: 'application/xhtml+xml',
+        },
+        {
+          id: 'chapter3',
+          href: 'chapter3.xhtml',
+          mediaType: 'application/xhtml+xml',
+        },
+      ]
+    ),
+    readXhtmlItemContents: mock(async (id: string, as?: string) => {
+      if (as === 'text') {
         return `<html><body><h1>Chapter ${id}</h1><p>This is test content for ${id}.</p></body></html>`;
       }
       // Return parsed XML structure (simplified)
@@ -146,33 +184,37 @@ function createMockEpubInstance(options: any = {}) {
     }),
 
     // Manifest and other methods
-    getManifest: mock(async () => ({
-      chapter1: {
-        id: 'chapter1',
-        href: 'chapter1.xhtml',
-        mediaType: 'application/xhtml+xml',
-      },
-      chapter2: {
-        id: 'chapter2',
-        href: 'chapter2.xhtml',
-        mediaType: 'application/xhtml+xml',
-      },
-      chapter3: {
-        id: 'chapter3',
-        href: 'chapter3.xhtml',
-        mediaType: 'application/xhtml+xml',
-      },
-    })),
+    getManifest: mock(
+      async (): Promise<Record<string, ManifestItem>> => ({
+        chapter1: {
+          id: 'chapter1',
+          href: 'chapter1.xhtml',
+          mediaType: 'application/xhtml+xml',
+        },
+        chapter2: {
+          id: 'chapter2',
+          href: 'chapter2.xhtml',
+          mediaType: 'application/xhtml+xml',
+        },
+        chapter3: {
+          id: 'chapter3',
+          href: 'chapter3.xhtml',
+          mediaType: 'application/xhtml+xml',
+        },
+      })
+    ),
     getCoverImage: mock(async () => new Uint8Array([1, 2, 3, 4, 5])),
-    getCoverImageItem: mock(async () => ({
-      id: 'cover',
-      href: 'cover.jpg',
-      mediaType: 'image/jpeg',
-    })),
+    getCoverImageItem: mock(
+      async (): Promise<ManifestItem | null> => ({
+        id: 'cover',
+        href: 'cover.jpg',
+        mediaType: 'image/jpeg',
+      })
+    ),
 
     // Cleanup method
     close: mock(async () => Promise.resolve()),
-  };
+  } as unknown as Epub;
 }
 
 mock.module('@smoores/epub', () => ({
@@ -181,7 +223,7 @@ mock.module('@smoores/epub', () => ({
 
 describe('EPUBParser Constructor', () => {
   let parser: EPUBParser;
-  let fixture: any;
+  let fixture: ReturnType<typeof setupEPUBParserFixture>;
 
   beforeEach(() => {
     fixture = setupEPUBParserFixture();
@@ -210,7 +252,7 @@ describe('EPUBParser Constructor', () => {
 
 describe('EPUBParser Parse Method', () => {
   let parser: EPUBParser;
-  let fixture: any;
+  let fixture: ReturnType<typeof setupEPUBParserFixture>;
 
   beforeEach(() => {
     fixture = setupEPUBParserFixture();
@@ -244,7 +286,7 @@ describe('EPUBParser Parse Method', () => {
 
 describe('EPUBParser Configuration and Stats', () => {
   let parser: EPUBParser;
-  let fixture: any;
+  let fixture: ReturnType<typeof setupEPUBParserFixture>;
 
   beforeEach(() => {
     fixture = setupEPUBParserFixture();
@@ -266,7 +308,7 @@ describe('EPUBParser Configuration and Stats', () => {
 
 describe('EPUBParser Error Handling', () => {
   let parser: EPUBParser;
-  let fixture: any;
+  let fixture: ReturnType<typeof setupEPUBParserFixture>;
 
   beforeEach(() => {
     fixture = setupEPUBParserFixture();
@@ -314,7 +356,7 @@ describe('EPUBParser Content Processing', () => {
 
 describe('EPUBParser Statistics and Interface', () => {
   let parser: EPUBParser;
-  let fixture: any;
+  let fixture: ReturnType<typeof setupEPUBParserFixture>;
 
   beforeEach(() => {
     fixture = setupEPUBParserFixture();

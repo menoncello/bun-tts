@@ -44,6 +44,19 @@ export type {
   ValidationWarning,
 } from './validation-types';
 
+// Structure analyzer types
+export type {
+  DocumentTreeNode,
+  ConfidenceReport,
+  StructureAnalysisOptions,
+  StructureAnalysisResult,
+  StructureValidatorOptions,
+  StructureCorrection,
+  StructureCorrectionResult,
+  EdgeCaseDetection,
+  RiskLevel,
+} from './structure-analyzer-types';
+
 // PDF-specific types
 export type {
   PDFAnalysisMetadata,

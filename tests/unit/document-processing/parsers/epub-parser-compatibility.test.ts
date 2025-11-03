@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
-import { Epub } from '@smoores/epub';
+import { type Epub, type ParsedXml } from '@smoores/epub';
 import {
   detectEPUBVersion,
   analyzeCompatibility,
@@ -8,7 +8,9 @@ import {
   type CompatibilityConfig,
   EPUBVersion,
   type EPUBFeatureSupport,
+  CompatibilityAnalysis,
 } from '../../../../src/core/document-processing/parsers/epub-parser-compatibility.js';
+import type { ManifestItem } from '../../../../src/core/document-processing/parsers/epub-parser-types.js';
 import type {
   DocumentMetadata,
   TableOfContentsItem,
@@ -16,7 +18,7 @@ import type {
 import {
   setupEPUBParserFixture,
   cleanupEPUBParserFixture,
-} from '../../../support/fixtures/epub-parser.fixture';
+} from '../../../support/fixtures/epub-parser.fixture.js';
 
 // Helper functions for test setup
 const createCompatibilityConfig = (
@@ -29,17 +31,43 @@ const createCompatibilityConfig = (
   logCompatibilityWarnings: logWarnings,
 });
 
+/**
+ * Check if version supports EPUB 3.x features.
+ */
+function isEpub3Version(version: EPUBVersion): boolean {
+  return (
+    version === EPUBVersion.EPUB_3_0 ||
+    version === EPUBVersion.EPUB_3_1 ||
+    version === EPUBVersion.EPUB_3_2
+  );
+}
+
 const createMockAnalysis = (
   version: EPUBVersion,
   warnings: string[] = [],
   requiredFallbacks: string[] = []
-) => ({
-  detectedVersion: version,
-  featureSupport: {} as EPUBFeatureSupport,
-  warnings,
-  requiredFallbacks,
-  isCompatible: true,
-});
+): CompatibilityAnalysis => {
+  const supportsEpub3 = isEpub3Version(version);
+
+  const featureSupport: EPUBFeatureSupport = {
+    html5: supportsEpub3,
+    scripting: supportsEpub3,
+    audioVideo: supportsEpub3,
+    fixedLayout: supportsEpub3,
+    mediaOverlays: supportsEpub3,
+    javascript: supportsEpub3,
+    svg: true,
+    css3: supportsEpub3,
+  };
+
+  return {
+    detectedVersion: version,
+    featureSupport,
+    warnings,
+    requiredFallbacks,
+    isCompatible: true,
+  };
+};
 
 const createEpub20FeatureSupport = (): EPUBFeatureSupport => ({
   html5: false,
@@ -95,7 +123,7 @@ const createTestTOC = (): TableOfContentsItem[] => [
 ];
 
 describe('EPUB Parser Compatibility Layer - Version Detection', () => {
-  let fixture: any;
+  let fixture: ReturnType<typeof setupEPUBParserFixture>;
 
   beforeEach(() => {
     fixture = setupEPUBParserFixture();
@@ -162,7 +190,7 @@ describe('EPUB Parser Compatibility Layer - Version Detection', () => {
 });
 
 describe('EPUB Parser Compatibility Layer - Feature Support Analysis', () => {
-  let fixture: any;
+  let fixture: ReturnType<typeof setupEPUBParserFixture>;
 
   beforeEach(() => {
     fixture = setupEPUBParserFixture();
@@ -201,7 +229,7 @@ describe('EPUB Parser Compatibility Layer - Feature Support Analysis', () => {
 });
 
 describe('EPUB Parser Compatibility Layer - Compatibility Analysis', () => {
-  let fixture: any;
+  let fixture: ReturnType<typeof setupEPUBParserFixture>;
 
   beforeEach(() => {
     fixture = setupEPUBParserFixture();
@@ -280,7 +308,7 @@ function createCompatibilityFixtures() {
 }
 
 describe('EPUB Parser Compatibility Layer - Compatibility Fixes', () => {
-  let fixture: any;
+  let fixture: ReturnType<typeof setupEPUBParserFixture>;
 
   beforeEach(() => {
     fixture = setupEPUBParserFixture();
@@ -339,7 +367,7 @@ describe('EPUB Parser Compatibility Layer - Compatibility Fixes', () => {
 });
 
 describe('EPUB Parser Compatibility Layer - Configuration Options', () => {
-  let fixture: any;
+  let fixture: ReturnType<typeof setupEPUBParserFixture>;
 
   beforeEach(() => {
     fixture = setupEPUBParserFixture();
@@ -374,7 +402,10 @@ describe('EPUB Parser Compatibility Layer - Configuration Options', () => {
       });
 
       // WHEN: Analyzing compatibility with default configuration
-      const analysis = await analyzeCompatibility(mockEpub);
+      const analysis = await analyzeCompatibility(
+        mockEpub,
+        createCompatibilityConfig()
+      );
 
       // THEN: Should use default configuration and work correctly
       expect(analysis).toBeDefined();
@@ -385,21 +416,89 @@ describe('EPUB Parser Compatibility Layer - Configuration Options', () => {
 });
 
 // Helper function to create mock EPUB instances
-function createMockEpub(metadata: any): Epub {
-  return {
-    getMetadata: () => Promise.resolve(metadata),
-    getNavItems: () => Promise.resolve([]),
-    getNcxItems: () => Promise.resolve([]),
-    getSpineItems: () =>
-      Promise.resolve([
-        {
-          id: 'chapter1',
-          href: 'chapter1.xhtml',
-          mediaType: 'application/xhtml+xml',
-        },
-      ]),
-    readXhtmlItemContents: () =>
-      Promise.resolve('<html><body>Test content</body></html>'),
+function createMockEpub(metadata: Record<string, string>): Epub {
+  const mockEpub: Partial<Epub> = {
+    getMetadata: () => Promise.resolve(metadata as any),
+    getSpineItems: () => Promise.resolve(getMockSpineItems()),
+    readXhtmlItemContents: createMockReadXhtmlItemContents(),
     close: () => Promise.resolve(),
-  } as any;
+    getManifest: () => Promise.resolve({}),
+    getTitle: () => Promise.resolve('Test Title'),
+    getLanguage: () => Promise.resolve(null),
+    getCreators: () => Promise.resolve([]),
+    getContributors: () => Promise.resolve([]),
+    getSubjects: () => Promise.resolve([]),
+    getPublicationDate: () => Promise.resolve(null),
+    getType: () => Promise.resolve(null),
+    getCoverImageItem: () => Promise.resolve(null),
+    getCoverImage: () => Promise.resolve(null),
+    addSubject: () => Promise.resolve(),
+    setTitle: () => Promise.resolve(),
+    setLanguage: () => Promise.resolve(),
+    addCreator: () => Promise.resolve(),
+    removeCreator: () => Promise.resolve(),
+    addContributor: () => Promise.resolve(),
+    removeContributor: () => Promise.resolve(),
+    setPublicationDate: () => Promise.resolve(),
+    setType: () => Promise.resolve(),
+    setCoverImage: () => Promise.resolve(),
+    addMetadata: () => Promise.resolve(),
+    replaceMetadata: () => Promise.resolve(),
+    readItemContents: createMockReadItemContents(),
+    writeItemContents: () => Promise.resolve(),
+    writeXhtmlItemContents: () => Promise.resolve(),
+    removeManifestItem: () => Promise.resolve(),
+    addManifestItem: () => Promise.resolve(),
+    updateManifestItem: () => Promise.resolve(),
+    writeToArray: () => Promise.resolve(new Uint8Array()),
+    writeToFile: () => Promise.resolve(),
+    getPackageVocabularyPrefixes: () => Promise.resolve({}),
+    setPackageVocabularyPrefix: () => Promise.resolve(),
+    addSpineItem: () => Promise.resolve(),
+    removeSpineItem: () => Promise.resolve(),
+    createXhtmlDocument: () => Promise.resolve([]),
+  };
+
+  return mockEpub as Epub;
+}
+
+// Helper functions to reduce complexity
+function getMockSpineItems(): ManifestItem[] {
+  return [
+    {
+      id: 'chapter1',
+      href: 'chapter1.xhtml',
+      mediaType: 'application/xhtml+xml',
+    },
+  ];
+}
+
+function readXhtmlItemContentsHandler(id: string, as?: 'xhtml' | 'text') {
+  if (as === 'text') {
+    return Promise.resolve('<html><body>Test content</body></html>') as any;
+  }
+  return Promise.resolve([
+    {
+      html: {
+        body: {
+          '#text': 'Test content',
+        },
+      },
+    },
+  ] as unknown as ParsedXml);
+}
+
+function readItemContentsHandler(id: string, encoding?: 'utf-8') {
+  if (encoding === 'utf-8') {
+    return Promise.resolve('Test content') as any;
+  }
+  return Promise.resolve(new Uint8Array() as any);
+}
+
+function createMockReadXhtmlItemContents(): Epub['readXhtmlItemContents'] {
+  return readXhtmlItemContentsHandler;
+}
+
+function createMockReadItemContents(): Epub['readItemContents'] {
+  return readItemContentsHandler;
 }

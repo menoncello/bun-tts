@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>5</storyId>
+    <title>Document Structure Analyzer</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-5-document-structure-analyzer.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>As a user processing complex documents,</asA>
+    <iWant>I want the system to intelligently analyze and structure the content,</iWant>
+    <soThat>so that I get well-organized audiobook chapters and sections.</soThat>
+    <tasks>- [ ] Implement StructureAnalyzer foundation class (AC: 1, 6)
+  - [ ] Create StructureAnalyzer.ts class in src/core/document-processing/
+  - [ ] Implement format-agnostic structure detection interface
+  - [ ] Support integration with MarkdownParser, PDFParser, and EPUBParser
+  - [ ] Generate hierarchical structure tree with DocumentNode interface
+  - [ ] Implement streaming architecture for large documents (1000+ pages)
+
+- [ ] Implement chapter and section detection (AC: 1, 2, 5)
+  - [ ] Detect chapter boundaries using heuristic analysis
+  - [ ] Identify section headers at multiple hierarchy levels
+  - [ ] Handle missing or irregular headers with fallback strategies
+  - [ ] Implement confidence scoring for detected structures
+  - [ ] Support different document format conventions
+
+- [ ] Implement paragraph and sentence boundary detection (AC: 2, 3)
+  - [ ] Extract paragraph boundaries with whitespace and formatting analysis
+  - [ ] Implement sentence-level segmentation with punctuation detection
+  - [ ] Provide confidence scores for each boundary detection
+  - [ ] Handle edge cases (abbreviations, decimals, ellipses)
+  - [ ] Support multilingual sentence boundary detection
+
+- [ ] Implement confidence scoring system (AC: 3)
+  - [ ] Calculate structure detection confidence metrics
+  - [ ] Provide confidence levels per chapter, section, paragraph, sentence
+  - [ ] Implement weighted scoring based on multiple detection signals
+  - [ ] Generate confidence reports for user review
+  - [ ] Support threshold-based acceptance criteria
+
+- [ ] Implement validation and correction interface (AC: 4)
+  - [ ] Create StructureValidation interface for user review
+  - [ ] Implement correction mechanisms for structure boundaries
+  - [ ] Support interactive validation and adjustment
+  - [ ] Allow manual override of automatic detection
+  - [ ] Preserve user corrections for future processing
+
+- [ ] Implement TUI visualization structure generation (AC: 6)
+  - [ ] Generate hierarchical structure tree for TUI components
+  - [ ] Create DocumentTreeNode interface for React components
+  - [ ] Support real-time structure updates during processing
+  - [ ] Implement efficient tree rendering for large documents
+  - [ ] Provide structure statistics and metadata
+
+- [ ] Integration with existing parsers (AC: 1, 6)
+  - [ ] Extend MarkdownParser with structure analysis capabilities
+  - [ ] Extend PDFParser with layout-based structure detection
+  - [ ] Extend EPUBParser with chapter/section hierarchy extraction
+  - [ ] Ensure consistent structure output across all formats
+  - [ ] Implement parser-agnostic StructureAnalyzer interface
+
+- [ ] Write comprehensive tests (Quality Standards)
+  - [ ] Unit tests for StructureAnalyzer class methods
+  - [ ] Integration tests with all three parser types
+  - [ ] Edge case tests for irregular document formatting
+  - [ ] Performance tests for large document analysis
+  - [ ] Mutation testing for structure detection logic
+  - [ ] Confidence scoring validation tests
+  - [ ] TUI visualization component tests</tasks>
+  </story>
+
+  <acceptanceCriteria>1. Analyze document structure across all supported formats
+2. Identify chapters, sections, paragraphs, and sentence boundaries
+3. Provide confidence scores for structure detection
+4. Allow user validation and correction of automatic analysis
+5. Handle edge cases (missing headers, irregular formatting)
+6. Generate hierarchical structure tree for TUI visualization</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/architecture.md">
+        <title>Decision Architecture</title>
+        <section>Document Processing Stack</section>
+        <snippet>Structure Analysis: Custom confidence scoring and validation system. Project structure at lines 60-67 defines document-processing module layout.</snippet>
+      </doc>
+      <doc path="docs/architecture.md">
+        <title>Decision Architecture</title>
+        <section>Streaming Document Processing Pattern</section>
+        <snippet>Pattern 2: Streaming Document Processing for large documents (1000+ pages) without memory issues - critical for AC1, AC5</snippet>
+      </doc>
+      <doc path="docs/PRD.md">
+        <title>Product Requirements Document</title>
+        <section>FR004 & FR005</section>
+        <snippet>FR004: Automatically analyze document structure and identify chapters, paragraphs, and individual sentences with confidence scoring. FR005: Handle large documents through streaming processing.</snippet>
+      </doc>
+      <doc path="docs/epics.md">
+        <title>Epic Breakdown</title>
+        <section>Story 1.5: Document Structure Analyzer</section>
+        <snippet>Complete story specification with 6 acceptance criteria: structure analysis, boundary detection, confidence scoring, validation, edge cases, and TUI visualization.</snippet>
+      </doc>
+      <doc path="docs/stories/1-4-epub-document-parser.md">
+        <title>Story 1.4: EPUB Document Parser</title>
+        <section>Lessons Learned</section>
+        <snippet>Comprehensive modular parser architecture with 48 specialized modules. Error handling with Result pattern. Streaming architecture for large documents. 106 test files with factory patterns.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <file path="src/core/document-processing/document-structure.ts" kind="interface">
+        <symbol>EnhancedChapter, Section, DocumentStructureBuilder</symbol>
+        <lines>16-80</lines>
+        <reason>Existing document structure interfaces and builder pattern for hierarchical organization</reason>
+      </file>
+      <file path="src/core/document-processing/parsers/parser-core.ts" kind="module">
+        <symbol>parseMarkdownDocument, tokenizeMarkdown</symbol>
+        <lines>38-67</lines>
+        <reason>Core parsing orchestration patterns and token processing infrastructure</reason>
+      </file>
+      <file path="src/core/document-processing/parsers/markdown-parser.ts" kind="class">
+        <symbol>MarkdownParser</symbol>
+        <reason>Existing Markdown parsing implementation to extend with structure analysis</reason>
+      </file>
+      <file path="src/core/document-processing/parsers/pdf-parser.ts" kind="class">
+        <symbol>PDFParser</symbol>
+        <reason>Existing PDF parsing with layout preservation - integrate structure detection</reason>
+      </file>
+      <file path="src/core/document-processing/parsers/epub-parser.ts" kind="class">
+        <symbol>EPUBParser</symbol>
+        <reason>Existing EPUB parsing with chapter detection - add structure analyzer integration</reason>
+      </file>
+      <file path="src/core/document-processing/parsers/confidence-utils.ts" kind="module">
+        <symbol>confidence scoring utilities</symbol>
+        <reason>Existing confidence scoring patterns from PDF parser for structure detection</reason>
+      </file>
+    </code>
+    <dependencies>
+      <ecosystem node>
+        <package>pdf-parse</package>
+        <version>PDF text extraction</version>
+      </ecosystem>
+      <ecosystem node>
+        <package>@smoores/epub@0.1.9</package>
+        <version>EPUB parsing library</version>
+      </ecosystem>
+      <ecosystem node>
+        <package>marked</package>
+        <version>Markdown parser</version>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Follow documented project structure from architecture.md lines 60-67
+    - Implement StructureAnalyzer class in src/core/document-processing/
+    - Use feature-based organization aligning with epic structure
+    - Follow streaming architecture pattern for memory efficiency (Pattern 2)
+    - Integrate with existing MarkdownParser, PDFParser, and EPUBParser
+    - TypeScript strict mode compliance (full type safety)
+    - Zero ESLint violations policy
+    - Comprehensive error handling with custom error classes + Result pattern
+    - Structured Pino logging throughout
+    - Modular design with separation of concerns
+  </constraints>
+
+  <interfaces>
+    <api name="StructureAnalyzer">
+      <kind>TypeScript interface</kind>
+      <signature>interface StructureAnalyzer {
+  analyzeDocument(content: string, format: DocumentFormat): Promise&lt;DocumentStructure | Error&gt;;
+  detectChapters(structure: PartialDocumentStructure): Chapter[];
+  detectSections(chapter: Chapter): Section[];
+  detectParagraphs(section: Section): Paragraph[];
+  detectSentences(paragraph: Paragraph): Sentence[];
+  calculateConfidence(detection: StructureDetection): ConfidenceScore;
+  validateStructure(structure: DocumentStructure): ValidationResult;
+}</signature>
+      <path>src/core/document-processing/StructureAnalyzer.ts (to be created)</path>
+    </api>
+    <api name="DocumentNode">
+      <kind>TypeScript interface</kind>
+      <signature>interface DocumentNode {
+  id: string;
+  type: 'chapter' | 'section' | 'paragraph' | 'sentence';
+  title?: string;
+  content: string;
+  confidence: number;
+  children: DocumentNode[];
+  metadata: Record&lt;string, unknown&gt;;
+}</signature>
+      <path>src/core/document-processing/types.ts (to be extended)</path>
+    </api>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Bun Test framework for unit and integration testing. Comprehensive test coverage for all structure detection scenarios. Mutation testing with StrykerJS to ensure analysis quality. Edge case handling for corrupted structures. Performance validation for 1000+ page documents. Integration testing with all three document parsers.
+    </standards>
+    <locations>
+      tests/unit/document-processing/structure-analyzer/ (to be created)
+      tests/integration/document-processing/structure-analyzer/ (to be created)
+      tests/support/factories/document-structure/ (to be created)
+    </locations>
+    <ideas>
+      AC1: Test structure analysis across Markdown, PDF, and EPUB formats with varying complexities
+      AC2: Test chapter/section detection with missing headers, irregular formatting, and edge cases
+      AC3: Test confidence scoring accuracy with known document structures and boundary detection
+      AC4: Test user validation interface with manual corrections and override capabilities
+      AC5: Test handling of malformed documents, missing headers, and irregular formatting
+      AC6: Test hierarchical structure tree generation and TUI visualization efficiency
+    </ideas>
+  </tests>
+</story-context>
