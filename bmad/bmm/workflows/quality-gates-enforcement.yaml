@@ -1,0 +1,96 @@
+# Quality Gates Enforcement Workflow
+name: "quality-gates-enforcement"
+description: "MANDATORY quality validation that blocks story completion if any quality gate fails"
+author: "BMad Quality System"
+
+config_source: "{project-root}/bmad/bmm/config.yaml"
+output_folder: "{config_source}:output_folder"
+user_name: "{config_source}:user_name"
+communication_language: "{config_source}:communication_language"
+user_skill_level: "{config_source}:user_skill_level"
+document_output_language: "{config_source}:document_output_language"
+date: system-generated
+
+installed_path: "{project-root}/bmad/bmm/workflows/quality-gates-enforcement"
+template: false
+instructions: "{installed_path}/instructions.md"
+
+mode: validation
+trigger: "Run BEFORE any story completion - MANDATORY"
+
+quality_gates:
+  mandatory_checks:
+    - name: "typescript_compilation"
+      description: "All code must compile with TypeScript strict mode"
+      command: "bun run build"
+      expected_result: "exit_code_0"
+      failure_action: "BLOCK_COMPLETION"
+
+    - name: "eslint_compliance"
+      description: "ZERO ESLint errors - no exceptions permitted"
+      command: "bun run lint"
+      expected_result: "zero_errors"
+      failure_action: "BLOCK_COMPLETION"
+
+    - name: "test_success"
+      description: "All tests must pass - zero failures permitted"
+      command: "bun test"
+      expected_result: "all_tests_pass"
+      failure_action: "BLOCK_COMPLETION"
+
+    - name: "mutation_testing"
+      description: "Mutation testing must meet minimum thresholds"
+      command: "bun run stryker"
+      threshold: "80%"
+      expected_result: "above_threshold"
+      failure_action: "BLOCK_COMPLETION"
+
+  code_quality_checks:
+    - name: "no_eslint_disables"
+      description: "ZERO eslint-disable or @ts-ignore permitted"
+      scan_pattern: "src/**/*.ts"
+      forbidden_patterns:
+        - "eslint-disable"
+        - "@ts-ignore"
+        - "@ts-expect-error"
+      failure_action: "BLOCK_COMPLETION"
+
+    - name: "function_size_limit"
+      description: "Functions must be ≤ 30 lines"
+      scan_pattern: "src/**/*.ts"
+      max_lines: 30
+      failure_action: "BLOCK_COMPLETION"
+
+    - name: "file_size_limit"
+      description: "Files must be ≤ 300 lines"
+      scan_pattern: "src/**/*.ts"
+      max_lines: 300
+      failure_action: "BLOCK_COMPLETION"
+
+  test_quality_checks:
+    - name: "test_fixture_existence"
+      description: "All test fixtures referenced must exist"
+      scan_pattern: "tests/**/*.ts"
+      validate_imports: true
+      failure_action: "BLOCK_COMPLETION"
+
+    - name: "test_coverage"
+      description: "Minimum test coverage required"
+      command: "bun test --coverage"
+      min_coverage: "80%"
+      failure_action: "BLOCK_COMPLETION"
+
+blocking_behavior:
+  on_failure:
+    - Stop workflow immediately
+    - Report specific quality gate failures
+    - Provide actionable remediation steps
+    - Do NOT allow story completion until all gates pass
+
+  on_success:
+    - Generate quality compliance report
+    - Allow story progression to next phase
+    - Log quality metrics for tracking
+
+validation_strictness: "ZERO_TOLERANCE"
+enforcement_mode: "MANDATORY"

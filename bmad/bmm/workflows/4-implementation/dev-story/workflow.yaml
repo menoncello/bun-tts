@@ -23,4 +23,40 @@ installed_path: "{project-root}/bmad/bmm/workflows/4-implementation/dev-story"
 instructions: "{installed_path}/instructions.md"
 validation: "{installed_path}/checklist.md"
 
+# QUALITY GATES ENFORCEMENT - MANDATORY FOR DEVELOPMENT
+# ====================================================
+# DEVELOPER MUST PASS ALL QUALITY GATES BEFORE STORY COMPLETION
+# NO EXCEPTIONS, NO WORKAROUNDS, NO SHORTCUTS
+# ZERO TOLERANCE FOR QUALITY VIOLATIONS
+quality_gates: "{project-root}/bmad/bmm/workflows/quality-gates-enforcement.yaml"
+validation_required: true
+enforcement_mode: "ZERO_TOLERANCE"
+blocking_behavior: "MANDATORY"
+
+# Quality gate checkpoints for development
+quality_checkpoints:
+  - name: "implementation_complete"
+    description: "All code must pass quality gates before implementation can be considered complete"
+    required_gates: "all"
+    failure_action: "BLOCK_COMPLETION"
+
+  - name: "tests_complete"
+    description: "All tests must pass quality gates before testing can be considered complete"
+    required_gates: "all"
+    failure_action: "BLOCK_COMPLETION"
+
+  - name: "story_completion"
+    description: "Final quality gate validation before story can be marked as done"
+    required_gates: "all"
+    failure_action: "BLOCK_COMPLETION"
+
+# Development quality requirements
+development_requirements:
+  - "ZERO ESLint errors permitted"
+  - "ZERO TypeScript errors permitted"
+  - "All tests must pass"
+  - "Mutation testing thresholds must be met"
+  - "Code complexity limits must be respected"
+  - "No eslint-disable or @ts-ignore allowed"
+
 standalone: true

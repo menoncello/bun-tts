@@ -1,0 +1,211 @@
+# Quality Gates Configuration - MANDATORY ENFORCEMENT
+name: "quality-gates"
+description: "CRITICAL: Mandatory quality gates that BLOCK story completion if ANY quality check fails"
+author: "BMad Quality Enforcement System"
+version: "1.0.0"
+enforcement: "STRICT - NO EXCEPTIONS"
+
+# QUALITY GATES ARE NON-NEGOTIABLE
+# =================================
+# ANY failure = AUTOMATIC BLOCK of story completion
+# NO manual overrides permitted
+# NO "eslint-disable" or @ts-ignore allowed
+# Production-ready standards ONLY
+
+quality_gates:
+  mandatory_checks:
+    - name: "typescript_compilation"
+      description: "TypeScript strict mode compilation - ZERO errors permitted"
+      command: "bun run build"
+      validation_type: "exit_code"
+      expected_result: 0
+      failure_action: "BLOCK_COMPLETION"
+      error_message: "🚨 BLOCKED: TypeScript compilation failed - Fix ALL TypeScript errors before proceeding"
+
+    - name: "eslint_compliance"
+      description: "ESLint strict compliance - ZERO errors permitted"
+      command: "bun run lint"
+      validation_type: "exit_code"
+      expected_result: 0
+      failure_action: "BLOCK_COMPLETION"
+      error_message: "🚨 BLOCKED: ESLint errors detected - Fix ALL ESLint issues. NO eslint-disable allowed!"
+
+    - name: "test_execution"
+      description: "All tests must pass - ZERO test failures permitted"
+      command: "bun test"
+      validation_type: "exit_code"
+      expected_result: 0
+      failure_action: "BLOCK_COMPLETION"
+      error_message: "🚨 BLOCKED: Test failures detected - ALL tests must pass before proceeding"
+
+    - name: "test_coverage"
+      description: "Minimum test coverage requirements"
+      command: "bun run test:coverage"
+      validation_type: "coverage_threshold"
+      thresholds:
+        statements: 90
+        branches: 85
+        functions: 90
+        lines: 90
+      failure_action: "BLOCK_COMPLETION"
+      error_message: "🚨 BLOCKED: Test coverage below threshold - Improve test coverage before proceeding"
+
+    - name: "mutation_testing"
+      description: "Mutation testing quality gates"
+      command: "bun run test:mutation"
+      validation_type: "mutation_score"
+      thresholds:
+        high: 90
+        low: 80
+        break: 70
+      failure_action: "BLOCK_COMPLETION"
+      error_message: "🚨 BLOCKED: Mutation score below threshold - Write better tests to kill mutants"
+
+    - name: "code_complexity"
+      description: "Code complexity and structure validation"
+      command: "bun run lint:complexity"
+      validation_type: "complexity_metrics"
+      limits:
+        max_function_lines: 30
+        max_file_lines: 300
+        max_cyclomatic_complexity: 15
+      failure_action: "BLOCK_COMPLETION"
+      error_message: "🚨 BLOCKED: Code complexity exceeded - Refactor into smaller, simpler functions"
+
+    - name: "dependency_security"
+      description: "Security vulnerability scan"
+      command: "bun audit"
+      validation_type: "security_vulnerabilities"
+      max_allowed_vulnerabilities: 0
+      failure_action: "BLOCK_COMPLETION"
+      error_message: "🚨 BLOCKED: Security vulnerabilities detected - Update dependencies before proceeding"
+
+# FORBIDDEN PATTERNS - INSTANT REJECTION
+forbidden_patterns:
+  - pattern: "eslint-disable"
+    description: "ESLint disables are forbidden - Fix the root cause instead"
+    severity: "CRITICAL"
+    action: "BLOCK_COMPLETION"
+
+  - pattern: "@ts-ignore"
+    description: "TypeScript ignores are forbidden - Fix the type issue instead"
+    severity: "CRITICAL"
+    action: "BLOCK_COMPLETION"
+
+  - pattern: "any"
+    description: "TypeScript any types are forbidden - Use proper typing"
+    severity: "ERROR"
+    action: "REQUEST_FIX"
+
+  - pattern: "console.log"
+    description: "Console.log statements are forbidden in production code"
+    severity: "WARNING"
+    action: "REQUEST_REMOVE"
+
+# CODE STYLE REQUIREMENTS
+code_style_requirements:
+  function_length:
+    max_lines: 30
+    description: "Functions must be <= 30 lines - Extract helper functions if needed"
+
+  file_length:
+    max_lines: 300
+    description: "Files must be <= 300 lines - Split into multiple files if needed"
+
+  class_length:
+    max_lines: 200
+    description: "Classes must be <= 200 lines - Extract methods to separate files"
+
+  cyclomatic_complexity:
+    max_score: 15
+    description: "Complexity must be <= 15 - Simplify logic and extract functions"
+
+# TESTING REQUIREMENTS
+testing_requirements:
+  unit_tests:
+    coverage_minimum: 90
+    description: "Unit test coverage must be >= 90%"
+
+  integration_tests:
+    required_for_critical_paths: true
+    description: "Critical paths must have integration tests"
+
+  test_quality:
+    no_mock_only_tests: true
+    description: "Tests must verify actual behavior, not just mocks"
+
+  mutation_testing:
+    minimum_score: 80
+    description: "Mutation testing score must be >= 80%"
+
+# DOCUMENTATION REQUIREMENTS
+documentation_requirements:
+  public_apis:
+    require_jsdoc: true
+    description: "All public APIs must have JSDoc documentation"
+
+  complex_functions:
+    require_comments: true
+    description: "Complex functions must have explanatory comments"
+
+  configuration:
+    require_documentation: true
+    description: "All configuration options must be documented"
+
+# ENFORCEMENT PROTOCOL
+enforcement_protocol:
+  automatic_blocking:
+    enabled: true
+    description: "Automatically block story completion on ANY quality gate failure"
+
+  manual_override:
+    allowed: false
+    description: "NO manual overrides permitted for quality gates"
+
+  notification:
+    level: "CRITICAL"
+    description: "Quality gate failures are treated as critical blocking issues"
+
+# QUALITY SCORE CALCULATION
+quality_score:
+  weights:
+    functionality: 0.3
+    reliability: 0.25
+    security: 0.2
+    maintainability: 0.15
+    performance: 0.1
+
+  minimum_acceptable_score: 85
+  target_score: 95
+
+# REPORTING
+reporting:
+  generate_report: true
+  include_metrics: true
+  include_recommendations: true
+  output_format: "markdown"
+
+# INTEGRATION WITH WORKFLOWS
+integration_points:
+  - workflow: "create-story"
+    checkpoint: "story_completion"
+    required_gates: "all"
+
+  - workflow: "dev-story"
+    checkpoint: "implementation_complete"
+    required_gates: "all"
+
+  - workflow: "code-review"
+    checkpoint: "review_complete"
+    required_gates: "all"
+
+---
+# USAGE INSTRUCTIONS
+# ===================
+# This file is automatically loaded by all development workflows
+# ANY quality gate failure will BLOCK story completion
+# NO exceptions, NO workarounds, NO manual overrides permitted
+
+# To integrate with a workflow, add:
+# quality_gates: "{project-root}/bmad/bmm/workflows/quality-gates.yaml"
+# validation_required: true
