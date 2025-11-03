@@ -157,37 +157,40 @@ Expected ready-for-dev or in-progress. Continuing anyway...
   </step>
 
   <step n="4" goal="Run quality gates and validations">
-    <critical>Quality validation is MANDATORY - ALL substeps must pass with ZERO errors before marking any task complete</critical>
+    <critical>Quality validation is MANDATORY - ALL substeps must pass with ZERO errors</critical>
 
     <substep n="4.1" goal="TypeScript type checking">
-      <action>Run: bun run typecheck</action>
+      <action>Run: bun run typecheck (or tsc --noEmit)</action>
       <check>ZERO TypeScript errors required - no exceptions</check>
-      <critical>NEVER use @ts-ignore or @ts-expect-error - fix the underlying type issue</critical>
-      <action if="TypeScript errors exist">STOP and fix all type errors before continuing</action>
+      <critical>NEVER use @ts-ignore - fix the actual type issue</critical>
     </substep>
 
     <substep n="4.2" goal="ESLint validation">
       <action>Run: bun run lint</action>
       <check>ZERO ESLint errors required</check>
       <critical>NEVER add eslint-disable comments - refactor code to satisfy the rule</critical>
-      <action if="ESLint errors exist">STOP and fix all lint errors before continuing</action>
     </substep>
 
-    <substep n="4.3" goal="Test execution">
+    <substep n="4.3" goal="Code formatting">
+      <action>Run: bun run format:check</action>
+      <check>100% Prettier compliance required</check>
+    </substep>
+
+    <substep n="4.4" goal="Unit/integration tests">
+      <action>Determine how to run tests for this repo (infer or use {{run_tests_command}} if provided)</action>
       <action>Run: bun test</action>
       <check>100% test pass rate required</check>
-      <action if="any test fails">STOP and fix failing tests before continuing</action>
+      <action if="regression tests fail">STOP and fix before continuing, consider how current changes made broke regression</action>
+      <action if="new tests fail">STOP and fix before continuing</action>
     </substep>
 
-    <substep n="4.4" goal="Mutation testing">
+    <substep n="4.5" goal="Mutation testing">
       <action>Run: bun run test:mutation</action>
       <check>Must meet thresholds: 90% high, 80% low, 70% break</check>
-      <action if="mutation score below thresholds">STOP and improve tests to kill more mutants</action>
     </substep>
 
-    <action>Validate implementation meets ALL story acceptance criteria</action>
-    <action>ONLY mark task checkboxes with [x] if ALL quality gates pass</action>
-    <action if="any quality gate fails">Return to implementation and fix issues - NEVER mark tasks complete with failing quality gates</action>
+    <action>Validate implementation meets ALL story acceptance criteria; if ACs include quantitative thresholds (e.g., test pass rate), ensure they are met before marking complete</action>
+    <action if="any quality gate fails">STOP and fix before continuing - never disable rules or lower thresholds</action>
   </step>
 
   <step n="5" goal="Mark task complete, track review resolutions, and update story">

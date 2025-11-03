@@ -3,22 +3,41 @@ import {
   getErrorCode,
   getErrorRecoverable,
 } from '../../../../src/core/document-processing/parsers/epub-parser-type-guards.js';
+import type { EPUBParseOptions } from '../../../../src/core/document-processing/parsers/epub-parser-types.js';
 import { EPUBParser } from '../../../../src/core/document-processing/parsers/epub-parser.js';
+import type {
+  ParseResult,
+  PerformanceStats,
+} from '../../../../src/core/document-processing/types.js';
 import {
   setupEPUBParserFixture,
   cleanupEPUBParserFixture,
-} from '../../../support/fixtures/epub-parser.fixture';
+} from '../../../support/fixtures/epub-parser.fixture.js';
 
 // Mock the Epub module before importing the modules that use it
 const mockEpub = {
-  from: mock((input: any) => {
+  from: mock((input: unknown) => {
     // Check for empty buffer that should fail EPUB parsing
-    if (input && input.length === 0) {
+    if (Buffer.isBuffer(input) && input.length === 0) {
       return Promise.reject(new Error('Invalid EPUB: empty file'));
     }
 
     // Default success case for valid inputs
-    return Promise.resolve({ metadata: { title: 'Test Book' } });
+    const mockEpubInstance = {
+      metadata: { title: 'Test Book', creator: 'Test Author' },
+      getMetadata: mock(() =>
+        Promise.resolve({ title: 'Test Book', creator: 'Test Author' })
+      ),
+      getTitle: mock(() => Promise.resolve('Test Book')),
+      getCreators: mock(() => Promise.resolve(['Test Author'])),
+      getLanguage: mock(() => Promise.resolve('en')),
+      getSpineItems: mock(() =>
+        Promise.resolve([{ idref: 'chapter1', href: 'chapter1.xhtml' }])
+      ),
+      readXhtmlItemContents: mock(() => Promise.resolve('<p>Test content</p>')),
+      close: mock(() => Promise.resolve()),
+    };
+    return Promise.resolve(mockEpubInstance);
   }),
 };
 
@@ -27,18 +46,18 @@ mock.module('@smoores/epub', () => ({
 }));
 
 let parser: EPUBParser;
-let fixture: any;
+let fixture: ReturnType<typeof setupEPUBParserFixture>;
 
-const setupTestEnvironment = () => {
+const setupTestEnvironment = (): void => {
   fixture = setupEPUBParserFixture();
   parser = fixture.parser;
 };
 
-const teardownTestEnvironment = async () => {
+const teardownTestEnvironment = async (): Promise<void> => {
   await cleanupEPUBParserFixture(fixture);
 };
 
-const testLargeBufferHandling = async () => {
+const testLargeBufferHandling = async (): Promise<void> => {
   // GIVEN: Extremely large buffer input
   const largeBuffer = Buffer.alloc(10 * 1024 * 1024); // 10MB buffer
   largeBuffer.fill('A');
@@ -56,7 +75,7 @@ const testLargeBufferHandling = async () => {
   }
 };
 
-const testCorruptedStructureHandling = async () => {
+const testCorruptedStructureHandling = async (): Promise<void> => {
   // GIVEN: Malformed EPUB content with corrupted zip structure
   const corruptedContent = Buffer.from([
     0x50,
@@ -84,7 +103,7 @@ const testCorruptedStructureHandling = async () => {
   expect(errorCode).toBe('EPUB_FORMAT_ERROR');
 };
 
-const testBinaryContentHandling = async () => {
+const testBinaryContentHandling = async (): Promise<void> => {
   // GIVEN: Binary content that's not EPUB format
   const binaryContent = Buffer.from([
     0x89,
@@ -105,7 +124,7 @@ const testBinaryContentHandling = async () => {
   expect(result.error).toBeDefined();
 };
 
-const testUnicodeContentHandling = async () => {
+const testUnicodeContentHandling = async (): Promise<void> => {
   // GIVEN: Content with unicode characters
   const unicodeContent = Buffer.from(
     'PK\x03\x04Unicode content: ñáéíóú 📚',
@@ -120,13 +139,13 @@ const testUnicodeContentHandling = async () => {
   expect(typeof result.success).toBe('boolean');
 };
 
-const createParserWithOptions = (options: any) => {
+const createParserWithOptions = (options: EPUBParseOptions): void => {
   expect(() => new EPUBParser(options)).not.toThrow();
 };
 
-const testParserOptionsValidation = () => {
+const testParserOptionsValidation = (): void => {
   // GIVEN: Parser with various option combinations
-  const testOptions = [
+  const testOptions: EPUBParseOptions[] = [
     { extractMedia: true },
     { extractMedia: false },
     { preserveHTML: true },
@@ -145,7 +164,7 @@ const testParserOptionsValidation = () => {
   }
 };
 
-const testEmptyOptionsHandling = () => {
+const testEmptyOptionsHandling = (): void => {
   // GIVEN: Empty options object
   // WHEN: Creating parser
   const parserWithOptions = new EPUBParser({});
@@ -155,15 +174,19 @@ const testEmptyOptionsHandling = () => {
   expect(typeof parserWithOptions.parse).toBe('function');
 };
 
-const testNullOrUndefinedOptionsHandling = () => {
+const testNullOrUndefinedOptionsHandling = (): void => {
   // GIVEN: Null or undefined options
   // WHEN: Creating parser with null/undefined options
   // THEN: Should not throw and use defaults
-  expect(() => new EPUBParser(null as any)).not.toThrow();
-  expect(() => new EPUBParser(undefined as any)).not.toThrow();
+  expect(
+    () => new EPUBParser(null as unknown as EPUBParseOptions)
+  ).not.toThrow();
+  expect(
+    () => new EPUBParser(undefined as unknown as EPUBParseOptions)
+  ).not.toThrow();
 };
 
-const testStatisticsTracking = async () => {
+const testStatisticsTracking = async (): Promise<void> => {
   // GIVEN: Parser instance
 
   // WHEN: Performing parse operation that affects stats
@@ -180,7 +203,7 @@ const testStatisticsTracking = async () => {
   expect(typeof statsAfter.cacheMisses).toBe('number');
 };
 
-const testRepeatedOperations = async () => {
+const testRepeatedOperations = async (): Promise<void> => {
   // GIVEN: Parser instance
   // WHEN: Performing multiple parse operations
   const results = await Promise.all([
@@ -196,7 +219,7 @@ const testRepeatedOperations = async () => {
   }
 };
 
-const testConcurrentOperations = async () => {
+const testConcurrentOperations = async (): Promise<void> => {
   // GIVEN: Parser instance
   // WHEN: Running multiple parse operations concurrently
   const concurrentPromises = Array.from({ length: 5 }, () =>
@@ -213,7 +236,7 @@ const testConcurrentOperations = async () => {
   }
 };
 
-const testMalformedJSONHandling = async () => {
+const testMalformedJSONHandling = async (): Promise<void> => {
   // GIVEN: Content that simulates malformed metadata
   const malformedContent = Buffer.from(
     'PK\x03\x04mimetypeapplication/epub+zipPK\x03\x04META-INF/container.xml' +
@@ -235,21 +258,22 @@ const testMalformedJSONHandling = async () => {
   expect(typeof result.success).toBe('boolean');
 };
 
-const testParserStateMutations = async () => {
+const testParserStateMutations = async (): Promise<void> => {
   // GIVEN: Parser instance
 
   // WHEN: Modifying parser options during operation
-  parser.setOptions({ extractMedia: !parser.getStats().parseTime });
+  const currentStats = parser.getStats();
+  parser.setOptions({ extractMedia: !currentStats.parseTimeMs });
   await parser.parse(fixture.corruptedEPUB);
   parser.setOptions({ extractMedia: false });
 
   // THEN: Parser should remain functional
   const finalStats = parser.getStats();
   expect(finalStats).toBeDefined();
-  expect(typeof finalStats.parseTime).toBe('number');
+  expect(typeof finalStats.parseTimeMs).toBe('number');
 };
 
-const testBoundaryConditions = async () => {
+const testBoundaryConditions = async (): Promise<void> => {
   // GIVEN: Buffer with various boundary conditions
   const boundaryConditions = [
     Buffer.alloc(0), // Empty buffer
@@ -274,7 +298,7 @@ const testBoundaryConditions = async () => {
   }
 };
 
-const validateErrorConditionResult = (result: any) => {
+const validateErrorConditionResult = (result: ParseResult): void => {
   // THEN: Each should produce structured error response
   expect(result).toBeDefined();
   if (!result.success) {
@@ -289,9 +313,9 @@ const validateErrorConditionResult = (result: any) => {
   }
 };
 
-const testErrorConditionHandling = async () => {
+const testErrorConditionHandling = async (): Promise<void> => {
   // GIVEN: Various error conditions
-  const errorConditions = [
+  const errorConditions: Array<string | Buffer | null | undefined> = [
     null,
     undefined,
     '',
@@ -302,15 +326,15 @@ const testErrorConditionHandling = async () => {
 
   // WHEN: Testing each error condition
   for (const condition of errorConditions) {
-    const result = await parser.parse(condition as any);
+    const result = await parser.parse(condition as unknown);
     validateErrorConditionResult(result);
   }
 };
 
-const generateAllConfigurations = () => {
+const generateAllConfigurations = (): EPUBParseOptions[] => {
   // GIVEN: All possible parser configuration combinations
   const booleanOptions = [true, false];
-  const configurations = [];
+  const configurations: EPUBParseOptions[] = [];
 
   for (const extractMedia of booleanOptions) {
     for (const preserveHTML of booleanOptions) {
@@ -326,7 +350,7 @@ const generateAllConfigurations = () => {
   return configurations;
 };
 
-const testConfigurationCreation = () => {
+const testConfigurationCreation = (): void => {
   const configurations = generateAllConfigurations();
 
   // WHEN: Creating parsers with all configurations
@@ -336,16 +360,16 @@ const testConfigurationCreation = () => {
   }
 };
 
-const validateStatsStructure = (stats: any) => {
+const validateStatsStructure = (stats: PerformanceStats): void => {
   expect(stats).toBeDefined();
-  expect(typeof stats.parseTime).toBe('number');
+  expect(typeof stats.parseTimeMs).toBe('number');
   expect(typeof stats.chaptersPerSecond).toBe('number');
-  expect(typeof stats.memoryUsage).toBe('number');
+  expect(typeof stats.memoryUsageMB).toBe('number');
   expect(typeof stats.cacheHits).toBe('number');
   expect(typeof stats.cacheMisses).toBe('number');
 };
 
-const testStatisticsWithDifferentStates = () => {
+const testStatisticsWithDifferentStates = (): void => {
   // GIVEN: Parser in different states
   const freshParser = new EPUBParser();
   const configuredParser = new EPUBParser({ extractMedia: true });
@@ -360,7 +384,7 @@ const testStatisticsWithDifferentStates = () => {
   }
 };
 
-const defineBufferHandlingTests = () => {
+const defineBufferHandlingTests = (): void => {
   describe('Buffer Handling Edge Cases', () => {
     test(
       'AC1-EC01: should handle extremely large buffer input',
@@ -389,7 +413,7 @@ const defineBufferHandlingTests = () => {
   });
 };
 
-const defineParserOptionsTests = () => {
+const defineParserOptionsTests = (): void => {
   describe('Parser Options Edge Cases', () => {
     test(
       'AC1-EC05: should handle parser options validation',
@@ -408,7 +432,7 @@ const defineParserOptionsTests = () => {
   });
 };
 
-const definePerformanceTests = () => {
+const definePerformanceTests = (): void => {
   describe('Performance and Concurrency Edge Cases', () => {
     test(
       'AC1-EC08: should handle statistics tracking mutations',
@@ -427,7 +451,7 @@ const definePerformanceTests = () => {
   });
 };
 
-const defineDataHandlingTests = () => {
+const defineDataHandlingTests = (): void => {
   describe('Data Handling Edge Cases', () => {
     test(
       'AC1-EC11: should handle malformed JSON in metadata extraction',
@@ -441,7 +465,7 @@ const defineDataHandlingTests = () => {
   });
 };
 
-const defineCriticalEdgeCaseTests = () => {
+const defineCriticalEdgeCaseTests = (): void => {
   describe('Critical Edge Cases for Mutation Coverage', () => {
     defineBufferHandlingTests();
     defineParserOptionsTests();
@@ -450,7 +474,7 @@ const defineCriticalEdgeCaseTests = () => {
   });
 };
 
-const defineMutationCoverageTests = () => {
+const defineMutationCoverageTests = (): void => {
   describe('Mutation Testing Coverage', () => {
     test(
       'AC1-MT01: should test all conditional branches in error handling',

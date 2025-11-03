@@ -51,6 +51,8 @@ export interface ValidationWarning {
     sentence?: number;
     line?: number;
   };
+  /** Warning severity level */
+  severity: 'low' | 'medium' | 'high' | 'critical';
   /** Suggested action for the warning */
   suggestion?: string;
 }

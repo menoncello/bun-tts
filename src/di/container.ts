@@ -13,6 +13,7 @@ import {
 } from '../cli/commands/help-command.js';
 import { VersionCommand } from '../cli/commands/version-command.js';
 import { ConfigManager } from '../config/index.js';
+import { ProfileManager } from '../config/profile-manager.js';
 import { MarkdownParser } from '../core/document-processing/parsers/markdown-parser.js';
 import { Logger } from '../utils/logger.js';
 
@@ -33,6 +34,7 @@ export const container: AwilixContainer = createContainer();
 // Configuration and Logging - SINGLETON for shared state
 container.register({
   configManager: asClass(ConfigManager, { lifetime: Lifetime.SINGLETON }),
+  profileManager: asClass(ProfileManager, { lifetime: Lifetime.SINGLETON }),
   logger: asFunction(
     () => {
       // In test environment, ensure logger is created without worker threads
@@ -79,6 +81,7 @@ container.register({
       new ConfigCommand(
         cradle.logger,
         cradle.configManager,
+        cradle.profileManager,
         cradle.outputWriter
       ),
     { lifetime: Lifetime.TRANSIENT }

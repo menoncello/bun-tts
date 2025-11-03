@@ -93,8 +93,21 @@ export class ProfileFileOperations {
    */
   isFileNotFoundError(error: unknown): boolean {
     if (error instanceof Error) {
+      // Check for direct NodeJS ENOENT error
       const code = (error as NodeJS.ErrnoException).code;
-      return code === 'ENOENT';
+      if (code === 'ENOENT') {
+        return true;
+      }
+
+      // Check for ConfigurationError wrapping an ENOENT error
+      if (error instanceof ConfigurationError) {
+        // Check if the error message contains ENOENT or "no such file or directory"
+        const message = error.message.toLowerCase();
+        return (
+          message.includes('enoent') ||
+          message.includes('no such file or directory')
+        );
+      }
     }
     return false;
   }

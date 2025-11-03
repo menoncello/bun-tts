@@ -202,6 +202,8 @@ export interface Chapter {
   content?: string | string[];
   /** Chapter index (for compatibility) */
   index?: number;
+  /** Confidence score for chapter structure detection (0-1) */
+  confidence?: number;
 }
 
 /**

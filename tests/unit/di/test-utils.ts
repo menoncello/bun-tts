@@ -14,6 +14,7 @@ import {
 } from '../../../src/cli/commands/help-command.js';
 import { VersionCommand } from '../../../src/cli/commands/version-command.js';
 import { ConfigManager } from '../../../src/config/index.js';
+import { ProfileManager } from '../../../src/config/profile-manager.js';
 import { Logger as LoggerClass } from '../../../src/utils/logger.js';
 
 function registerCoreDependencies(
@@ -25,6 +26,10 @@ function registerCoreDependencies(
     configManager: mocks.configManager
       ? asValue(mocks.configManager)
       : asClass(ConfigManager, { lifetime: Lifetime.SINGLETON }),
+
+    profileManager: mocks.profileManager
+      ? asValue(mocks.profileManager)
+      : asClass(ProfileManager, { lifetime: Lifetime.SINGLETON }),
 
     logger: mocks.logger
       ? asValue(mocks.logger)
@@ -61,6 +66,7 @@ function registerCommands(container: AwilixContainer) {
         new ConfigCommand(
           cradle.logger,
           cradle.configManager,
+          cradle.profileManager,
           cradle.outputWriter
         ),
       { lifetime: Lifetime.TRANSIENT }
@@ -90,6 +96,7 @@ export const createMockTestContainer = (
     configManager?: any;
     logger?: any;
     outputWriter?: any;
+    profileManager?: any;
   } = {}
 ): AwilixContainer => {
   const testContainer = createContainer();

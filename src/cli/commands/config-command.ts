@@ -1,4 +1,5 @@
 import { ConfigManager } from '../../config/index.js';
+import { ProfileManager } from '../../config/profile-manager.js';
 import type { Logger } from '../../interfaces/logger.js';
 import type { CliContext } from '../../types/index.js';
 import { ConfigOperationHandlers } from './config-operation-handlers.js';
@@ -18,14 +19,20 @@ export class ConfigCommand {
    *
    * @param {Logger} logger - Logger instance for recording command execution and debugging information
    * @param {ConfigManager} configManager - Configuration manager instance for loading and validating configurations
+   * @param {ProfileManager} profileManager - Profile manager instance for profile operations
    * @param {OutputWriter} outputWriter - Output writer for displaying configuration to the user
    */
   constructor(
     private logger: Logger,
     private configManager: ConfigManager,
+    private profileManager: ProfileManager,
     private outputWriter: OutputWriter
   ) {
-    this.profileHandler = new ProfileCommandHandler(logger, outputWriter);
+    this.profileHandler = new ProfileCommandHandler(
+      logger,
+      profileManager,
+      outputWriter
+    );
     this.operationHandlers = new ConfigOperationHandlers(
       logger,
       configManager,
@@ -56,7 +63,8 @@ export class ConfigCommand {
    * @returns {string} The action to execute
    */
   private getActionFromContext(context: CliContext): string {
-    return context.input[1] || 'show';
+    // Handle both ['config', 'action'] and ['action'] formats
+    return context.input[1] || context.input[0] || 'show';
   }
 
   /**

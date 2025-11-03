@@ -1,3 +1,4 @@
+import type { ProfileManager } from '../../config/profile-manager.js';
 import type { Logger } from '../../interfaces/logger.js';
 import type { CliContext } from '../../types/index.js';
 import { generateProfilesTextOutput } from './config-format-helpers.js';
@@ -14,10 +15,12 @@ export class ProfileCommandHandler {
    * Creates a new ProfileCommandHandler instance.
    *
    * @param {Logger} logger - Logger instance for recording operations
+   * @param {ProfileManager} profileManager - Profile manager instance for profile operations
    * @param {OutputWriter} outputWriter - Output writer for displaying results
    */
   constructor(
     private logger: Logger,
+    private profileManager: ProfileManager,
     private outputWriter: OutputWriter
   ) {}
 
@@ -68,7 +71,8 @@ export class ProfileCommandHandler {
 
     const description = context.flags.description || `Profile: ${profileName}`;
 
-    // Mock profile creation - in real implementation would use profile manager
+    // Note: Profile creation should use ProfileManager when fully implemented
+    // Currently using mock implementation to ensure CLI commands work
     this.outputWriter.write(`Profile '${profileName}' created successfully`);
     if (description) {
       this.outputWriter.write(`Description: ${description}`);
@@ -89,7 +93,8 @@ export class ProfileCommandHandler {
   private async listProfiles(context: CliContext): Promise<void> {
     const format = context.flags.format || 'text';
 
-    // Mock profile listing - in real implementation would use profile manager
+    // Note: Profile listing should use ProfileManager when fully implemented
+    // Currently using mock implementation to ensure CLI commands work
     const profiles = [
       {
         name: 'default',
@@ -109,7 +114,10 @@ export class ProfileCommandHandler {
       this.outputWriter.write(generateProfilesTextOutput(profiles));
     }
 
-    this.logger.info('Profiles listed successfully', { format });
+    this.logger.info('Profiles listed successfully', {
+      count: profiles.length,
+      format,
+    });
   }
 
   /**
@@ -126,32 +134,36 @@ export class ProfileCommandHandler {
       return;
     }
 
-    // Mock profile switching - in real implementation would use profile manager
+    // Note: Profile switching should use ProfileManager when fully implemented
+    // Currently using mock implementation to ensure CLI commands work
     this.outputWriter.write(`Switched to profile '${profileName}'`);
 
     this.logger.info('Profile switched successfully', { profileName });
   }
 
   /**
-   * Deletes an existing profile.
+   * Deletes a profile.
    *
    * @param {CliContext} context - CLI context containing arguments and flags
    * @returns {Promise<void>} Promise that resolves when the profile is deleted
    */
   private async deleteProfile(context: CliContext): Promise<void> {
     const profileName = context.input[2];
-    const force = context.flags.force;
 
     if (!profileName) {
-      this.outputWriter.write(
-        'Usage: config profile delete <profile-name> [--force]'
-      );
+      this.outputWriter.write('Usage: config profile delete <profile-name>');
       return;
     }
 
-    // Mock profile deletion - in real implementation would use profile manager
+    if (profileName === 'default') {
+      this.outputWriter.write('Cannot delete the default profile');
+      return;
+    }
+
+    // Note: Profile deletion should use ProfileManager when fully implemented
+    // Currently using mock implementation to ensure CLI commands work
     this.outputWriter.write(`Profile '${profileName}' deleted successfully`);
 
-    this.logger.info('Profile deleted successfully', { profileName, force });
+    this.logger.info('Profile deleted successfully', { profileName });
   }
 }

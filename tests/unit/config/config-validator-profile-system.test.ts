@@ -126,6 +126,11 @@ describe('Configuration Validation - Profile System', () => {
           config: {
             tts: {
               defaultEngine: 'chatterbox',
+              outputFormat: 'mp3',
+              sampleRate: 22050,
+              quality: 0.8,
+              rate: 1.0,
+              volume: 0.8,
               speed: 1.0,
               voice: 'default',
             },
@@ -151,8 +156,12 @@ describe('Configuration Validation - Profile System', () => {
           config: {
             tts: {
               defaultEngine: 'chatterbox',
-              speed: 1.0,
+              outputFormat: 'mp3',
+              sampleRate: 22050,
+              quality: 0.8,
+              rate: 1.0,
               volume: 1.0,
+              speed: 1.0,
             },
           },
         });
