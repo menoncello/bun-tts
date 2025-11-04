@@ -1,0 +1,143 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>1</storyId>
+    <title>TTS Adapter Architecture</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-03</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/2-1-tts-adapter-architecture.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer implementing TTS functionality</asA>
+    <iWant>a flexible adapter system that supports multiple TTS engines</iWant>
+    <soThat>I can easily switch between different TTS providers and add new engines</soThat>
+    <tasks>- Implement ITTSAdapter interface and core types (AC: 1)
+  - Create ITTSAdapter interface with synthesis, capabilities, and validation methods
+  - Define TTSRequest, VoiceConfig, TTSOptions, and related types
+  - Create QualityScore and TTSCapabilities interfaces
+  - Define standard success/error response patterns
+  - Write unit tests for interface contracts and type definitions
+  - Write integration tests for interface compliance
+- Implement TTSAdapterManager factory and orchestration (AC: 2)
+  - Create TTSAdapterManager class with engine registration and selection
+  - Implement engine lifecycle management (initialize/cleanup)
+  - Create fallback mechanism with automatic engine switching
+  - Add engine availability detection and health checking
+  - Implement dependency injection integration with Awilix
+  - Write unit tests for manager orchestration and fallback logic
+  - Write integration tests for engine selection scenarios
+- Implement engine capabilities detection system (AC: 3)
+  - Create capabilities discovery methods for each adapter
+  - Implement voice enumeration and metadata extraction
+  - Add format support detection and limitation reporting
+  - Create capability caching and refresh mechanisms
+  - Write unit tests for capability detection across scenarios
+  - Write integration tests with mock engine implementations
+- Implement comprehensive error handling framework (AC: 4)
+  - Create TTSError base class and specific error subtypes
+  - Implement Result pattern for functional error propagation
+  - Add error recovery mechanisms and retry logic
+  - Create error classification and reporting system
+  - Write unit tests for all error types and recovery scenarios
+  - Write mutation tests for error handling robustness
+- Implement quality metrics and performance monitoring (AC: 5)
+  - Create quality scoring interfaces and collection methods
+  - Implement performance monitoring for synthesis operations
+  - Add metrics tracking for engine comparison and selection
+  - Create monitoring data aggregation and reporting
+  - Write unit tests for quality metrics calculation
+  - Write performance tests for monitoring overhead
+- Implement configuration validation and engine-specific settings (AC: 6)
+  - Integrate with ConfigManager for TTS adapter settings
+  - Create validation schemas for all adapter configurations
+  - Implement engine-specific option handling and validation
+  - Add configuration migration and upgrade support
+  - Write unit tests for configuration validation scenarios
+  - Write integration tests with configuration system</tasks>
+  </story>
+
+  <acceptanceCriteria>1. Define ITTSAdapter interface with standardized methods for synthesis, capabilities discovery, and configuration validation [Source: docs/tech-spec-epic-2.md#AC-2.1.1]
+2. Implement TTSAdapterManager for engine selection, initialization, and fallback management [Source: docs/tech-spec-epic-2.md#AC-2.1.2]
+3. Support automatic detection of engine capabilities (voice options, formats, limits) [Source: docs/tech-spec-epic-2.md#AC-2.1.3]
+4. Provide comprehensive error handling with specific error types and recovery mechanisms [Source: docs/tech-spec-epic-2.md#AC-2.1.4]
+5. Include quality metrics collection and performance monitoring interfaces [Source: docs/tech-spec-epic-2.md#AC-2.1.5]
+6. Support engine-specific configuration and settings with validation [Source: docs/tech-spec-epic-2.md#AC-2.1.6]</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/tech-spec-epic-2.md" title="Epic 2 Technical Specification" section="TTS Adapter System" snippet="This technical specification defines the implementation of bun-tts's core TTS (Text-to-Speech) integration system, establishing a flexible adapter architecture that supports multiple open-source TTS engines while maintaining unified audio processing capabilities." />
+      <doc path="docs/architecture.md" title="Project Architecture" section="Decision Summary" snippet="Audio Processing: Custom PCM buffer processing for complete control over concatenation, cross-fading, quality normalization. Error Handling: Custom classes + Result pattern for structured error handling + functional error propagation." />
+      <doc path="docs/PRD.md" title="Product Requirements Document" section="Robust TTS Processing" snippet="FR006: Implement unified TTS adapter system supporting multiple engines (Kokoro, Chatterbox) with automatic fallback and quality comparison." />
+      <doc path="docs/epics.md" title="Epic Breakdown" section="Story 2.1" snippet="As a developer implementing TTS functionality, I want a flexible adapter system that supports multiple TTS engines, so that I can easily switch between different TTS providers and add new engines." />
+      <doc path="stories/1-6-configuration-management-system.md" title="Configuration Management System" section="Dev Agent Record" snippet="ConfigManager available at src/config/ConfigManager.ts with load/save methods - reuse for TTS adapter configuration. Dependency Injection: Awilix DI pattern established - apply to TTS adapter registration and resolution." />
+    </docs>
+    <code>
+      <code path="src/config/config-manager.ts" kind="service" symbol="ConfigManager" lines="1-30" reason="Existing configuration manager with Cosmiconfig integration to reuse for TTS adapter settings" />
+      <code path="src/config/config-validator.ts" kind="service" symbol="ConfigValidator" lines="1-20" reason="Configuration validation patterns to apply for TTS adapter configuration validation" />
+      <code path="src/errors/configuration-error.ts" kind="error" symbol="ConfigurationError" lines="1-20" reason="Base error pattern to follow for TTSError hierarchy" />
+      <code path="src/errors/result.ts" kind="utility" symbol="Result" lines="1-20" reason="Result pattern for functional error propagation to use in TTS adapters" />
+      <code path="src/types/config.ts" kind="types" symbol="BunTtsConfig" lines="1-50" reason="Configuration interface to extend with tts.adapter section for engine-specific settings" />
+    </code>
+    <dependencies>
+      <dependency ecosystem="Node.js" name="cosmiconfig" version="^9.0.0" />
+      <dependency ecosystem="Node.js" name="pino" version="^10.1.0" />
+      <dependency ecosystem="Node.js" name="awilix" version="^12.0.5" />
+      <dependency ecosystem="Node.js" name="@types/bun" version="^1.3.1" />
+      <dependency ecosystem="Testing" name="@stryker-mutator/core" version="^9.2.0" />
+      <dependency ecosystem="Testing" name="@stryker-mutator/typescript-checker" version="^9.2.0" />
+      <dependency ecosystem="Testing" name="ink-testing-library" version="4.0.0" />
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="pattern">Implement adapter interface pattern with ITTSAdapter defining standardized contract for all TTS operations</constraint>
+    <constraint type="pattern">Follow factory pattern for TTSAdapterManager with engine registration, selection, and lifecycle management</constraint>
+    <constraint type="pattern">Use Result pattern for functional error propagation extending existing patterns from configuration system</constraint>
+    <constraint type="pattern">Extend BunTtsError base class for TTSError hierarchy following ConfigurationError pattern</constraint>
+    <constraint type="location">Create TTS adapter components in src/core/tts/adapters/ directory following feature-based organization</constraint>
+    <constraint type="testing">Apply zero-tolerance quality gates: 90% test coverage, 80% mutation score, zero ESLint violations</constraint>
+    <constraint type="testing">Use Bun Test for unit/integration tests and StrykerJS for mutation testing</constraint>
+    <constraint type="integration">Leverage existing ConfigManager for TTS adapter settings and Cosmiconfig for configuration loading</constraint>
+    <constraint type="integration">Use Awilix dependency injection pattern established in previous stories for TTS adapter registration</constraint>
+    <constraint type="logging">Implement structured logging with Pino for all TTS operations following existing patterns</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="ITTSAdapter" kind="class interface" signature="interface ITTSAdapter {
+  synthesize(request: TTSRequest): Promise&lt;{ success: boolean; data?: AudioBuffer; error?: TTSError; }&gt;;
+  getSupportedVoices(): VoiceInfo[];
+  getCapabilities(): TTSCapabilities;
+  validateOptions(options: TTSOptions): ValidationResult;
+  validateVoice(voice: VoiceConfig): ValidationResult;
+  initialize(): Promise&lt;void&gt;;
+  cleanup(): Promise&lt;void&gt;;
+}" path="src/core/tts/adapters/ITTSAdapter.ts" />
+    <interface name="TTSAdapterManager" kind="factory class" signature="class TTSAdapterManager {
+  registerAdapter(name: string, adapter: ITTSAdapter): void;
+  getAdapter(name: string): ITTSAdapter | undefined;
+  selectBestAdapter(request: TTSRequest): ITTSAdapter;
+  initializeAll(): Promise&lt;void&gt;;
+  cleanupAll(): Promise&lt;void&gt;;
+}" path="src/core/tts/adapters/TTSAdapterManager.ts" />
+    <interface name="ConfigManager" kind="service class" signature="class ConfigManager {
+  load&lt;T = BunTtsConfig&gt;(): Promise&lt;Result&lt;T, ConfigurationError&gt;&gt;;
+  save&lt;T extends BunTtsConfig&gt;(config: T): Promise&lt;Result&lt;void, ConfigurationError&gt;&gt;;
+  validate&lt;T&gt;(config: unknown, schema: ValidationSchema): Result&lt;T, ValidationError&gt;;
+}" path="src/config/config-manager.ts" />
+  </interfaces>
+
+  <tests>
+    <standards>Use Bun Test framework for unit and integration tests. Apply mutation testing with StrykerJS using 80/70 thresholds for critical TTS logic. Follow zero-tolerance quality gates: 90% line coverage, zero ESLint violations, comprehensive error scenario testing. Use mock implementations for TTS engines in unit tests, integration tests with real engine instances where available.</standards>
+    <locations>tests/unit/tts/adapters/ for unit tests, tests/integration/tts/adapters/ for integration tests. Follow patterns from tests/unit/config/ established in previous stories. Performance tests for synthesis speed and capability detection. Error injection tests for recovery mechanism validation.</locations>
+    <ideas>
+      <test idea="Interface contract testing" ac="1">Test ITTSAdapter interface compliance with mock implementations, verify all methods exist and return expected types</test>
+      <test idea="Factory pattern testing" ac="2">Test TTSAdapterManager engine registration, selection logic, and fallback mechanisms with various scenarios</test>
+      <test idea="Capabilities detection testing" ac="3">Test engine capabilities discovery, voice enumeration, format support detection, and capability caching</test>
+      <test idea="Error handling testing" ac="4">Test all TTSError types, Result pattern propagation, recovery mechanisms, and retry logic</test>
+      <test idea="Quality metrics testing" ac="5">Test quality score calculation, performance monitoring, metrics aggregation, and engine comparison</test>
+      <test idea="Configuration validation testing" ac="6">Test TTS adapter configuration validation, engine-specific settings, and integration with ConfigManager</test>
+    </ideas>
+  </tests>
+</story-context>
