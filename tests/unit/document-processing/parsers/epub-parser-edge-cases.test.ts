@@ -190,7 +190,7 @@ const testStatisticsTracking = async (): Promise<void> => {
   // GIVEN: Parser instance
 
   // WHEN: Performing parse operation that affects stats
-  await parser.parse(fixture.corruptedEPUB);
+  await parser.parse(fixture.mockData.corruptedEPUB);
 
   const statsAfter = parser.getStats();
 
@@ -207,9 +207,9 @@ const testRepeatedOperations = async (): Promise<void> => {
   // GIVEN: Parser instance
   // WHEN: Performing multiple parse operations
   const results = await Promise.all([
-    parser.parse(fixture.corruptedEPUB),
-    parser.parse(fixture.corruptedEPUB),
-    parser.parse(fixture.corruptedEPUB),
+    parser.parse(fixture.mockData.corruptedEPUB),
+    parser.parse(fixture.mockData.corruptedEPUB),
+    parser.parse(fixture.mockData.corruptedEPUB),
   ]);
 
   // THEN: All should complete without errors
@@ -223,7 +223,7 @@ const testConcurrentOperations = async (): Promise<void> => {
   // GIVEN: Parser instance
   // WHEN: Running multiple parse operations concurrently
   const concurrentPromises = Array.from({ length: 5 }, () =>
-    parser.parse(fixture.corruptedEPUB)
+    parser.parse(fixture.mockData.corruptedEPUB)
   );
 
   const results = await Promise.all(concurrentPromises);
@@ -264,7 +264,7 @@ const testParserStateMutations = async (): Promise<void> => {
   // WHEN: Modifying parser options during operation
   const currentStats = parser.getStats();
   parser.setOptions({ extractMedia: !currentStats.parseTimeMs });
-  await parser.parse(fixture.corruptedEPUB);
+  await parser.parse(fixture.mockData.corruptedEPUB);
   parser.setOptions({ extractMedia: false });
 
   // THEN: Parser should remain functional

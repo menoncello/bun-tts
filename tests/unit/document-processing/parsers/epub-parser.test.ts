@@ -280,7 +280,7 @@ describe('EPUBParser Parse Method', () => {
   });
 
   test('AC1-TC07: should handle invalid EPUB content', async () => {
-    await testInvalidEPUBContent(parser, fixture.corruptedEPUB);
+    await testInvalidEPUBContent(parser, fixture.mockData.corruptedEPUB);
   });
 });
 
@@ -320,11 +320,11 @@ describe('EPUBParser Error Handling', () => {
   });
 
   test('AC1-TC10: should normalize Error objects to DocumentParseError', async () => {
-    await testErrorNormalization(parser, fixture.corruptedEPUB);
+    await testErrorNormalization(parser, fixture.mockData.corruptedEPUB);
   });
 
   test('AC1-TC11: should handle unknown error types', async () => {
-    await testUnknownErrorTypes(parser, fixture.corruptedEPUB);
+    await testUnknownErrorTypes(parser, fixture.mockData.corruptedEPUB);
   });
 });
 
@@ -368,7 +368,7 @@ describe('EPUBParser Statistics and Interface', () => {
   });
 
   test('AC1-TC12: should update performance stats after parsing attempt', async () => {
-    await testPerformanceStatsUpdate(parser, fixture.corruptedEPUB);
+    await testPerformanceStatsUpdate(parser, fixture.mockData.corruptedEPUB);
   });
 
   test('AC1-TC13: should implement DocumentParser interface', () => {
