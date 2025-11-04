@@ -4,12 +4,13 @@ import { EPUBParser } from '../../../../src/core/document-processing/parsers/epu
 import {
   setupEPUBParserFixture,
   cleanupEPUBParserFixture,
+  type EPUBParserFixture,
 } from '../../../support/fixtures/epub-parser.fixture';
 import { VALID_TEST_INPUTS } from './epub-parser-test-utils.js';
 
 describe('EPUBParser Interface Tests', () => {
   let parser: EPUBParser;
-  let fixture: any;
+  let fixture: EPUBParserFixture;
 
   beforeEach(() => {
     fixture = setupEPUBParserFixture();

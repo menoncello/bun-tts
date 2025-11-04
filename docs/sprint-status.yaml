@@ -1,4 +1,4 @@
-# generated: 2025-10-26
+# generated: 2025-11-03T18:30:00Z
 # project: bun-tts
 # project_key: bun-tts
 # tracking_system: file-system
@@ -29,8 +29,7 @@
 # - SM typically drafts next story after previous one is 'done' to incorporate learnings
 # - Dev moves story to 'review', SM reviews, then Dev moves to 'done'
 
-generated: 2025-10-29
-# Updated: 2025-10-30 - Story 1.4 third review completed, APPROVED for production deployment, status set to done
+generated: 2025-11-03T18:30:00Z
 project: bun-tts
 project_key: bun-tts
 tracking_system: file-system
@@ -41,15 +40,15 @@ development_status:
   epic-1: backlog
   1-1-project-infrastructure-cli-foundation: done
   1-2-markdown-document-parser: done
-  1-3-pdf-document-parser: done  # Approved 2025-11-01 - All ACs implemented, all issues resolved
+  1-3-pdf-document-parser: done
   1-4-epub-document-parser: done
   1-5-document-structure-analyzer: done
-  1-6-configuration-management-system: done  # Completed 2025-11-01 - All 6 ACs implemented, CLI parsing fixed, tests passing
-  epic-1-retrospective: optional
+  1-6-configuration-management-system: done
+  epic-1-retrospective: completed
 
   # Epic 2: TTS Integration & Audio Generation
-  epic-2: backlog
-  2-1-tts-adapter-architecture: backlog
+  epic-2: contexted
+  2-1-tts-adapter-architecture: done
   2-2-kokoro-tts-engine-integration: backlog
   2-3-chatterbox-tts-engine-integration: backlog
   2-4-sentence-level-audio-synthesis: backlog

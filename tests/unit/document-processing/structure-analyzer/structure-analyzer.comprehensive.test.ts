@@ -57,7 +57,10 @@ describe('StructureAnalyzer - Comprehensive Tests', () => {
       const expectedConfigManager = mockConfigManager;
 
       // WHEN: Creating StructureAnalyzer instance with default configuration
-      const result = new StructureAnalyzer(expectedLogger, expectedConfigManager);
+      const result = new StructureAnalyzer(
+        expectedLogger,
+        expectedConfigManager
+      );
 
       // THEN: Instance is created with expected default configuration
       expect(result).toBeDefined();
@@ -75,18 +78,18 @@ describe('StructureAnalyzer - Comprehensive Tests', () => {
       const expectedStreamingDisabled = false;
 
       // WHEN: Creating StructureAnalyzer with configuration overrides
-      const result = new StructureAnalyzer(
-        mockLogger,
-        mockConfigManager,
-        {
-          defaultConfidenceThreshold: customThreshold,
-          enableStreaming: expectedStreamingDisabled,
-        }
-      );
+      const result = new StructureAnalyzer(mockLogger, mockConfigManager, {
+        defaultConfidenceThreshold: customThreshold,
+        enableStreaming: expectedStreamingDisabled,
+      });
 
       // THEN: Configuration overrides are applied correctly
-      expect(result.getConfig().defaultConfidenceThreshold).toBe(customThreshold);
-      expect(result.getConfig().enableStreaming).toBe(expectedStreamingDisabled);
+      expect(result.getConfig().defaultConfidenceThreshold).toBe(
+        customThreshold
+      );
+      expect(result.getConfig().enableStreaming).toBe(
+        expectedStreamingDisabled
+      );
     });
   });
 
@@ -346,7 +349,9 @@ describe('StructureAnalyzer - Comprehensive Tests', () => {
       const updatedConfig = analyzer.getConfig();
       expect(updatedConfig.defaultConfidenceThreshold).toBe(newThreshold);
       expect(updatedConfig.validateStructure).toBe(expectedValidationDisabled);
-      expect(updatedConfig.enableStreaming).toBe(originalConfig.enableStreaming); // Unchanged
+      expect(updatedConfig.enableStreaming).toBe(
+        originalConfig.enableStreaming
+      ); // Unchanged
     });
   });
 
@@ -385,7 +390,8 @@ describe('StructureAnalyzer - Comprehensive Tests', () => {
       });
 
       // WHEN: Analyzing the malformed document structure
-      const confidenceReport = analyzer.generateConfidenceReport(malformedStructure);
+      const confidenceReport =
+        analyzer.generateConfidenceReport(malformedStructure);
       const structureTree = analyzer.generateStructureTree(malformedStructure);
 
       // THEN: Edge cases are handled without errors and structure analysis completes
@@ -397,10 +403,10 @@ describe('StructureAnalyzer - Comprehensive Tests', () => {
       expect(structureTree.children.length).toBe(3); // All chapters processed despite malformed headers
 
       // Test that chapters with empty/irregular titles are still processed
-      const emptyTitleChapter = structureTree.children.find(child =>
-        child.data?.chapter?.title === ''
+      const emptyTitleChapter = structureTree.children.find(
+        (child) => child.data?.chapter?.title === ''
       );
-      const irregularTitleChapter = structureTree.children.find(child =>
+      const irregularTitleChapter = structureTree.children.find((child) =>
         child.data?.chapter?.title?.includes('???')
       );
       expect(emptyTitleChapter).toBeDefined();
@@ -419,7 +425,8 @@ describe('StructureAnalyzer - Comprehensive Tests', () => {
       });
 
       // WHEN: Analyzing document with missing chapter boundaries
-      const confidenceReport = analyzer.generateConfidenceReport(noChaptersStructure);
+      const confidenceReport =
+        analyzer.generateConfidenceReport(noChaptersStructure);
       const structureTree = analyzer.generateStructureTree(noChaptersStructure);
 
       // THEN: Missing chapter boundaries are handled gracefully
@@ -458,8 +465,10 @@ describe('StructureAnalyzer - Comprehensive Tests', () => {
       });
 
       // WHEN: Analyzing problematic structure data
-      const confidenceReport = analyzer.generateConfidenceReport(problematicStructure);
-      const structureTree = analyzer.generateStructureTree(problematicStructure);
+      const confidenceReport =
+        analyzer.generateConfidenceReport(problematicStructure);
+      const structureTree =
+        analyzer.generateStructureTree(problematicStructure);
 
       // THEN: Problematic data is handled without crashes
       expect(confidenceReport).toBeDefined();
@@ -518,8 +527,12 @@ describe('StructureAnalyzer - Comprehensive Tests', () => {
       });
 
       // WHEN: Analyzing document with inconsistent formatting
-      const confidenceReport = analyzer.generateConfidenceReport(inconsistentStructure);
-      const structureTree = analyzer.generateStructureTree(inconsistentStructure);
+      const confidenceReport = analyzer.generateConfidenceReport(
+        inconsistentStructure
+      );
+      const structureTree = analyzer.generateStructureTree(
+        inconsistentStructure
+      );
 
       // THEN: Inconsistent formatting is processed without errors
       expect(confidenceReport).toBeDefined();
@@ -530,16 +543,16 @@ describe('StructureAnalyzer - Comprehensive Tests', () => {
       expect(structureTree.children.length).toBe(4); // All chapters processed despite inconsistencies
 
       // Test that chapters with different title formats and levels are processed
-      const uppercaseChapter = structureTree.children.find(child =>
+      const uppercaseChapter = structureTree.children.find((child) =>
         child.data?.chapter?.title?.includes('CHAPTER 1: UPPERCASE')
       );
-      const lowercaseChapter = structureTree.children.find(child =>
+      const lowercaseChapter = structureTree.children.find((child) =>
         child.data?.chapter?.title?.includes('chapter 2: lowercase')
       );
-      const level3Chapter = structureTree.children.find(child =>
-        child.data?.chapter?.level === 3
+      const level3Chapter = structureTree.children.find(
+        (child) => child.data?.chapter?.level === 3
       );
-      const spacedChapter = structureTree.children.find(child =>
+      const spacedChapter = structureTree.children.find((child) =>
         child.data?.chapter?.title?.includes('Leading and Trailing Spaces')
       );
 

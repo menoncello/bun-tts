@@ -25,7 +25,7 @@ export function testCustomConstructor(customOptions: EPUBParseOptions): void {
 }
 
 export async function testNullInput(parser: EPUBParser): Promise<void> {
-  const result = await parser.parse(null as any);
+  const result = await parser.parse(null as never);
 
   expect(result.success).toBe(false);
   expect(result.error).toBeDefined();
@@ -37,7 +37,7 @@ export async function testNullInput(parser: EPUBParser): Promise<void> {
 }
 
 export async function testUndefinedInput(parser: EPUBParser): Promise<void> {
-  const result = await parser.parse(undefined as any);
+  const result = await parser.parse(undefined as never);
 
   expect(result.success).toBe(false);
   expect(result.error).toBeDefined();

@@ -3,10 +3,11 @@ import { EPUBParser } from '../../../../src/core/document-processing/parsers/epu
 import {
   setupEPUBParserFixture,
   cleanupEPUBParserFixture,
+  type EPUBParserFixture,
 } from '../../../support/fixtures/epub-parser.fixture';
 
 describe('EPUBParser Compatibility Tests - Modes', () => {
-  let fixture: any;
+  let fixture: EPUBParserFixture;
 
   beforeEach(() => {
     fixture = setupEPUBParserFixture();

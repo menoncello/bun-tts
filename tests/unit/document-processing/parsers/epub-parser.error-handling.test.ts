@@ -4,13 +4,14 @@ import { EPUBParser } from '../../../../src/core/document-processing/parsers/epu
 import {
   setupEPUBParserFixture,
   cleanupEPUBParserFixture,
+  type EPUBParserFixture,
 } from '../../../support/fixtures/epub-parser.fixture';
 
 // Mock the Epub module before importing the modules that use it
 const mockEpub = {
-  from: mock((input: any) => {
+  from: mock((input: unknown) => {
     // Check for empty buffer that should fail EPUB parsing
-    if (input && input.length === 0) {
+    if (Buffer.isBuffer(input) && input.length === 0) {
       return Promise.reject(new Error('Invalid EPUB: empty file'));
     }
 
@@ -25,7 +26,7 @@ mock.module('@smoores/epub', () => ({
 
 describe('EPUBParser Error Handling Basic Tests', () => {
   let parser: EPUBParser;
-  let fixture: any;
+  let fixture: EPUBParserFixture;
 
   beforeEach(() => {
     fixture = setupEPUBParserFixture();
