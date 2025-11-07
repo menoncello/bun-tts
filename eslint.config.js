@@ -1,9 +1,11 @@
 import tseslint from '@typescript-eslint/eslint-plugin';
 import tsparser from '@typescript-eslint/parser';
-import sonarjs from 'eslint-plugin-sonarjs';
-import unicorn from 'eslint-plugin-unicorn';
 import importPlugin from 'eslint-plugin-import';
 import jsdoc from 'eslint-plugin-jsdoc';
+import nodePlugin from 'eslint-plugin-node';
+import securityPlugin from 'eslint-plugin-security';
+import sonarjs from 'eslint-plugin-sonarjs';
+import unicorn from 'eslint-plugin-unicorn';
 
 export default [
   {
@@ -17,7 +19,6 @@ export default [
       '**/.stryker-tmp/**',
     ],
   },
-  // Main TypeScript configuration
   {
     files: ['**/*.ts'],
     languageOptions: {
@@ -25,70 +26,71 @@ export default [
       parserOptions: {
         ecmaVersion: 2022,
         sourceType: 'module',
+        project: './tsconfig.json',
+        tsconfigRootDir: import.meta.dirname,
       },
-    },
-    settings: {
-      'import/resolver': {
-        typescript: {
-          alwaysTryTypes: true,
-          project: './tsconfig.json',
-          extensions: ['.ts', '.js'],
-        },
-        node: {
-          extensions: ['.ts', '.js'],
-        },
+      globals: {
+        Bun: 'readonly',
+        process: 'readonly',
+        console: 'readonly',
+        Buffer: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        global: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        setImmediate: 'readonly',
+        clearImmediate: 'readonly',
       },
-      'import/core-modules': ['bun:test', 'bun'],
     },
     plugins: {
       '@typescript-eslint': tseslint,
-      sonarjs: sonarjs,
-      unicorn: unicorn,
+      sonarjs,
+      unicorn,
       import: importPlugin,
-      jsdoc: jsdoc,
+      jsdoc,
+      node: nodePlugin,
+      security: securityPlugin,
     },
     rules: {
-      // TypeScript ESLint - Strictest Rules (without type-checking)
-      ...tseslint.configs['recommended'].rules,
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
-      ],
-      '@typescript-eslint/no-explicit-any': 'error',
+      // Template-based strict thresholds
+      complexity: ['error', 5],
+      'max-depth': ['error', 3],
+      'max-lines': ['error', { max: 200, skipBlankLines: true, skipComments: true }],
+      'max-lines-per-function': ['error', { max: 15, skipBlankLines: true, skipComments: true }],
+      'max-nested-callbacks': ['error', 3],
+      'max-params': ['error', 4],
+      'max-statements': ['error', 10],
+
+      // TypeScript Advanced Rules
       '@typescript-eslint/explicit-function-return-type': ['error', { allowExpressions: true }],
       '@typescript-eslint/explicit-module-boundary-types': 'error',
       '@typescript-eslint/no-non-null-assertion': 'error',
-      '@typescript-eslint/no-useless-constructor': 'error',
       '@typescript-eslint/prefer-for-of': 'error',
       '@typescript-eslint/prefer-as-const': 'error',
       '@typescript-eslint/no-array-constructor': 'error',
-      '@typescript-eslint/no-empty-function': 'error',
       '@typescript-eslint/no-inferrable-types': 'error',
       '@typescript-eslint/array-type': ['error', { default: 'array-simple' }],
       '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
       '@typescript-eslint/method-signature-style': ['error', 'property'],
       '@typescript-eslint/naming-convention': [
         'error',
-        {
-          selector: 'interface',
-          format: ['PascalCase'],
-          custom: { regex: '^I[A-Z]', match: false },
-        },
+        { selector: 'interface', format: ['PascalCase'] },
         { selector: 'typeAlias', format: ['PascalCase'] },
         { selector: 'enum', format: ['PascalCase'] },
       ],
 
-      // SonarJS - Code Quality & Complexity
-      ...sonarjs.configs.recommended.rules,
-      'sonarjs/cognitive-complexity': ['error', 15],
+      // SonarJS Static Analysis
+      'sonarjs/cognitive-complexity': ['error', 5],
       'sonarjs/no-duplicate-string': ['error', { threshold: 3 }],
       'sonarjs/no-identical-functions': 'error',
-      'sonarjs/no-collapsible-if': 'error',
       'sonarjs/no-duplicated-branches': 'error',
       'sonarjs/no-redundant-boolean': 'error',
       'sonarjs/prefer-immediate-return': 'error',
 
-      // Unicorn - Best Practices
+      // Unicorn Modern Best Practices
       'unicorn/better-regex': 'error',
       'unicorn/catch-error-name': 'error',
       'unicorn/consistent-function-scoping': 'error',
@@ -101,13 +103,8 @@ export default [
       'unicorn/no-abusive-eslint-disable': 'error',
       'unicorn/no-array-for-each': 'error',
       'unicorn/no-console-spaces': 'error',
-      'unicorn/no-for-loop': 'error',
       'unicorn/no-instanceof-array': 'error',
       'unicorn/no-invalid-remove-event-listener': 'error',
-      'unicorn/no-negated-condition': 'error',
-      'unicorn/no-nested-ternary': 'error',
-      'unicorn/no-new-array': 'error',
-      'unicorn/no-new-buffer': 'error',
       'unicorn/no-unreadable-array-destructuring': 'error',
       'unicorn/no-unused-properties': 'error',
       'unicorn/no-useless-undefined': 'error',
@@ -123,11 +120,9 @@ export default [
       'unicorn/prefer-number-properties': 'error',
       'unicorn/prefer-optional-catch-binding': 'error',
       'unicorn/prefer-string-starts-ends-with': 'error',
-      'unicorn/prefer-ternary': 'error',
       'unicorn/prefer-type-error': 'error',
-      'unicorn/throw-new-error': 'error',
 
-      // Import - Module Management
+      // Import Organization
       'import/no-duplicates': 'error',
       'import/no-unresolved': 'error',
       'import/order': [
@@ -142,7 +137,7 @@ export default [
       'import/no-default-export': 'error',
       'import/no-mutable-exports': 'error',
 
-      // JSDoc - Documentation Quality
+      // JSDoc Documentation
       'jsdoc/check-alignment': 'error',
       'jsdoc/check-param-names': 'error',
       'jsdoc/check-tag-names': 'error',
@@ -167,48 +162,82 @@ export default [
         },
       ],
 
-      // Core ESLint - Code Quality
-      complexity: ['error', 10],
-      'max-depth': ['error', 3],
-      'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
-      'max-lines-per-function': ['error', { max: 30, skipBlankLines: true, skipComments: true }],
-      'max-nested-callbacks': ['error', 3],
-      'max-params': ['error', 4],
-      'max-statements': ['error', 15],
-      'no-console': 'error',
-      'no-magic-numbers': [
-        'error',
-        { ignore: [0, 1, -1], ignoreArrayIndexes: true, ignoreDefaultValues: true },
-      ],
+      // Core ESLint Rules
+      'no-magic-numbers': ['error', { ignoreArrayIndexes: true, ignoreDefaultValues: true }],
       'no-duplicate-imports': 'error',
-      'no-else-return': 'error',
       'no-lonely-if': 'error',
-      'no-negated-condition': 'error',
-      'no-nested-ternary': 'error',
       'no-return-await': 'error',
-      'no-unneeded-ternary': 'error',
       'no-useless-return': 'error',
       'prefer-const': 'error',
       'prefer-template': 'error',
       yoda: 'error',
+
+      // Filtered TypeScript ESLint Rules
+      ...Object.fromEntries(
+        Object.entries(tseslint.configs.recommended.rules).filter(
+          ([rule]) =>
+            ![
+              '@typescript-eslint/no-unused-vars',
+              '@typescript-eslint/no-explicit-any',
+              '@typescript-eslint/no-debugger',
+              '@typescript-eslint/no-empty-function',
+              '@typescript-eslint/no-non-null-assertion',
+              '@typescript-eslint/no-misused-new',
+              '@typescript-eslint/no-unnecessary-type-assertion',
+              '@typescript-eslint/prefer-const',
+              '@typescript-eslint/no-var-requires',
+            ].includes(rule),
+        ),
+      ),
+
+      // Additional Performance and Security Rules
+      'no-loop-func': 'error',
+      'no-self-compare': 'error',
+      'no-iterator': 'error',
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'WithStatement',
+          message: 'Avoid using with statements',
+        },
+        {
+          selector: 'DebuggerStatement',
+          message: 'Avoid using debugger statements in production',
+        },
+        {
+          selector: 'LabeledStatement',
+          message: 'Avoid using labeled statements',
+        },
+      ],
+      'prefer-rest-params': 'error',
+
+      // Code Quality Rules
+      'array-callback-return': 'error',
+      'consistent-return': 'error',
+      'func-name-matching': 'error',
+
+      // Additional TypeScript Rules
+      '@typescript-eslint/ban-ts-comment': 'error',
+      '@typescript-eslint/no-restricted-types': 'error',
+      '@typescript-eslint/no-dynamic-delete': 'error',
+      '@typescript-eslint/no-empty-interface': 'error',
+      '@typescript-eslint/prefer-nullish-coalescing': 'error',
+      '@typescript-eslint/prefer-optional-chain': 'error',
+      '@typescript-eslint/restrict-template-expressions': 'error',
+      '@typescript-eslint/strict-boolean-expressions': 'error',
+
+      // Additional Import Rules
+      'import/extensions': ['error', 'never'],
+      'import/first': 'error',
+      'import/no-relative-parent-imports': 'off', // Allow relative imports for project structure
+      'import/no-useless-path-segments': 'error',
     },
   },
-  // Disable false positive for PASSWORD_PROTECTED enum in error descriptions
-  {
-    files: ['src/errors/pdf-parse-error-descriptions.ts'],
-    rules: {
-      'sonarjs/no-hardcoded-passwords': 'off',
-    },
-  },
-  // Test files - Relaxed rules
   {
     files: ['**/*.test.ts', '**/*.spec.ts', '**/tests/**/*.ts'],
     rules: {
-      // Apenas desabilita as regras de tamanho que você pediu
       'max-lines': 'off',
       'max-lines-per-function': 'off',
-
-      // Mantém algumas relaxações úteis para testes (opcional - pode remover se quiser)
       '@typescript-eslint/no-explicit-any': 'off',
       'sonarjs/no-duplicate-string': 'off',
       'jsdoc/require-jsdoc': 'off',
@@ -217,13 +246,6 @@ export default [
       'jsdoc/require-returns': 'off',
       'no-magic-numbers': 'off',
       'import/no-default-export': 'off',
-      'max-nested-callbacks': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      'sonarjs/no-nested-functions': 'off',
-      'max-statements': 'off',
-      '@typescript-eslint/no-non-null-assertion': 'off',
-      'max-depth': 'off',
     },
   },
 ];

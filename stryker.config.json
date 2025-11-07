@@ -5,14 +5,7 @@
     "command": "bun test --cwd='../../'"
   },
   "coverageAnalysis": "perTest",
-  "mutate": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "!src/**/*.test.ts",
-    "!src/**/*.test.tsx",
-    "!src/**/*.spec.ts",
-    "!src/**/*.spec.tsx"
-  ],
+  "mutate": ["**/*.ts", "**/*.tsx", "!**/*.test.ts", "!**/*.test.tsx", "!**/*.spec.ts", "!**/*.spec.tsx"],
   "thresholds": {
     "high": 90,
     "low": 80,
@@ -26,7 +19,9 @@
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/*.spec.ts",
-    "**/*.spec.tsx"
+    "**/*.spec.tsx",
+    "stryker-tmp",
+    ".stryker-tmp"
   ],
   "tsconfigFile": "tsconfig.json",
   "reporters": ["progress", "clear-text", "html"],
